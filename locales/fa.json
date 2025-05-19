@@ -1,0 +1,39 @@
+{
+    "target": {
+        "changeoil": "تعویض روغن",
+        "changeoilfilter": "تعویض فیلتر روغن",
+        "changeairfilter": "تعویض فیاتر هوا",
+        "changetires": "تعویض لاستیک",
+        "changebrakes": "سرویس ترمز"
+    },
+    "progress": {
+        "changingoil": "درحال تعویض روغن...",
+        "changingoilfilter": "درحال تعویض فیلتر روغن...",
+        "changingairfilter": "درحال تعویض فیلتر هوا...",
+        "changingtires": "درحال تعویض لاستیک...",
+        "changingbrakes": "درحال سرویس سیستم ترمز..."
+    },
+    "info": {
+        "oil_changed": "روغن با موفقیت تعویض شد",
+        "filter_changed": "فیلتر روغن با موفقیت تعویض شد",
+        "air_filter_changed": "فیلتر هوا با موفقیت تعویض شد",
+        "tire_changed": "لاستیک با موفقیت تعویض شد",
+        "brakes_changed": "ترمز با موفقیت سرویس شد"
+    },
+    "warning": {
+        "remaining_oil": "عمر مانده روغن",
+        "remaining_filter": "عمر مانده فیلتر روغن",
+        "remaining_air_filter": "عمر مانده فیلتر هوا",
+        "remaining_tire": "عمر مانده لاستیک",
+        "remaining_brakes": "عمر مانده ترمز",
+        "remaining": "",
+        "replace_need": "تعویض توصیه میشود",
+        "replace_soon": "تعویض شود",
+        "replace_immediately": "حتما تعویض شود",
+        "engine_critical": "خودرو بخاطر تعویض نکردن روغن و یا فیلتر روغن، اسیب جدی دید"
+    },
+    "error": {
+        "not_in_vehicle": "شما باید در ماشین باشی",
+        "not_owned": "این ماشین توسط کسی خریداری نشده"
+    }
+}

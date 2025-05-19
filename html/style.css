@@ -1,0 +1,70 @@
+:root {
+    --primary-bg: rgba(0, 0, 0, 0.8);
+    --text-color: #fff;
+    --progress-bg: rgba(255, 255, 255, 0.2);
+    --success-gradient: linear-gradient(90deg, #4CAF50, #8BC34A);
+    --warning-gradient: linear-gradient(90deg, #ff9800, #ffa726);
+    --danger-gradient: linear-gradient(90deg, #f44336, #ff5252);
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+#mileageDisplay {
+    display: none;
+    position: absolute;
+    padding: 0.625rem 1.25rem;
+    background: var(--primary-bg);
+    border-radius: 5px;
+    color: var(--text-color);
+    font-size: 1.125rem;
+    z-index: 1000;
+}
+.top-left { top: 1.25rem; left: 1.25rem; }
+.top-right { top: 1.25rem; right: 1.25rem; }
+.bottom-left { bottom: 1.25rem; left: 1.25rem; }
+.bottom-right { bottom: 1.25rem; right: 1.25rem; }
+.wear-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 1.25rem;
+    transform: translateY(-50%);
+    background: var(--primary-bg);
+    padding: 0.9375rem;
+    border-radius: 8px;
+    width: 18.75rem;
+}
+.wear-bar {
+    margin: 0.625rem 0;
+}
+.wear-label {
+    color: var(--text-color);
+    font-size: 0.875rem;
+    margin-bottom: 0.3125rem;
+}
+.progress-bar {
+    background: var(--progress-bg);
+    height: 1.25rem;
+    border-radius: 0.625rem;
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+    width: 80%;
+}
+.progress {
+    height: 100%;
+    background: var(--success-gradient);
+    transition: width 0.3s ease, background 0.3s ease;
+    border-radius: 0.625rem;
+}
+.percent {
+    color: var(--text-color);
+    font-size: 0.875rem;
+    margin-left: 0.625rem;
+}

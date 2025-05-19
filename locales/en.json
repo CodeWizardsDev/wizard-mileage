@@ -1,0 +1,39 @@
+{
+    "target": {
+        "changeoil": "Changing Oil...",
+        "changeoilfilter": "Changing Oil Filter...",
+        "changeairfilter": "Changing Air Filter...",
+        "changetires": "Changing Tires...",
+        "changebrakes": "Change Brakes"
+    },
+    "progress": {
+        "changingoil": "Changing Oil...",
+        "changingoilfilter": "Changing Oil Filter...",
+        "changingairfilter": "Changing Tires...",
+        "changingtires": "Changing Tires...",
+        "changingbrakes": "Changing Brakes..."
+    },
+    "info": {
+        "oil_changed": "Vehicle Oil has been successfully changed",
+        "filter_changed": "Vehicle Oil Filter has been successfully changed",
+        "air_filter_changed": "Vehicle Oil Filter has been successfully changed",
+        "tire_changed": "Vehicle Tires has been successfully changed",
+        "brakes_changed": "Vehicle Brakes have been successfully changed"
+    },
+    "warning": {
+        "remaining_oil": "Oil life at",
+        "remaining_filter": "Oil filter life at",
+        "remaining_air_filter": "Air filter life at",
+        "remaining_tire": "Tire life at",
+        "remaining_brakes": "Brake life at",
+        "remaining": "remaining",
+        "replace_need": "Replace needed!",
+        "replace_soon": "Replace soon!",
+        "replace_immediately": "Replace immediately!",
+        "engine_critical": "Engine is critically damaged due to lack of oil maintenance!"
+    },
+    "error": {
+        "not_in_vehicle": "You must be in a vehicle",
+        "not_owned": "This vehicle is not owned by anyone"
+    }
+}

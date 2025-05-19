@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Mileage Display</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="mileageDisplay" class="bottom-right">
+        <span>Mileage: <span id="mileageValue">0.00</span> <span id="unitLabel">km</span></span>
+    </div>
+    <div id="wearDisplay" class="wear-container">
+        <template id="wearBarTemplate">
+            <div class="wear-bar">
+                <div class="wear-label"></div>
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+                <span class="percent">100%</span>
+            </div>
+        </template>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
