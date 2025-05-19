@@ -57,15 +57,15 @@ Config.Targeting = 'ox'               -- Choose targeting system: 'ox' for ox_ta
 Config.ChangeWarnings = true          -- Enable notifications when vehicle parts need maintenance
 Config.WarningsInterval = 30          -- How often to check and warn about vehicle maintenance (in seconds)
 
-Config.OilChangeDistance = 20         -- Distance in km/miles before oil change is needed
+Config.OilChangeDistance = 50         -- Distance in km/miles before oil change is needed
 Config.OilFilterDistance = 40         -- Distance in km/miles before oil filter change is needed
 Config.EngineDamageRate = 0.5         -- How quickly engine takes damage from poor maintenance (0.0 to 1.0)
 
-Config.AirFilterDistance = 50         -- Distance in km/miles before air filter change is needed
+Config.AirFilterDistance = 100         -- Distance in km/miles before air filter change is needed
 Config.MaxSpeedReduction = 0.2        -- Maximum speed reduction when air filter is worn (20%)
 Config.AccelerationReduction = 0.3    -- Maximum acceleration reduction when air filter is worn (30%)
 
-Config.TireWearDistance = 10          -- Distance in km/miles before tires need replacement
+Config.TireWearDistance = 250         -- Distance in km/miles before tires need replacement
 Config.BaseTireGrip = 2.5             -- Maximum tire grip when new
 Config.MinTireGrip = 0.5              -- Minimum tire grip when completely worn
 
