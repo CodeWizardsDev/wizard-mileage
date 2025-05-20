@@ -142,6 +142,8 @@ ensure wizard-mileage
 6. Customize other settings as per your preference.
 7. Save the `config.lua` file.
 
+## 📞 Support <a name = "support"></a>
+- Discord Server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
+  
 ## ✍️ Authors <a name = "authors"></a>
-
 - @The_Hs5
