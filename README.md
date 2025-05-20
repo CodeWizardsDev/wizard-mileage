@@ -30,7 +30,7 @@
 - Introduce more features
 - Fix existing bugs
 
-## ⛓️ Dependencie <a name = "dependencies"></a>
+## ⛓️ Dependency <a name = "dependencies"></a>
 
 - [oxmysql](https://github.com/overextended/oxmysql)
 - [ox_lib](https://github.com/overextended/ox_lib)
