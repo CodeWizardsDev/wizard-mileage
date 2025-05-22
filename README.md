@@ -92,6 +92,29 @@
    - Replace Air Filter
    - Change Tires
    - Service Brakes
+   - Replace Clutch
+4. Each interaction requires appropriate inventory items
+5. Progress bars and animations for maintenance actions
+### Job Requirements
+- Mechanic job required for maintenance (configurable)
+- Minimum job grade requirement (configurable)
+- Job name configurable in config.lua
+- Supports both ox_target and qb-target systems
+### Inventory System
+- Integrated inventory support for:
+  - Engine Oil
+  - Oil Filter
+  - Air Filter
+  - Tires
+  - Brake Parts
+  - Clutch Parts
+- Supports multiple inventory systems:
+  - ox_inventory
+  - qb-inventory
+  - ESX inventory
+- Configurable item weights and descriptions
+- Items can be used directly from inventory
+- Automatic item removal after use
 ### HUD Features
 - Real-time mileage display
 - Configurable position (top-left, top-right, bottom-left, bottom-right)
@@ -131,12 +154,7 @@ This guide will help you set up the script easily!
 1. Download the folder and remove the -main suffix from it. The folder name should be wizard-mileage
 
 ### Installing
-1. Copy the folder and paste it into your resources folder.
-2. Add the following code to your server.cfg. Make sure to place it at the top of the resources list to ensure it's loaded before other resources:
-```
-ensure wizard-mileage
-```
-3. Import the `import.sql` file to your SQL Database
+[GUIDE](https://github.com/CodeWizardsDev/wizard-mileage/blob/main/setup/README.md)
 
 ### Configuration
 1. Open the `config.lua` file in the wizard-mileage folder.
@@ -153,3 +171,8 @@ ensure wizard-mileage
 ## ✍️ Authors <a name = "authors"></a>
 
 - @The_Hs5
+
+## Support
+For support, join our Discord server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
+## License
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
