@@ -17,7 +17,7 @@
 --          Thank you for downloading our script! we're glad to help you to make your server better:)
 --          Feel free to contact us if you have any problem/idea for this script! 
 --
---          Script Wiki: https://github.com/CodeWizardsDev/
+--          Script Wiki: none
 --
 --          CodeWizards Discord Server: https://discord.gg/ZBvacHyczY
 --          CodeWizards Github: https://github.com/CodeWizardsDev
@@ -29,7 +29,7 @@
 
 
 Config = {}
-Config.Debug = false                  -- When enabled, prints debug messages to the console for troubleshooting
+Config.Debug = true                  -- When enabled, prints debug messages to the console for troubleshooting
 
 Config.Notify = 'qbx'                 -- Choose your notification system: "wizard", "qb", "qbx", "okok", or "esx"
 Config.Unit = 'km'                    -- Set distance unit: "km" for kilometers or "mile" for miles
@@ -74,6 +74,24 @@ Config.MaxBrakeWear = 100.0           -- Maximum brake wear value
 Config.BrakeEfficiencyLoss = 1.0      -- How much braking power is lost when worn
 Config.BaseBrakeForce = 1.0           -- Base brake force multiplier
 
+Config.ClutchWearRate = 0.1           -- How quickly clutch wears out during gear shifts
+Config.MaxClutchWear = 100.0          -- Maximum clutch wear value
+Config.ClutchEfficiencyLoss = 0.8     -- How much power is lost when clutch is worn (80%)
+Config.BaseClutchForce = 1.0          -- Base clutch force multiplier
+Config.StallChance = 0.4              -- Chance of engine stalling when clutch is worn (40%)
+
+-- Configuration table for clutch change interaction
+Config.ChangeClutch = {
+    Animation = "fixing_a_ped",
+    AnimationDict = "mini@repair",
+
+    Duration = 15000,                   -- 15 seconds for clutch change
+
+    FreezeCar = true,
+    FreezePlayer = true,
+
+    Cancelable = true,
+}
 
 -- Configuration table for oil change interaction
 Config.ChangeOil  = {
@@ -133,4 +151,24 @@ Config.ChangeBrakes = {
     FreezePlayer = true,
 
     Cancelable = true,
+}
+
+-- Configuration table for disabled vehicle classes
+Config.DisabledVehicleClasses = {
+    --[0] = true,   -- Compacts  
+    --[1] = true,   -- Sedans  
+    --[2] = true,   -- SUVs  
+    --[3] = true,   -- Coupes  
+    --[4] = true,   -- Muscle  
+    --[5] = true,   -- Sports Classics  
+    --[6] = true,   -- Sports  
+    --[7] = true,   -- Super 
+    --[8] = true,   -- Motorcycles
+    [13] = true,    -- Cycles
+    [14] = true,    -- Boats
+    [15] = true,    -- Helicopters
+    [16] = true,    -- Planes
+    [21] = true,    -- Trains
+    [19] = true,    -- Military vehicles
+    [20] = true     -- Commercial vehicles
 }

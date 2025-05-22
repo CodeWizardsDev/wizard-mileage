@@ -3,7 +3,8 @@ const WEAR_COMPONENTS = {
     filter: { id: 'filterWear', label: 'Oil Filter' },
     airFilter: { id: 'airFilterWear', label: 'Air Filter' },
     tire: { id: 'tireWear', label: 'Tires' },
-    brake: { id: 'brakeWear', label: 'Brakes' }
+    brake: { id: 'brakeWear', label: 'Brakes' },
+    clutch: { id: 'clutchWear', label: 'Clutch' }
 };
 function createWearBars() {
     const template = document.getElementById('wearBarTemplate');
@@ -52,6 +53,7 @@ window.addEventListener('message', ({ data }) => {
             updateProgressBar('airFilterWear', data.airFilterPercentage);
             updateProgressBar('tireWear', data.tirePercentage);
             updateProgressBar('brakeWear', data.brakePercentage);
+            updateProgressBar('clutchWear', data.clutchPercentage);
             
             setTimeout(() => wearDisplay.style.display = 'none', 6000);
         }

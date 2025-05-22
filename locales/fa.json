@@ -4,21 +4,24 @@
         "changeoilfilter": "تعویض فیلتر روغن",
         "changeairfilter": "تعویض فیاتر هوا",
         "changetires": "تعویض لاستیک",
-        "changebrakes": "سرویس ترمز"
+        "changebrakes": "سرویس ترمز",
+        "changeclutch": "تعویض کلاچ"
     },
     "progress": {
         "changingoil": "درحال تعویض روغن...",
         "changingoilfilter": "درحال تعویض فیلتر روغن...",
         "changingairfilter": "درحال تعویض فیلتر هوا...",
         "changingtires": "درحال تعویض لاستیک...",
-        "changingbrakes": "درحال سرویس سیستم ترمز..."
+        "changingbrakes": "درحال سرویس سیستم ترمز...",
+        "changingclutch": "درحال تعویض کلاچ..."
     },
     "info": {
         "oil_changed": "روغن با موفقیت تعویض شد",
         "filter_changed": "فیلتر روغن با موفقیت تعویض شد",
         "air_filter_changed": "فیلتر هوا با موفقیت تعویض شد",
         "tire_changed": "لاستیک با موفقیت تعویض شد",
-        "brakes_changed": "ترمز با موفقیت سرویس شد"
+        "brakes_changed": "ترمز با موفقیت سرویس شد",
+        "clutch_changed": "کلاچ با موفقیت تعویض شد"
     },
     "warning": {
         "remaining_oil": "عمر مانده روغن",
@@ -26,11 +29,13 @@
         "remaining_air_filter": "عمر مانده فیلتر هوا",
         "remaining_tire": "عمر مانده لاستیک",
         "remaining_brakes": "عمر مانده ترمز",
+        "remaining_clutch": "عمر مانده کلاچ",
         "remaining": "",
         "replace_need": "تعویض توصیه میشود",
         "replace_soon": "تعویض شود",
         "replace_immediately": "حتما تعویض شود",
-        "engine_critical": "خودرو بخاطر تعویض نکردن روغن و یا فیلتر روغن، اسیب جدی دید"
+        "engine_critical": "خودرو بخاطر تعویض نکردن روغن و یا فیلتر روغن، اسیب جدی دید",
+        "stalled": "موتور به دلیل خرابی کلاچ خاموش شد!"
     },
     "error": {
         "not_in_vehicle": "شما باید در ماشین باشی",

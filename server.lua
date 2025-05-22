@@ -8,7 +8,7 @@ AddEventHandler('vehicleMileage:retrieveMileage', function(plate)
     if not plate then return end
     local query = [[
         SELECT mileage, last_oil_change, last_oil_filter_change, last_air_filter_change, 
-        last_tire_change, last_brakes_change, brake_wear 
+        last_tire_change, last_brakes_change, brake_wear, last_clutch_change, clutch_wear 
         FROM vehicle_mileage WHERE plate = ? LIMIT 1
     ]]
     exports.oxmysql:execute(query, {plate}, function(result)
@@ -19,6 +19,8 @@ AddEventHandler('vehicleMileage:retrieveMileage', function(plate)
         local lastTire = 0.0
         local last_brakes_change = 0.0
         local brake_wear = 0.0
+        local last_clutch_change = 0.0
+        local clutch_wear = 0.0
         if result and result[1] then
             mileage = tonumber(result[1].mileage) or 0.0
             lastOil = tonumber(result[1].last_oil_change) or 0.0
@@ -27,8 +29,10 @@ AddEventHandler('vehicleMileage:retrieveMileage', function(plate)
             lastTire = tonumber(result[1].last_tire_change) or 0.0
             lastBrake = tonumber(result[1].last_brakes_change) or 0.0
             brakeWear = tonumber(result[1].brake_wear) or 0.0
+            lastClutch = tonumber(result[1].last_clutch_change) or 0.0
+            clutchWear = tonumber(result[1].clutch_wear) or 0.0
         end
-        TriggerClientEvent('vehicleMileage:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear)
+        TriggerClientEvent('vehicleMileage:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear, lastClutch, clutchWear)
     end)
 end)
 
@@ -40,8 +44,9 @@ AddEventHandler('vehicleMileage:updateMileage', function(plate, mileage)
     end
     debug("Updating mileage for plate " .. plate .. " to " .. mileage)
     local query = [[
-        INSERT INTO vehicle_mileage (plate, mileage, last_oil_change, last_oil_filter_change, last_air_filter_change, last_tire_change, last_brakes_change, brake_wear)
-        VALUES (?, ?, 0, 0, 0, 0, 0, 0)
+        INSERT INTO vehicle_mileage (plate, mileage, last_oil_change, last_oil_filter_change, last_air_filter_change, 
+        last_tire_change, last_brakes_change, brake_wear, last_clutch_change, clutch_wear)
+        VALUES (?, ?, 0, 0, 0, 0, 0, 0, 0, 0)
         ON DUPLICATE KEY UPDATE mileage = ?
     ]]
     exports.oxmysql:execute(query, {plate, mileage, mileage}, function(rowsChanged)
@@ -181,6 +186,46 @@ AddEventHandler('vehicleMileage:updateBrakeChange', function(plate)
                     debug("Brake change update successful for plate " .. plate .. " at mileage " .. mileage)
                 else
                     debug("Brake change update failed for plate " .. plate)
+                end
+            end)
+        else
+            debug("No mileage record found for plate " .. plate)
+        end
+    end)
+end)
+
+RegisterNetEvent('vehicleMileage:updateClutchWear')
+AddEventHandler('vehicleMileage:updateClutchWear', function(plate, clutchWear)
+    if not plate or type(clutchWear) ~= "number" then return end
+    
+    local query = "UPDATE vehicle_mileage SET clutch_wear = ? WHERE plate = ?"
+    exports.oxmysql:execute(query, {clutchWear, plate}, function(rowsChanged)
+        if rowsChanged then
+            debug("Clutch wear updated for plate " .. plate .. " to " .. clutchWear)
+        else
+            debug("Clutch wear update failed for plate " .. plate)
+        end
+    end)
+end)
+
+RegisterNetEvent('vehicleMileage:updateClutchChange')
+AddEventHandler('vehicleMileage:updateClutchChange', function(plate)
+    if not plate then 
+        debug("Invalid plate provided for clutch change update")
+        return 
+    end
+    
+    local query = "SELECT mileage FROM vehicle_mileage WHERE plate = ?"
+    exports.oxmysql:execute(query, {plate}, function(result)
+        if result and result[1] then
+            local mileage = tonumber(result[1].mileage) or 0.0
+            
+            local updateQuery = "UPDATE vehicle_mileage SET last_clutch_change = ?, clutch_wear = ? WHERE plate = ?"
+            exports.oxmysql:execute(updateQuery, {mileage, 0.0, plate}, function(rowsChanged)
+                if rowsChanged then
+                    debug("Clutch change update successful for plate " .. plate .. " at mileage " .. mileage)
+                else
+                    debug("Clutch change update failed for plate " .. plate)
                 end
             end)
         else

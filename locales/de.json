@@ -1,39 +1,44 @@
 {
     "target": {
-        "changeoil": "Changing Oil...",
-        "changeoilfilter": "Changing Oil Filter...",
-        "changeairfilter": "Changing Air Filter...",
-        "changetires": "Changing Tires...",
-        "changebrakes": "Change Brakes"
+        "changeoil": "Öl wechseln...",
+        "changeoilfilter": "Ölfilter wechseln...",
+        "changeairfilter": "Luftfilter wechseln...",
+        "changetires": "Reifen wechseln...",
+        "changebrakes": "Bremsen wechseln",
+        "changeclutch": "Kupplung wechseln"
     },
     "progress": {
-        "changingoil": "Changing Oil...",
-        "changingoilfilter": "Changing Oil Filter...",
-        "changingairfilter": "Changing Tires...",
-        "changingtires": "Changing Tires...",
-        "changingbrakes": "Changing Brakes..."
+        "changingoil": "Ölwechsel wird durchgeführt...",
+        "changingoilfilter": "Ölfilter wird gewechselt...",
+        "changingairfilter": "Luftfilter wird gewechselt...",
+        "changingtires": "Reifen werden gewechselt...",
+        "changingbrakes": "Bremsen werden gewechselt...",
+        "changingclutch": "Kupplung wird gewechselt..."
     },
     "info": {
-        "oil_changed": "Vehicle Oil has been successfully changed",
-        "filter_changed": "Vehicle Oil Filter has been successfully changed",
-        "air_filter_changed": "Vehicle Oil Filter has been successfully changed",
-        "tire_changed": "Vehicle Tires has been successfully changed",
-        "brakes_changed": "Vehicle Brakes have been successfully changed"
+        "oil_changed": "Fahrzeugöl wurde erfolgreich gewechselt",
+        "filter_changed": "Fahrzeugölfilter wurde erfolgreich gewechselt",
+        "air_filter_changed": "Fahrzeugluftfilter wurde erfolgreich gewechselt",
+        "tire_changed": "Fahrzeugreifen wurden erfolgreich gewechselt",
+        "brakes_changed": "Fahrzeugbremsen wurden erfolgreich gewechselt",
+        "clutch_changed": "Fahrzeugkupplung wurde erfolgreich gewechselt"
     },
     "warning": {
-        "remaining_oil": "Oil life at",
-        "remaining_filter": "Oil filter life at",
-        "remaining_air_filter": "Air filter life at",
-        "remaining_tire": "Tire life at",
-        "remaining_brakes": "Brake life at",
-        "remaining": "remaining",
-        "replace_need": "Replace needed!",
-        "replace_soon": "Replace soon!",
-        "replace_immediately": "Replace immediately!",
-        "engine_critical": "Engine is critically damaged due to lack of oil maintenance!"
+        "remaining_oil": "Öllebensdauer bei",
+        "remaining_filter": "Ölfilterlebensdauer bei",
+        "remaining_air_filter": "Luftfilterlebensdauer bei",
+        "remaining_tire": "Reifenlebensdauer bei",
+        "remaining_brakes": "Bremslebensdauer bei",
+        "remaining_clutch": "Kupplungslebensdauer bei",
+        "remaining": "verbleibend",
+        "replace_need": "Austausch erforderlich!",
+        "replace_soon": "Bald austauschen!",
+        "replace_immediately": "Sofort austauschen!",
+        "engine_critical": "Motor ist aufgrund mangelnder Ölwartung kritisch beschädigt!",
+        "stalled": "Motor ist wegen abgenutzter Kupplung abgewürgt!"
     },
     "error": {
-        "not_in_vehicle": "You must be in a vehicle",
-        "not_owned": "This vehicle is not owned by anyone"
+        "not_in_vehicle": "Du musst in einem Fahrzeug sein",
+        "not_owned": "Dieses Fahrzeug gehört niemandem"
     }
 }
