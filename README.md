@@ -16,6 +16,7 @@
 ## 🖼️ ShowCase <a name = "showcase"></a>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
     <img src="https://github.com/user-attachments/assets/7dc20e40-f1bc-4ae3-94fb-d9da5a9dad14" alt="" style="width: 400px; height: auto; object-fit: cover;">
+    <img src="https://github.com/user-attachments/assets/23e2ed14-b2cc-4467-a47f-854aa0e534d2" alt="" style="width: 400px; height: auto; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/c580684a-5899-4a96-8690-2df41557a31b" alt="" style="width: 400px; height: 200px; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/5cafe0d7-b996-4aa4-a9a3-78dcdfe872a6" alt="" style="width: 400px; height: 200px; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/40889768-9da5-47ba-b5eb-a1a521af5510" alt="" style="width: 400px; height: 200px; object-fit: cover;">
@@ -30,7 +31,7 @@
 - Introduce more features
 - Fix existing bugs
 
-## ⛓️ Dependency <a name = "dependencies"></a>
+## ⛓️ Dependencie <a name = "dependencies"></a>
 
 - [oxmysql](https://github.com/overextended/oxmysql)
 - [ox_lib](https://github.com/overextended/ox_lib)
@@ -75,6 +76,13 @@
 - Brake maintenance service
 - Warning system for brake condition
 - Configurable wear rates and efficiency loss
+### Clutch System
+- Clutch wear tracking based on gear changes
+- Impact on vehicle performance
+- Engine Stalls when clutch is worn out
+- Clutch replacement service
+- Warning system for clutch condition
+- Configurable wear rates and performance loss
 ### Mechanic Interactions
 1. Approach a vehicle
 2. Use the target system (ox_target or qb-target)
@@ -142,8 +150,6 @@ ensure wizard-mileage
 6. Customize other settings as per your preference.
 7. Save the `config.lua` file.
 
-## 📞 Support <a name = "support"></a>
-- Discord Server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
-  
 ## ✍️ Authors <a name = "authors"></a>
+
 - @The_Hs5
