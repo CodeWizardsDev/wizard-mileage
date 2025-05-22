@@ -18,7 +18,7 @@
     "info": {
         "oil_changed": "Vehicle Oil has been successfully changed",
         "filter_changed": "Vehicle Oil Filter has been successfully changed",
-        "air_filter_changed": "Vehicle Oil Filter has been successfully changed",
+        "air_filter_changed": "Vehicle Air Filter has been successfully changed",
         "tire_changed": "Vehicle Tires has been successfully changed",
         "brakes_changed": "Vehicle Brakes have been successfully changed",
         "clutch_changed": "Vehicle Clutch have been successfully changed"
@@ -38,7 +38,16 @@
         "stalled": "Engine stalled because of worn out clutch!"
     },
     "error": {
+        "not_mechanic": "You must be a mechanic to do this",
+        "low_grade": "You are not skillfull enough to do this",
         "not_in_vehicle": "You must be in a vehicle",
-        "not_owned": "This vehicle is not owned by anyone"
+        "not_owned": "This vehicle is not owned by anyone",
+
+        "no_oil": "You don't have engine oil",
+        "no_oil_filter": "You don't have an oil filter",
+        "no_air_filter": "You don't have an air filter",
+        "no_tires": "You don't have replacement tires",
+        "no_brake_parts": "You don't have brake parts",
+        "no_clutch": "You don't have clutch parts"
     }
 }

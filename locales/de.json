@@ -39,6 +39,12 @@
     },
     "error": {
         "not_in_vehicle": "Du musst in einem Fahrzeug sein",
-        "not_owned": "Dieses Fahrzeug gehört niemandem"
+        "not_owned": "Dieses Fahrzeug gehört niemandem",
+        "no_oil": "Du hast kein Motoröl",
+        "no_oil_filter": "Du hast keinen Ölfilter",
+        "no_air_filter": "Du hast keinen Luftfilter",
+        "no_tires": "Du hast keine Ersatzreifen",
+        "no_brake_parts": "Du hast keine Bremsteile",
+        "no_clutch": "Du hast keine Kupplungsteile"
     }
 }

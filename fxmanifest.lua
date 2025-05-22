@@ -4,13 +4,14 @@ games { 'gta5' }
 author 'The_Hs5'
 
 description 'Display vehicle mileage, Service veihcle'
-version '1.0.1 beta'
+version '1.1.0'
 ui_page 'html/index.html'
 
 dependency {'oxmysql', 'ox_lib'}
 
 shared_scripts {
 	'@ox_lib/init.lua',
+    --'@es_extended/imports.lua',
 	'config.lua'
 }
 

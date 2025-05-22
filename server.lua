@@ -2,6 +2,79 @@ local function debug(data)
     if Config.Debug then print(data) end
 end
 
+if Config.InventoryScript == 'qb' then
+    local QBCore = exports['qb-core']:GetCoreObject()
+
+    QBCore.Functions.CreateUseableItem('engine_oil', function(source, item)
+		local Player = QBCore.Functions.GetPlayer(source)
+		if not Player.Functions.GetItemByName(item.name) then return end
+	    TriggerClientEvent('vehicleMileage:changeoil', source)
+    end)
+    QBCore.Functions.CreateUseableItem('oil_filter', function(source, item)
+		local Player = QBCore.Functions.GetPlayer(source)
+		if not Player.Functions.GetItemByName(item.name) then return end
+	    TriggerClientEvent('vehicleMileage:changeoilfilter', source)
+    end)
+    QBCore.Functions.CreateUseableItem('air_filter', function(source, item)
+		local Player = QBCore.Functions.GetPlayer(source)
+		if not Player.Functions.GetItemByName(item.name) then return end
+	    TriggerClientEvent('vehicleMileage:changeairfilter', source)
+    end)
+    QBCore.Functions.CreateUseableItem('tires', function(source, item)
+		local Player = QBCore.Functions.GetPlayer(source)
+		if not Player.Functions.GetItemByName(item.name) then return end
+	    TriggerClientEvent('vehicleMileage:changetires', source)
+    end)
+    QBCore.Functions.CreateUseableItem('brake_parts', function(source, item)
+		local Player = QBCore.Functions.GetPlayer(source)
+		if not Player.Functions.GetItemByName(item.name) then return end
+	    TriggerClientEvent('vehicleMileage:changebrakes', source)
+    end)
+    QBCore.Functions.CreateUseableItem('clutch', function(source, item)
+		local Player = QBCore.Functions.GetPlayer(source)
+		if not Player.Functions.GetItemByName(item.name) then return end
+	    TriggerClientEvent('vehicleMileage:changeclutch', source)
+    end)
+elseif Config.InventoryScript == 'esx' then
+    local ESX = exports.es_extended:getSharedObject()
+    ESX.RegisterUsableItem('engine_oil', function(source)
+        TriggerClientEvent('vehicleMileage:changeoil', source)
+    end)
+    ESX.RegisterUsableItem('engine_oil', function(source)
+        TriggerClientEvent('vehicleMileage:changeoilfilter', source)
+    end)
+    ESX.RegisterUsableItem('air_filter', function(source)
+        TriggerClientEvent('vehicleMileage:changeairfilter', source)
+    end)
+    ESX.RegisterUsableItem('tires', function(source)
+        TriggerClientEvent('vehicleMileage:changetires', source)
+    end)
+    ESX.RegisterUsableItem('brake_parts', function(source)
+        TriggerClientEvent('vehicleMileage:changebrakes', source)
+    end)
+    ESX.RegisterUsableItem('clutch', function(source)
+        TriggerClientEvent('vehicleMileage:changeclutch', source)
+    end)
+end
+
+RegisterNetEvent('vehicleMileage:removeItem')
+AddEventHandler('vehicleMileage:removeItem', function(item, amount)
+    local src = source
+    if not item then return end
+    if not amount then return end
+    if Config.InventoryItems then
+        -- Remove the used oil
+        if Config.InventoryScript == 'ox' then
+            exports.ox_inventory:RemoveItem(src, item, amount)
+        elseif Config.InventoryScript == 'qb' then
+            exports['qb-inventory']:RemoveItem(src, item, amount, false, 'wizard-mileage:Vehicle maintenance')
+        elseif Config.InventoryScript == 'esx' then
+            TriggerEvent('esx:removeInventoryItem', 'item_standard', item, amount)
+        end
+    end
+end)
+
+
 RegisterNetEvent('vehicleMileage:retrieveMileage')
 AddEventHandler('vehicleMileage:retrieveMileage', function(plate)
     local src = source

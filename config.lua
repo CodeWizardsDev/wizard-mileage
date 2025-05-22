@@ -48,8 +48,12 @@ Config.VehDB = 'player_vehicles'      -- Database table name for vehicle ownersh
                                         -- 'owned_vehicles' for ESX
                                         -- or any custom vehicle database table name
 
-Config.JobRequired = true             -- If true, only below job can service vehicle parts
+Config.JobRequired = true             -- If true, only below job can service vehicle parts (QBCore and QBox only)
 Config.MechanicJob = 'mechanic'       -- Job name for mechanics in your server
+Config.MinimumJobGrade = 2            -- Minimum job grade required to service vehicle parts
+
+Config.InventoryItems = true          -- Enable inventory items for vehicle parts and tools
+Config.InventoryScript = 'ox'         -- Choose inventory system: 'ox' for ox_inventory, 'qb' for qb-inventory, or 'esx' for esx built in inventory
 
 Config.UseTarget = true               -- Enable targeting system for vehicle maintenance
 Config.Targeting = 'ox'               -- Choose targeting system: 'ox' for ox_target, 'qb' for qb-target

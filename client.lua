@@ -64,6 +64,47 @@ else
     end
 end
 
+local function checkInventoryItem(item)
+    if not Config.InventoryItems then return true end
+    
+    local hasItem = false
+    if Config.InventoryScript == 'ox' then
+        -- Check for specific maintenance items
+        if item == 'engine_oil' then
+            hasItem = exports.ox_inventory:Search('count', 'engine_oil') > 0
+        elseif item == 'oil_filter' then
+            hasItem = exports.ox_inventory:Search('count', 'oil_filter') > 0
+        elseif item == 'air_filter' then
+            hasItem = exports.ox_inventory:Search('count', 'air_filter') > 0
+        elseif item == 'tires' then
+            hasItem = exports.ox_inventory:Search('count', 'tires') > 0
+        elseif item == 'brake_parts' then
+            hasItem = exports.ox_inventory:Search('count', 'brake_parts') > 0
+        elseif item == 'clutch' then
+            hasItem = exports.ox_inventory:Search('count', 'clutch') > 0
+        end
+    elseif Config.InventoryScript == 'qb' then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local Player = QBCore.Functions.GetPlayerData()
+        for _, v in pairs(Player.items) do
+            if v.name == item then
+                hasItem = true
+                break
+            end
+        end
+    elseif Config.InventoryScript == 'esx' then
+        local ESX = exports['es_extended']:getSharedObject()
+        local inventory = ESX.GetPlayerData().inventory
+        for _, v in pairs(inventory) do
+            if v.name == item and v.count > 0 then
+                hasItem = true
+                break
+            end
+        end
+    end
+    return hasItem
+end
+
 local function getDistance(vec1, vec2)
     if not vec1 or not vec2 then return 0 end
     local dx, dy, dz = vec1.x - vec2.x, vec1.y - vec2.y, vec1.z - vec2.z
@@ -306,6 +347,369 @@ Citizen.CreateThread(function()
         end
     end
 end)
+
+RegisterNetEvent('vehicleMileage:changeoil')
+AddEventHandler('vehicleMileage:changeoil', function()
+    if Config.JobRequired then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local Player = QBCore.Functions.GetPlayerData()
+        local Job = Player.job.name
+        local Grade = Player.job.grade.level
+        if Job == Config.MechanicJob then
+            if Grade >= Config.MinimumJobGrade then
+                Wait(100)
+            else
+                Notify(locale("error.low_grade"), "error")
+                return
+            end
+        else
+            Notify(locale("error.not_mechanic"), "error")
+            return
+        end
+    end
+
+    local playerPed = PlayerPedId()
+    local closestVehicle = GetClosestVehicle(5.0)
+    if closestVehicle == 0 then
+        Notify(locale("error.no_vehicle_nearby"), "error")
+        return
+    end
+        
+    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
+        SetVehicleDoorOpen(closestVehicle, 4, false, true)
+        Wait(500)
+    end
+        
+    local animDict = Config.ChangeOilFilter.AnimationDict
+    RequestAnimDict(animDict)
+    while not HasAnimDictLoaded(animDict) do
+        Wait(10)
+    end
+        
+    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
+    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
+    Wait(1000)
+        
+    TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
+    if lib.progressBar({
+        duration = Config.ChangeOil.Duration,
+        label = locale("progress.changingoil"),
+        useWhileDead = false,
+        canCancel = Config.ChangeOil.Cancelable,
+        disable = {
+            car = Config.ChangeOil.FreezeCar,
+            move = Config.ChangeOil.FreezePlayer
+        }
+        }) then
+            
+        TriggerServerEvent('vehicleMileage:removeItem', 'engine_oil', 1)
+
+        local plate = GetVehicleNumberPlateText(closestVehicle)
+        Notify(locale("info.oil_changed"), "success")
+        TriggerServerEvent("vehicleMileage:updateOilChange", plate)
+        SetVehicleDoorShut(closestVehicle, 4, false)
+    else
+        SetVehicleDoorShut(closestVehicle, 4, false)
+    end
+    ClearPedTasks(playerPed)
+end)
+
+RegisterNetEvent('vehicleMileage:changeoilfilter')
+AddEventHandler('vehicleMileage:changeoilfilter', function()
+    if Config.JobRequired then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local Player = QBCore.Functions.GetPlayerData()
+        local Job = Player.job.name
+        local Grade = Player.job.grade.level
+        if Job == Config.MechanicJob then
+            if Grade >= Config.MinimumJobGrade then
+                Wait(100)
+            else
+                Notify(locale("error.low_grade"), "error")
+                return
+            end
+        else
+            Notify(locale("error.not_mechanic"), "error")
+            return
+        end
+    end
+
+    local playerPed = PlayerPedId()
+    local closestVehicle = GetClosestVehicle(5.0)
+    if closestVehicle == 0 then
+        Notify(locale("error.no_vehicle_nearby"), "error")
+        return
+    end
+    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
+        SetVehicleDoorOpen(closestVehicle, 4, false, true)
+        Wait(500)
+    end
+    local animDict = Config.ChangeOil.AnimationDict
+    RequestAnimDict(animDict)
+    while not HasAnimDictLoaded(animDict) do
+        Wait(10)
+    end
+    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
+    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
+    Wait(1000)
+    TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
+    if lib.progressBar({
+        duration = Config.ChangeOilFilter.Duration,
+        label = locale("progress.changingoilfilter"),
+        useWhileDead = false,
+        canCancel = Config.ChangeOilFilter.Cancelable,
+        disable = {
+            car = Config.ChangeOilFilter.FreezeCar,
+            move = Config.ChangeOilFilter.FreezePlayer
+        }
+    }) then
+
+        TriggerServerEvent('vehicleMileage:removeItem', 'oil_filter', 1)
+
+        local plate = GetVehicleNumberPlateText(closestVehicle)
+        Notify(locale("info.filter_changed"), "success")
+        TriggerServerEvent("vehicleMileage:updateOilFilter", plate)
+        SetVehicleDoorShut(closestVehicle, 4, false)
+    else
+        SetVehicleDoorShut(closestVehicle, 4, false)
+    end
+    ClearPedTasks(playerPed)
+end)
+
+RegisterNetEvent('vehicleMileage:changeairfilter')
+AddEventHandler('vehicleMileage:changeairfilter', function()
+    if Config.JobRequired then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local Player = QBCore.Functions.GetPlayerData()
+        local Job = Player.job.name
+        local Grade = Player.job.grade.level
+        if Job == Config.MechanicJob then
+            if Grade >= Config.MinimumJobGrade then
+                Wait(100)
+            else
+                Notify(locale("error.low_grade"), "error")
+                return
+            end
+        else
+            Notify(locale("error.not_mechanic"), "error")
+            return
+        end
+    end
+    
+    
+    local playerPed = PlayerPedId()
+        local closestVehicle = GetClosestVehicle(5.0)
+        if closestVehicle == 0 then
+            Notify(locale("error.no_vehicle_nearby"), "error")
+            return
+        end
+        if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
+            SetVehicleDoorOpen(closestVehicle, 4, false, true)
+            Wait(500)
+        end
+        local animDict = Config.ChangeAirFilter.AnimationDict
+        RequestAnimDict(animDict)
+        while not HasAnimDictLoaded(animDict) do
+            Wait(10)
+        end
+        local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
+        TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
+        Wait(1000)
+        TaskPlayAnim(playerPed, animDict, Config.ChangeAirFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
+        if lib.progressBar({
+            duration = Config.ChangeAirFilter.Duration,
+            label = locale("progress.changingairfilter"),
+            useWhileDead = false,
+            canCancel = Config.ChangeAirFilter.Cancelable,
+            disable = {
+                car = Config.ChangeAirFilter.FreezeCar,
+                move = Config.ChangeAirFilter.FreezePlayer
+            }
+        }) then
+
+            TriggerServerEvent('vehicleMileage:removeItem', 'air_filter', 1)
+            
+            local plate = GetVehicleNumberPlateText(closestVehicle)
+            Notify(locale("info.air_filter_changed"), "success")
+            TriggerServerEvent("vehicleMileage:updateAirFilter", plate)
+            SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fInitialDriveMaxFlatVel", Config.BaseTopSpeed)
+            SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fInitialDriveForce", Config.BaseAcceleration)
+            SetVehicleDoorShut(closestVehicle, 4, false)
+        else
+            SetVehicleDoorShut(closestVehicle, 4, false)
+        end
+        ClearPedTasks(playerPed)
+end)
+
+RegisterNetEvent('vehicleMileage:changetires')
+AddEventHandler('vehicleMileage:changetires', function()
+    if Config.JobRequired then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local Player = QBCore.Functions.GetPlayerData()
+        local Job = Player.job.name
+        local Grade = Player.job.grade.level
+        if Job == Config.MechanicJob then
+            if Grade >= Config.MinimumJobGrade then
+                Wait(100)
+            else
+                Notify(locale("error.low_grade"), "error")
+                return
+            end
+        else
+            Notify(locale("error.not_mechanic"), "error")
+            return
+        end
+    end
+    
+    
+    local playerPed = PlayerPedId()
+        local closestVehicle = GetClosestVehicle(5.0)
+        if closestVehicle == 0 then
+            Notify(locale("error.no_vehicle_nearby"), "error")
+            return
+        end
+        local animDict = Config.ChangeTires.AnimationDict
+        RequestAnimDict(animDict)
+        while not HasAnimDictLoaded(animDict) do
+            Wait(10)
+        end
+        TaskPlayAnim(playerPed, animDict, Config.ChangeTires.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
+        if lib.progressBar({
+            duration = Config.ChangeTires.Duration,
+            label = locale("progress.changingtires"),
+            useWhileDead = false,
+            canCancel = Config.ChangeTires.Cancelable,
+            disable = {
+                car = Config.ChangeTires.FreezeCar,
+                move = Config.ChangeTires.FreezePlayer
+            }
+        }) then
+
+            TriggerServerEvent('vehicleMileage:removeItem', 'tires', 1)
+            
+            local plate = GetVehicleNumberPlateText(closestVehicle)
+            lastTireChange = accDistance
+            for i = 0, 5 do
+                SetVehicleTyreFixed(closestVehicle, i)
+            end
+            Notify(locale("info.tire_changed"), "success")
+            TriggerServerEvent("vehicleMileage:updateTireChange", plate)
+            SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fTractionCurveMax", Config.BaseTireGrip)
+        end
+        ClearPedTasks(playerPed)
+end)
+
+RegisterNetEvent('vehicleMileage:changebrakes')
+AddEventHandler('vehicleMileage:changebrakes', function()
+    if Config.JobRequired then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local Player = QBCore.Functions.GetPlayerData()
+        local Job = Player.job.name
+        local Grade = Player.job.grade.level
+        if Job == Config.MechanicJob then
+            if Grade >= Config.MinimumJobGrade then
+                Wait(100)
+            else
+                Notify(locale("error.low_grade"), "error")
+                return
+            end
+        else
+            Notify(locale("error.not_mechanic"), "error")
+            return
+        end
+    end
+    
+    
+    local playerPed = PlayerPedId()
+        local closestVehicle = GetClosestVehicle(5.0)
+        if closestVehicle == 0 then
+            Notify(locale("error.no_vehicle_nearby"), "error")
+            return
+        end
+        local animDict = Config.ChangeBrakes.AnimationDict
+        RequestAnimDict(animDict)
+        while not HasAnimDictLoaded(animDict) do
+            Wait(10)
+        end
+        TaskPlayAnim(playerPed, animDict, Config.ChangeBrakes.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
+        if lib.progressBar({
+            duration = Config.ChangeBrakes.Duration,
+            label = locale("progress.changingbrakes"),
+            useWhileDead = false,
+            canCancel = Config.ChangeBrakes.Cancelable,
+            disable = {
+                car = Config.ChangeBrakes.FreezeCar,
+                move = Config.ChangeBrakes.FreezePlayer
+            }
+        }) then
+
+            TriggerServerEvent('vehicleMileage:removeItem', 'brake_parts', 1)
+            
+            local plate = GetVehicleNumberPlateText(closestVehicle)
+            Notify(locale("info.brakes_changed"), "success")
+            TriggerServerEvent("vehicleMileage:updateBrakeChange", plate)
+            lastbrakeWear = 0.0
+            updateBrakeWear(closestVehicle)
+        end
+        ClearPedTasks(playerPed)
+end)
+
+RegisterNetEvent('vehicleMileage:changeclutch')
+AddEventHandler('vehicleMileage:changeclutch', function()
+    if Config.JobRequired then
+        local QBCore = exports['qb-core']:GetCoreObject()
+        local Player = QBCore.Functions.GetPlayerData()
+        local Job = Player.job.name
+        local Grade = Player.job.grade.level
+        if Job == Config.MechanicJob then
+            if Grade >= Config.MinimumJobGrade then
+                Wait(100)
+            else
+                Notify(locale("error.low_grade"), "error")
+                return
+            end
+        else
+            Notify(locale("error.not_mechanic"), "error")
+            return
+        end
+    end
+    
+    
+    local playerPed = PlayerPedId()
+        local closestVehicle = GetClosestVehicle(5.0)
+        if closestVehicle == 0 then
+            Notify(locale("error.no_vehicle_nearby"), "error")
+            return
+        end
+        local animDict = Config.ChangeClutch.AnimationDict
+        RequestAnimDict(animDict)
+        while not HasAnimDictLoaded(animDict) do
+            Wait(10)
+        end
+        TaskPlayAnim(playerPed, animDict, Config.ChangeClutch.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
+        if lib.progressBar({
+            duration = Config.ChangeClutch.Duration,
+            label = locale("progress.changingclutch"),
+            useWhileDead = false,
+            canCancel = Config.ChangeClutch.Cancelable,
+            disable = {
+                car = Config.ChangeClutch.FreezeCar,
+                move = Config.ChangeClutch.FreezePlayer
+            }
+        }) then
+
+            TriggerServerEvent('vehicleMileage:removeItem', 'clutch', 1)
+            
+            local plate = GetVehicleNumberPlateText(closestVehicle)
+            Notify(locale("info.clutch_changed"), "success")
+            TriggerServerEvent("vehicleMileage:updateClutchChange", plate)
+            TriggerServerEvent("vehicleMileage:updateClutchWear", plate, 0)
+            lastClutchWear = 0
+            updateClutchWear(closestVehicle)
+        end
+        ClearPedTasks(playerPed)
+end)
+
 Citizen.CreateThread(function()
     if not Config.UseTarget then
         return
@@ -368,247 +772,74 @@ Citizen.CreateThread(function()
                 description = "Change vehicle oil",
                 icon = "oil-can",
                 onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local closestVehicle = GetClosestVehicle(5.0)
-                    if closestVehicle == 0 then
-                        Notify(locale("error.no_vehicle_nearby"), "error")
-                        return
+                    if Config.InventoryItems and not checkInventoryItem('engine_oil') then
+                        Notify(locale("error.no_oil"), "error")
+                    return
                     end
-                    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
-                        SetVehicleDoorOpen(closestVehicle, 4, false, true)
-                        Wait(500)
-                    end
-                    local animDict = Config.ChangeOilFilter.AnimationDict
-                    RequestAnimDict(animDict)
-                    while not HasAnimDictLoaded(animDict) do
-                        Wait(10)
-                    end
-                    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
-                    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
-                    Wait(1000)
-                    TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-                    if lib.progressBar({
-                        duration = Config.ChangeOil.Duration,
-                        label = locale("progress.changingoil"),
-                        useWhileDead = false,
-                        canCancel = Config.ChangeOil.Cancelable,
-                        disable = {
-                            car = Config.ChangeOil.FreezeCar,
-                            move = Config.ChangeOil.FreezePlayer
-                        }
-                    }) then
-                        local plate = GetVehicleNumberPlateText(closestVehicle)
-                        Notify(locale("info.oil_changed"), "success")
-                        TriggerServerEvent("vehicleMileage:updateOilChange", plate)
-                        SetVehicleDoorShut(closestVehicle, 4, false)
-                    else
-                        SetVehicleDoorShut(closestVehicle, 4, false)
-                    end
-                    ClearPedTasks(playerPed)
+                    TriggerEvent('vehicleMileage:changeoil')
                 end
             },
             {
-                title = locale("target.changeoilfilter"),
-                description = "Change oil filter",
-                icon = "filter",
-                onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local closestVehicle = GetClosestVehicle(5.0)
-                    if closestVehicle == 0 then
-                        Notify(locale("error.no_vehicle_nearby"), "error")
-                        return
-                    end
-                    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
-                        SetVehicleDoorOpen(closestVehicle, 4, false, true)
-                        Wait(500)
-                    end
-                    local animDict = Config.ChangeOil.AnimationDict
-                    RequestAnimDict(animDict)
-                    while not HasAnimDictLoaded(animDict) do
-                        Wait(10)
-                    end
-                    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
-                    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
-                    Wait(1000)
-                    TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-                    if lib.progressBar({
-                        duration = Config.ChangeOilFilter.Duration,
-                        label = locale("progress.changingoilfilter"),
-                        useWhileDead = false,
-                        canCancel = Config.ChangeOilFilter.Cancelable,
-                        disable = {
-                            car = Config.ChangeOilFilter.FreezeCar,
-                            move = Config.ChangeOilFilter.FreezePlayer
-                        }
-                    }) then
-                        local plate = GetVehicleNumberPlateText(closestVehicle)
-                        Notify(locale("info.filter_changed"), "success")
-                        TriggerServerEvent("vehicleMileage:updateOilFilter", plate)
-                        SetVehicleDoorShut(closestVehicle, 4, false)
-                    else
-                        SetVehicleDoorShut(closestVehicle, 4, false)
-                    end
-                    ClearPedTasks(playerPed)
-                end
-            },
+    title = locale("target.changeoilfilter"),
+    description = "Change oil filter",
+    icon = "filter",
+    onSelect = function()
+        if Config.InventoryItems and not checkInventoryItem('oil_filter') then
+            Notify(locale("error.no_oil_filter"), "error")
+            return
+        end
+        TriggerEvent('vehicleMileage:changeoilfilter')
+    end
+},
             {
-                title = locale("target.changeairfilter"),
-                description = "Change air filter",
-                icon = "wind",
-                onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local closestVehicle = GetClosestVehicle(5.0)
-                    if closestVehicle == 0 then
-                        Notify(locale("error.no_vehicle_nearby"), "error")
-                        return
-                    end
-                    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
-                        SetVehicleDoorOpen(closestVehicle, 4, false, true)
-                        Wait(500)
-                    end
-                    local animDict = Config.ChangeAirFilter.AnimationDict
-                    RequestAnimDict(animDict)
-                    while not HasAnimDictLoaded(animDict) do
-                        Wait(10)
-                    end
-                    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
-                    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
-                    Wait(1000)
-                    TaskPlayAnim(playerPed, animDict, Config.ChangeAirFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-                    if lib.progressBar({
-                        duration = Config.ChangeAirFilter.Duration,
-                        label = locale("progress.changingairfilter"),
-                        useWhileDead = false,
-                        canCancel = Config.ChangeAirFilter.Cancelable,
-                        disable = {
-                            car = Config.ChangeAirFilter.FreezeCar,
-                            move = Config.ChangeAirFilter.FreezePlayer
-                        }
-                    }) then
-                        local plate = GetVehicleNumberPlateText(closestVehicle)
-                        Notify(locale("info.air_filter_changed"), "success")
-                        TriggerServerEvent("vehicleMileage:updateAirFilter", plate)
-                        SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fInitialDriveMaxFlatVel", Config.BaseTopSpeed)
-                        SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fInitialDriveForce", Config.BaseAcceleration)
-                        SetVehicleDoorShut(closestVehicle, 4, false)
-                    else
-                        SetVehicleDoorShut(closestVehicle, 4, false)
-                    end
-                    ClearPedTasks(playerPed)
-                end
-            },
+    title = locale("target.changeairfilter"),
+    description = "Change air filter",
+    icon = "wind",
+    onSelect = function()
+        if Config.InventoryItems and not checkInventoryItem('air_filter') then
+            Notify(locale("error.no_air_filter"), "error")
+            return
+        end
+        TriggerEvent('vehicleMileage:changeairfilter')
+    end
+},
             {
-                title = locale("target.changetires"),
-                description = "Change vehicle tires",
-                icon = "fa-regular fa-circle",
-                onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local closestVehicle = GetClosestVehicle(5.0)
-                    if closestVehicle == 0 then
-                        Notify(locale("error.no_vehicle_nearby"), "error")
-                        return
-                    end
-                    local animDict = Config.ChangeTires.AnimationDict
-                    RequestAnimDict(animDict)
-                    while not HasAnimDictLoaded(animDict) do
-                        Wait(10)
-                    end
-                    TaskPlayAnim(playerPed, animDict, Config.ChangeTires.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-                    if lib.progressBar({
-                        duration = Config.ChangeTires.Duration,
-                        label = locale("progress.changingtires"),
-                        useWhileDead = false,
-                        canCancel = Config.ChangeTires.Cancelable,
-                        disable = {
-                            car = Config.ChangeTires.FreezeCar,
-                            move = Config.ChangeTires.FreezePlayer
-                        }
-                    }) then
-                        local plate = GetVehicleNumberPlateText(closestVehicle)
-                        lastTireChange = accDistance
-                        for i = 0, 5 do
-                            SetVehicleTyreFixed(closestVehicle, i)
-                        end
-                        Notify(locale("info.tire_changed"), "success")
-                        TriggerServerEvent("vehicleMileage:updateTireChange", plate)
-                        SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fTractionCurveMax", Config.BaseTireGrip)
-                    end
-                    ClearPedTasks(playerPed)
-                end
-            },
+    title = locale("target.changetires"),
+    description = "Change vehicle tires",
+    icon = "fa-regular fa-circle",
+    onSelect = function()
+        if Config.InventoryItems and not checkInventoryItem('tires') then
+            Notify(locale("error.no_tires"), "error")
+            return
+        end
+        TriggerEvent('vehicleMileage:changetires')
+    end
+},
             {
-                title = locale("target.changebrakes"),
-                description = "Service vehicle brakes",
-                icon = "fas fa-compact-disc",
-                onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local closestVehicle = GetClosestVehicle(5.0)
-                    if closestVehicle == 0 then
-                        Notify(locale("error.no_vehicle_nearby"), "error")
-                        return
-                    end
-                    local animDict = Config.ChangeBrakes.AnimationDict
-                    RequestAnimDict(animDict)
-                    while not HasAnimDictLoaded(animDict) do
-                        Wait(10)
-                    end
-                    TaskPlayAnim(playerPed, animDict, Config.ChangeBrakes.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-                    if lib.progressBar({
-                        duration = Config.ChangeBrakes.Duration,
-                        label = locale("progress.changingbrakes"),
-                        useWhileDead = false,
-                        canCancel = Config.ChangeBrakes.Cancelable,
-                        disable = {
-                            car = Config.ChangeBrakes.FreezeCar,
-                            move = Config.ChangeBrakes.FreezePlayer
-                        }
-                    }) then
-                        local plate = GetVehicleNumberPlateText(closestVehicle)
-                        Notify(locale("info.brakes_changed"), "success")
-                        TriggerServerEvent("vehicleMileage:updateBrakeChange", plate)
-                        lastbrakeWear = 0.0
-                        updateBrakeWear(closestVehicle)
-                    end
-                    ClearPedTasks(playerPed)
-                end
-            },
+    title = locale("target.changebrakes"),
+    description = "Service vehicle brakes",
+    icon = "fas fa-compact-disc",
+    onSelect = function()
+        if Config.InventoryItems and not checkInventoryItem('brake_parts') then
+            Notify(locale("error.no_brake_parts"), "error")
+            return
+        end
+        TriggerEvent('vehicleMileage:changebrakes')
+    end
+},
             {
-                title = locale("target.changeclutch"),
-                description = "Replace vehicle clutch",
-                icon = "fas fa-cog",
-                onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local closestVehicle = GetClosestVehicle(5.0)
-                    if closestVehicle == 0 then
-                        Notify(locale("error.no_vehicle_nearby"), "error")
-                        return
-                    end
-                    local animDict = Config.ChangeClutch.AnimationDict
-                    RequestAnimDict(animDict)
-                    while not HasAnimDictLoaded(animDict) do
-                        Wait(10)
-                    end
-                    TaskPlayAnim(playerPed, animDict, Config.ChangeClutch.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-                    if lib.progressBar({
-                        duration = Config.ChangeClutch.Duration,
-                        label = locale("progress.changingclutch"),
-                        useWhileDead = false,
-                        canCancel = Config.ChangeClutch.Cancelable,
-                        disable = {
-                            car = Config.ChangeClutch.FreezeCar,
-                            move = Config.ChangeClutch.FreezePlayer
-                        }
-                    }) then
-                        local plate = GetVehicleNumberPlateText(closestVehicle)
-                        Notify(locale("info.clutch_changed"), "success")
-                        TriggerServerEvent("vehicleMileage:updateClutchChange", plate)
-                        TriggerServerEvent("vehicleMileage:updateClutchWear", plate, 0)
-                        lastClutchWear = 0
-                        updateClutchWear(closestVehicle)
-                    end
-                    ClearPedTasks(playerPed)
-                end
-            }
+    title = locale("target.changeclutch"),
+    description = "Replace vehicle clutch",
+    icon = "fas fa-cog",
+    onSelect = function()
+        if Config.InventoryItems and not checkInventoryItem('clutch') then
+            Notify(locale("error.no_clutch"), "error")
+            return
+        end
+
+        
+    end
+}
         }
     })
 end)
