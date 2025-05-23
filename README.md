@@ -15,7 +15,7 @@
 
 ## 🖼️ ShowCase <a name = "showcase"></a>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-    <img src="https://github.com/user-attachments/assets/7dc20e40-f1bc-4ae3-94fb-d9da5a9dad14" alt="" style="width: 400px; height: auto; object-fit: cover;">
+    <img src="https://github.com/user-attachments/assets/adfb0ba2-03d6-41e1-87a4-8992d38bb7d0" alt="" style="width: 400px; height: auto; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/23e2ed14-b2cc-4467-a47f-854aa0e534d2" alt="" style="width: 400px; height: auto; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/c580684a-5899-4a96-8690-2df41557a31b" alt="" style="width: 400px; height: 200px; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/5cafe0d7-b996-4aa4-a9a3-78dcdfe872a6" alt="" style="width: 400px; height: 200px; object-fit: cover;">
@@ -23,7 +23,6 @@
     <img src="https://github.com/user-attachments/assets/c26309c4-8f6e-4290-834a-db867d65a83a" alt="" style="width: 400px; height: 200px; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/a845d78f-b3c0-49b7-b793-2ae4bbbaaec3" alt="" style="width: 400px; height: 200px; object-fit: cover;">
 </div>
-
 
 
 ## 💡 Todo <a name = "todo"></a>
