@@ -17,7 +17,7 @@
 --          Thank you for downloading our script! we're glad to help you to make your server better:)
 --          Feel free to contact us if you have any problem/idea for this script! 
 --
---          Script Wiki: none
+--          Script Wiki: https://github.com/CodeWizardsDev/wizard-mileage/blob/main/setup/README.md
 --
 --          CodeWizards Discord Server: https://discord.gg/ZBvacHyczY
 --          CodeWizards Github: https://github.com/CodeWizardsDev
@@ -35,6 +35,7 @@ Config.Notify = 'qbx'                 -- Choose your notification system: "wizar
 Config.Unit = 'km'                    -- Set distance unit: "km" for kilometers or "mile" for miles
 Config.M_Location = 'bottom-right'    -- Position of mileage display on screen: "top-left", "top-right", "bottom-left", "bottom-right"
 
+Config.ToggleCommand = 'togglemileage' -- Command to check vehicle parts condition (oil, filters, tires, etc.)
 Config.CheckWearCommand = 'checkwear' -- Command to check vehicle parts condition (oil, filters, tires, etc.)
 Config.CMCommand = 'clearmileage'     -- Command to reset vehicle mileage to zero
 

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vehicle Mileage Display</title>
+    <title>Vehicle Status</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div id="mileageDisplay" class="bottom-right">
@@ -13,11 +14,22 @@
     <div id="wearDisplay" class="wear-container">
         <template id="wearBarTemplate">
             <div class="wear-bar">
-                <div class="wear-label"></div>
-                <div class="progress-bar">
-                    <div class="progress"></div>
+                <div class="wear-label">
+                    <div class="wear-label-left">
+                        <div class="wear-icon"></div>
+                        <span class="component-name"></span>
+                        <span class="status-indicator"></span>
+                    </div>
+                    <span class="health-status"></span>
                 </div>
-                <span class="percent">100%</span>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+                <div class="progress-info">
+                    <span class="percent">100%</span>
+                </div>
             </div>
         </template>
     </div>

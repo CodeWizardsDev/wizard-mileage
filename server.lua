@@ -321,15 +321,18 @@ end)
 
 RegisterCommand(Config.CMCommand, function(source, args)
     if not args[1] then
+        TriggerClientEvent('vehicleMileage:Notify', source, "No plate provided for mileage clear command", 'error')
         print("No plate provided for mileage clear command")
         return
     end
     local plate = args[1]
     local query = "DELETE FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate}, function(result)
-        if result and result.affectedRows and result.affectedRows > 0 then
+        if result and result.affectedRows > 0 then
+            TriggerClientEvent('vehicleMileage:Notify', source, "Mileage data cleared successfully for plate " .. plate, 'success')
             print("Mileage data cleared successfully for plate " .. plate)
         else
+            TriggerClientEvent('vehicleMileage:Notify', source, "No mileage data found for plate " .. plate, 'error')
             print("No mileage data found for plate " .. plate)
         end
     end)

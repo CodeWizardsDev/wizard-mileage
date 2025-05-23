@@ -1,70 +1,194 @@
 :root {
-    --primary-bg: rgba(0, 0, 0, 0.8);
-    --text-color: #fff;
-    --progress-bg: rgba(255, 255, 255, 0.2);
-    --success-gradient: linear-gradient(90deg, #4CAF50, #8BC34A);
-    --warning-gradient: linear-gradient(90deg, #ff9800, #ffa726);
-    --danger-gradient: linear-gradient(90deg, #f44336, #ff5252);
+  --glass-bg: linear-gradient(135deg, #1a1a2ed7 0%, #16213ed7 100%);;
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --accent-blue: #4dabf7;
+  --accent-green: #69db7c;
+  --accent-orange: #ffa94d;
+  --accent-red: #ff6b6b;
+  --accent-purple: #9775fa;
+  --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+
 body {
-    font-family: Arial, sans-serif;
-    overflow: hidden;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow: hidden;
 }
+
 #mileageDisplay {
-    display: none;
-    position: absolute;
-    padding: 0.625rem 1.25rem;
-    background: var(--primary-bg);
-    border-radius: 5px;
-    color: var(--text-color);
-    font-size: 1.125rem;
-    z-index: 1000;
+  position: fixed;
+  padding: 12px 24px;
+  background: var(--glass-bg);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: var(--transition);
 }
-.top-left { top: 1.25rem; left: 1.25rem; }
-.top-right { top: 1.25rem; right: 1.25rem; }
-.bottom-left { bottom: 1.25rem; left: 1.25rem; }
-.bottom-right { bottom: 1.25rem; right: 1.25rem; }
+
+.bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+.top-left {
+  top: 20px;
+  left: 20px;
+}
+
 .wear-container {
-    display: none;
-    position: absolute;
-    top: 50%;
-    right: 1.25rem;
-    transform: translateY(-50%);
-    background: var(--primary-bg);
-    padding: 0.9375rem;
-    border-radius: 8px;
-    width: 18.75rem;
+  top: 10%;
+  right: 1%;
+  position: fixed;
+  padding: 24px;
+  background: var(--glass-bg);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  width: 360px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: var(--transition);
+  display: none;
 }
+
 .wear-bar {
-    margin: 0.625rem 0;
+  margin: 24px 0;
+  position: relative;
 }
+
 .wear-label {
-    color: var(--text-color);
-    font-size: 0.875rem;
-    margin-bottom: 0.3125rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
 }
+
+.wear-label-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wear-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.progress-container {
+  position: relative;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
 .progress-bar {
-    background: var(--progress-bg);
-    height: 1.25rem;
-    border-radius: 0.625rem;
-    overflow: hidden;
-    position: relative;
-    display: inline-block;
-    width: 80%;
+  position: relative;
+  height: 100%;
+  width: 100%;
 }
+
 .progress {
-    height: 100%;
-    background: var(--success-gradient);
-    transition: width 0.3s ease, background 0.3s ease;
-    border-radius: 0.625rem;
+  height: 100%;
+  border-radius: 3px;
+  transition: var(--transition);
+  position: relative;
 }
-.percent {
-    color: var(--text-color);
-    font-size: 0.875rem;
-    margin-left: 0.625rem;
+
+.progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0) 0%, 
+    rgba(255,255,255,0.3) 50%, 
+    rgba(255,255,255,0) 100%);
+  animation: shine 2.5s infinite;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.health-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.engine .wear-icon { background: rgba(77, 171, 247, 0.2); color: var(--accent-blue); }
+.tires .wear-icon { background: rgba(105, 219, 124, 0.2); color: var(--accent-green); }
+.brakes .wear-icon { background: rgba(255, 107, 107, 0.2); color: var(--accent-red); }
+.transmission .wear-icon { background: rgba(151, 117, 250, 0.2); color: var(--accent-purple); }
+
+.engine .progress { background: var(--accent-blue); }
+.tires .progress { background: var(--accent-green); }
+.brakes .progress { background: var(--accent-red); }
+.transmission .progress { background: var(--accent-purple); }
+
+.engine .status-indicator { background: var(--accent-blue); }
+.tires .status-indicator { background: var(--accent-green); }
+.brakes .status-indicator { background: var(--accent-red); }
+.transmission .status-indicator { background: var(--accent-purple); }
+
+.health-excellent { color: var(--accent-green); }
+.health-good { color: var(--accent-blue); }
+.health-warning { color: var(--accent-orange); }
+.health-critical { color: var(--accent-red); }
+
+@keyframes shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.pulse {
+  animation: pulse 1.5s infinite;
 }

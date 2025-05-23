@@ -38,6 +38,8 @@
         "stalled": "Motor ist wegen abgenutzter Kupplung abgewürgt!"
     },
     "error": {
+        "not_mechanic": "Du musst ein Mechaniker sein",
+        "low_grade": "Du bist nicht qualifiziert genug dafür",
         "not_in_vehicle": "Du musst in einem Fahrzeug sein",
         "not_owned": "Dieses Fahrzeug gehört niemandem",
         "no_oil": "Du hast kein Motoröl",

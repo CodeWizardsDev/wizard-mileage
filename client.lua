@@ -1,3 +1,4 @@
+local mileageVisible = false
 local inVehicle = false
 local lastPos = nil
 local accDistance = 0.0
@@ -253,6 +254,7 @@ Citizen.CreateThread(function()
                             type = "toggleMileage",
                             visible = true
                         })
+                        mileageVisible = true
                     else
                         SendNUIMessage({
                             type = "toggleMileage",
@@ -780,66 +782,64 @@ Citizen.CreateThread(function()
                 end
             },
             {
-    title = locale("target.changeoilfilter"),
-    description = "Change oil filter",
-    icon = "filter",
-    onSelect = function()
-        if Config.InventoryItems and not checkInventoryItem('oil_filter') then
-            Notify(locale("error.no_oil_filter"), "error")
-            return
-        end
-        TriggerEvent('vehicleMileage:changeoilfilter')
-    end
-},
+                title = locale("target.changeoilfilter"),
+                description = "Change oil filter",
+                icon = "filter",
+                onSelect = function()
+                    if Config.InventoryItems and not checkInventoryItem('oil_filter') then
+                        Notify(locale("error.no_oil_filter"), "error")
+                        return
+                    end
+                    TriggerEvent('vehicleMileage:changeoilfilter')
+                end
+            },
             {
-    title = locale("target.changeairfilter"),
-    description = "Change air filter",
-    icon = "wind",
-    onSelect = function()
-        if Config.InventoryItems and not checkInventoryItem('air_filter') then
-            Notify(locale("error.no_air_filter"), "error")
-            return
-        end
-        TriggerEvent('vehicleMileage:changeairfilter')
-    end
-},
+                title = locale("target.changeairfilter"),
+                description = "Change air filter",
+                icon = "wind",
+                onSelect = function()
+                    if Config.InventoryItems and not checkInventoryItem('air_filter') then
+                        Notify(locale("error.no_air_filter"), "error")
+                        return
+                    end
+                    TriggerEvent('vehicleMileage:changeairfilter')
+                end
+            },
             {
-    title = locale("target.changetires"),
-    description = "Change vehicle tires",
-    icon = "fa-regular fa-circle",
-    onSelect = function()
-        if Config.InventoryItems and not checkInventoryItem('tires') then
-            Notify(locale("error.no_tires"), "error")
-            return
-        end
-        TriggerEvent('vehicleMileage:changetires')
-    end
-},
+                title = locale("target.changetires"),
+                description = "Change vehicle tires",
+                icon = "fa-regular fa-circle",
+                onSelect = function()
+                    if Config.InventoryItems and not checkInventoryItem('tires') then
+                        Notify(locale("error.no_tires"), "error")
+                        return
+                    end
+                    TriggerEvent('vehicleMileage:changetires')
+                end
+            },
             {
-    title = locale("target.changebrakes"),
-    description = "Service vehicle brakes",
-    icon = "fas fa-compact-disc",
-    onSelect = function()
-        if Config.InventoryItems and not checkInventoryItem('brake_parts') then
-            Notify(locale("error.no_brake_parts"), "error")
-            return
-        end
-        TriggerEvent('vehicleMileage:changebrakes')
-    end
-},
+                title = locale("target.changebrakes"),
+                description = "Service vehicle brakes",
+                icon = "fas fa-compact-disc",
+                onSelect = function()
+                    if Config.InventoryItems and not checkInventoryItem('brake_parts') then
+                        Notify(locale("error.no_brake_parts"), "error")
+                        return
+                    end
+                    TriggerEvent('vehicleMileage:changebrakes')
+                end
+            },
             {
-    title = locale("target.changeclutch"),
-    description = "Replace vehicle clutch",
-    icon = "fas fa-cog",
-    onSelect = function()
-        if Config.InventoryItems and not checkInventoryItem('clutch') then
-            Notify(locale("error.no_clutch"), "error")
-            return
-        end
-
-        
-    end
-}
+                title = locale("target.changeclutch"),
+                description = "Replace vehicle clutch",
+                icon = "fas fa-cog",
+                onSelect = function()
+                    if Config.InventoryItems and not checkInventoryItem('clutch') then
+                        Notify(locale("error.no_clutch"), "error")
+                        return
+                    end
+                end
+            }
         }
     })
 end)
@@ -862,6 +862,10 @@ AddEventHandler('vehicleMileage:setData', function(mileage, oilChange, filterCha
         mileage = displayedMileage,
         unit = (Config.Unit == "mile" and "miles" or "km")
     })
+end)
+RegisterNetEvent('vehicleMileage:Notify')
+AddEventHandler('vehicleMileage:Notify', function(message, type)
+    Notify(message, type)
 end)
 
 if Config.Autosave then
@@ -1037,6 +1041,25 @@ RegisterCommand(Config.CheckWearCommand, function()
             brakePercentage = brakePercentage,
             clutchPercentage = clutchPercentage
         })
+    else
+        Notify(locale('error.not_in_vehicle'), 'error')
+    end
+end, false)
+RegisterCommand(Config.ToggleCommand, function()
+    if inVehicle and currentPlate then
+        if mileageVisible then
+            SendNUIMessage({
+                type = "toggleMileage",
+                visible = false
+            })
+            mileageVisible = false
+        else
+            SendNUIMessage({
+                type = "toggleMileage",
+                visible = true
+            })
+            mileageVisible = true
+        end
     else
         Notify(locale('error.not_in_vehicle'), 'error')
     end
