@@ -27,7 +27,7 @@ body {
   color: var(--text-primary);
   font-size: 1rem;
   font-weight: 500;
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 10px;
   z-index: 1000;

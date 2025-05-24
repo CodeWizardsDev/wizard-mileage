@@ -3,8 +3,7 @@ local function debug(data)
 end
 
 if Config.InventoryScript == 'qb' then
-    local QBCore = exports['qb-core']:GetCoreObject()
-
+    QBCore = exports['qb-core']:GetCoreObject()
     QBCore.Functions.CreateUseableItem('engine_oil', function(source, item)
 		local Player = QBCore.Functions.GetPlayer(source)
 		if not Player.Functions.GetItemByName(item.name) then return end
@@ -36,7 +35,7 @@ if Config.InventoryScript == 'qb' then
 	    TriggerClientEvent('vehicleMileage:changeclutch', source)
     end)
 elseif Config.InventoryScript == 'esx' then
-    local ESX = exports.es_extended:getSharedObject()
+    local ESX = exports["es_extended"]:getSharedObject()
     ESX.RegisterUsableItem('engine_oil', function(source)
         TriggerClientEvent('vehicleMileage:changeoil', source)
     end)
@@ -69,7 +68,9 @@ AddEventHandler('vehicleMileage:removeItem', function(item, amount)
         elseif Config.InventoryScript == 'qb' then
             exports['qb-inventory']:RemoveItem(src, item, amount, false, 'wizard-mileage:Vehicle maintenance')
         elseif Config.InventoryScript == 'esx' then
-            TriggerEvent('esx:removeInventoryItem', 'item_standard', item, amount)
+            local ESX = exports["es_extended"]:getSharedObject()
+            local xPlayer = ESX.GetPlayerFromId(source)
+            xPlayer.removeInventoryItem(item, amount)
         end
     end
 end)

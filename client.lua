@@ -1,4 +1,5 @@
 local mileageVisible = false
+local allowSmartGearDetect = true
 local inVehicle = false
 local lastPos = nil
 local accDistance = 0.0
@@ -228,6 +229,10 @@ Citizen.CreateThread(function()
         type = "Configuration",
         location = Config.M_Location
     })
+    SendNUIMessage({
+        type = "toggleMileage",
+        visible = false
+    })
     while true do
         Citizen.Wait(1500)
         local ped = PlayerPedId()
@@ -306,10 +311,11 @@ Citizen.CreateThread(function()
     local shiftCooldown = 500 -- 500ms cooldown between gear changes
     while true do
         Citizen.Wait(100) -- Gear detection interval
-        if inVehicle and currentPlate then
+        if inVehicle and currentPlate and allowSmartGearDetect then
             local ped = PlayerPedId()
             local veh = GetVehiclePedIsIn(ped, false)
             if DoesEntityExist(veh) then
+                if IsVehicleOwned(currentPlate) then
                 local currentGear = GetVehicleCurrentGear(veh)
                 local currentTime = GetGameTimer()
                 if (currentGear ~= prevGear) and ((currentTime - lastShiftTime) > shiftCooldown) then
@@ -327,6 +333,7 @@ Citizen.CreateThread(function()
                     lastShiftTime = currentTime
                     prevGear = currentGear
                 end
+                end
             end
         end
     end
@@ -335,6 +342,7 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(1000) -- Brake monitoring interval
         if inVehicle and currentPlate then
+            if IsVehicleOwned(currentPlate) then
             local ped = PlayerPedId()
             local veh = GetVehiclePedIsIn(ped, false)
             if DoesEntityExist(veh) and IsControlPressed(0, 72) then
@@ -347,11 +355,13 @@ Citizen.CreateThread(function()
                 end
             end
         end
+        end
     end
 end)
 
 RegisterNetEvent('vehicleMileage:changeoil')
 AddEventHandler('vehicleMileage:changeoil', function()
+    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
         local QBCore = exports['qb-core']:GetCoreObject()
         local Player = QBCore.Functions.GetPlayerData()
@@ -480,6 +490,7 @@ end)
 
 RegisterNetEvent('vehicleMileage:changeairfilter')
 AddEventHandler('vehicleMileage:changeairfilter', function()
+    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
         local QBCore = exports['qb-core']:GetCoreObject()
         local Player = QBCore.Functions.GetPlayerData()
@@ -545,6 +556,7 @@ end)
 
 RegisterNetEvent('vehicleMileage:changetires')
 AddEventHandler('vehicleMileage:changetires', function()
+    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
         local QBCore = exports['qb-core']:GetCoreObject()
         local Player = QBCore.Functions.GetPlayerData()
@@ -603,6 +615,7 @@ end)
 
 RegisterNetEvent('vehicleMileage:changebrakes')
 AddEventHandler('vehicleMileage:changebrakes', function()
+    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
         local QBCore = exports['qb-core']:GetCoreObject()
         local Player = QBCore.Functions.GetPlayerData()
@@ -658,6 +671,7 @@ end)
 
 RegisterNetEvent('vehicleMileage:changeclutch')
 AddEventHandler('vehicleMileage:changeclutch', function()
+    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
         local QBCore = exports['qb-core']:GetCoreObject()
         local Player = QBCore.Functions.GetPlayerData()
@@ -710,6 +724,23 @@ AddEventHandler('vehicleMileage:changeclutch', function()
             updateClutchWear(closestVehicle)
         end
         ClearPedTasks(playerPed)
+end)
+
+RegisterNetEvent('vehicleMileage:updateClutchWT')
+AddEventHandler('vehicleMileage:updateClutchWT', function()
+    if not IsVehicleOwned(currentPlate) then return end
+    
+    lastClutchWear = lastClutchWear + Config.ClutchWearRate
+    if lastClutchWear > Config.MaxClutchWear then
+        lastClutchWear = Config.MaxClutchWear
+    end
+    TriggerServerEvent('vehicleMileage:updateClutchWear', currentPlate, lastClutchWear)
+    updateClutchWear(veh)
+end)
+
+RegisterNetEvent('vehicleMileage:smartGearDetect')
+AddEventHandler('vehicleMileage:smartGearDetect', function(data)
+    allowSmartGearDetect = data
 end)
 
 Citizen.CreateThread(function()
@@ -1003,11 +1034,6 @@ if Config.ChangeWarnings then
         end
     end)
 end
-if IsControlPressed(0, 72) then
-    local brakeWear = brakeWear + Config.BrakeWearRate
-    TriggerServerEvent('vehicleMileage:updateBrakeWear', currentPlate, brakeWear)
-    updateBrakeWear(vehicle)
-end
 
 RegisterCommand(Config.CheckWearCommand, function()
     if inVehicle and currentPlate then
@@ -1055,6 +1081,7 @@ RegisterCommand(Config.ToggleCommand, function()
             })
             mileageVisible = false
         else
+            if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
             SendNUIMessage({
                 type = "toggleMileage",
                 visible = true

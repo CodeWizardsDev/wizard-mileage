@@ -29,9 +29,10 @@
 
 
 Config = {}
-Config.Debug = true                  -- When enabled, prints debug messages to the console for troubleshooting
+Config.Debug = false                  -- When enabled, prints debug messages to the console for troubleshooting
+Config.FrameWork = 'qb'               -- Choose your framework: "qb" for QBCore and QBox, "esx" for ESX, or "wizard" for Wizard Framework
 
-Config.Notify = 'qbx'                 -- Choose your notification system: "wizard", "qb", "qbx", "okok", or "esx"
+Config.Notify = 'ox'                  -- Choose your notification system: "wizard", "ox", "qb", "qbx" "okok", or "esx"
 Config.Unit = 'km'                    -- Set distance unit: "km" for kilometers or "mile" for miles
 Config.M_Location = 'bottom-right'    -- Position of mileage display on screen: "top-left", "top-right", "bottom-left", "bottom-right"
 
