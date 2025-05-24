@@ -838,6 +838,7 @@ Citizen.CreateThread(function()
                         Notify(locale("error.no_clutch"), "error")
                         return
                     end
+                    TriggerEvent('vehicleMileage:changeclutch')
                 end
             }
         }
