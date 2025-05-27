@@ -1,3 +1,25 @@
+let currentLocale = 'en';
+let translations = {};
+async function loadTranslations(locale) {
+    try {
+        const response = await fetch(`../locales/${locale}.json`);
+        translations = await response.json();
+        updateUITranslations();
+    } catch (error) {
+        console.error(`Failed to load translations for ${locale}:`, error);
+    }
+}
+function updateUITranslations() {
+    document.querySelectorAll('[data-locale]').forEach(element => {
+        const key = element.getAttribute('data-locale');
+        if (translations[key]) {
+            element.textContent = translations[key];
+        }
+    });
+}
+// Load default translations
+loadTranslations(currentLocale);
+
 const WEAR_COMPONENTS = {
     oil: { id: 'oilWear', label: 'Oil Life ', icon: 'fas fa-oil-can', type: 'engine' },
     filter: { id: 'filterWear', label: 'Oil Filter', icon: 'fas fa-filter', type: 'engine' },
@@ -78,6 +100,11 @@ window.addEventListener('message', ({ data }) => {
             const display = document.getElementById('mileageDisplay');
             display.className = data.location;
             display.style.display = 'none';
+
+            if (data.language) {
+                currentLocale = data.language;
+                loadTranslations(currentLocale);
+            }
         },
         updateWear: () => {
             const wearDisplay = document.getElementById('wearDisplay');
@@ -90,7 +117,14 @@ window.addEventListener('message', ({ data }) => {
             updateProgressBar('brakeWear', data.brakePercentage);
             updateProgressBar('clutchWear', data.clutchPercentage);
             
-            setTimeout(() => wearDisplay.style.display = 'none', 6000);
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' || event.key === 'Backspace') {
+                    wearDisplay.style.display = 'none';
+                    fetch(`https://${GetParentResourceName()}/closeWearMenu`, {
+                        method: 'POST'
+                    });
+                }
+            });
         }
     };
     

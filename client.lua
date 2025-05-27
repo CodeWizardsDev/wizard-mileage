@@ -21,6 +21,32 @@ local DoesEntityExist = DoesEntityExist
 local lastEngineCriticalNotify = 0
 local oilchangedist, oilfilterchangedist, airfilterchangedist, tirechangedist = nil, nil, nil, nil
 
+if Config.FrameWork == 'esx' then
+    ESX = exports["es_extended"]:getSharedObject()
+    RegisterNetEvent('esx:playerLoaded')
+    AddEventHandler('esx:playerLoaded', function(xPlayer)
+	    ESX.PlayerData = xPlayer
+	    ESX.PlayerLoaded = true
+    end)
+    function ChkJb()
+        ESX = exports["es_extended"]:getSharedObject()
+        return ESX.GetPlayerData().job.name
+    end
+    function ChkGr()
+        ESX = exports["es_extended"]:getSharedObject()
+        return ESX.GetPlayerData().job.grade
+    end
+else
+    QBCore = exports['qb-core']:GetCoreObject()
+    function ChkJb()
+        local Player = QBCore.Functions.GetPlayerData()
+        return Player.job.name
+    end
+    function ChkGr()
+        local Player = QBCore.Functions.GetPlayerData()
+        return Player.job.grade.level
+    end
+end
 local function Notify(message, type)
     if not message or not type then return end
     
@@ -49,14 +75,33 @@ elseif Config.Unit == "mile" then
     tirechangedist = Config.TireWearDistance * 1609.34
 end
 if Config.BoughtVehiclesOnly then
+    local ownershipCache = {}
     function IsVehicleOwned(plate)
+        -- Check cache first
+        if ownershipCache[plate] ~= nil then
+            return ownershipCache[plate]
+        end
+        
         local p = promise.new()
-        TriggerServerEvent('vehicleMileage:checkOwnership', plate)
-        RegisterNetEvent('vehicleMileage:ownershipResult')
-        AddEventHandler('vehicleMileage:ownershipResult', function(owned)
+        
+        -- Create event handler
+        local function ownershipHandler(owned)
+            ownershipCache[plate] = owned
             p:resolve(owned)
-        end)
-        return Citizen.Await(p)
+        end
+        
+        -- Register one-time event handler
+        RegisterNetEvent('vehicleMileage:ownershipResult')
+        local eventHandler = AddEventHandler('vehicleMileage:ownershipResult', ownershipHandler)
+        
+        -- Trigger server check and store result in cache
+        TriggerServerEvent('vehicleMileage:checkOwnership', plate)
+        
+        -- Remove event handler after getting result
+        local result = Citizen.Await(p)
+        RemoveEventHandler(eventHandler)
+        
+        return result
     end
 else
     function IsVehicleOwned()
@@ -171,13 +216,10 @@ local function updateAirFilterPerformance(vehicle)
     local airFilterDistanceDriven = accDistance - lastAirFilterChange
     local airFilterWearRatio = math.min(1.0, airFilterDistanceDriven / airfilterchangedist)
     
-    local currentTopSpeed = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel")
     local currentAcceleration = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce")
     
-    local reducedTopSpeed = currentTopSpeed * (1.0 - (Config.MaxSpeedReduction * airFilterWearRatio))
     local reducedAcceleration = currentAcceleration * (1.0 - (Config.AccelerationReduction * airFilterWearRatio))
     
-    SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveMaxFlatVel", reducedTopSpeed)
     SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", reducedAcceleration)
 end
 local function updateTireWear(vehicle)
@@ -211,7 +253,7 @@ local function updateClutchWear(vehicle)
         local currentForce = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce")
         local reducedForce = currentForce * 0.1 -- Only 10% power transfer when clutch is worn
         SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", reducedForce)
-        
+
         -- Add random stalling effect when clutch is worn out
         if math.random() < Config.StallChance then -- chance to stall
             SetVehicleEngineOn(vehicle, false, true, true)
@@ -220,18 +262,14 @@ local function updateClutchWear(vehicle)
     else
         -- Normal operation with reduced power based on wear
         local baseClutchForce = Config.BaseClutchForce
-        SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", baseClutchForce * efficiency)
     end
 end
 
 Citizen.CreateThread(function()
     SendNUIMessage({
         type = "Configuration",
-        location = Config.M_Location
-    })
-    SendNUIMessage({
-        type = "toggleMileage",
-        visible = false
+        location = Config.M_Location,
+        language = Config.Language
     })
     while true do
         Citizen.Wait(1500)
@@ -361,12 +399,9 @@ end)
 
 RegisterNetEvent('vehicleMileage:changeoil')
 AddEventHandler('vehicleMileage:changeoil', function()
-    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
-        local QBCore = exports['qb-core']:GetCoreObject()
-        local Player = QBCore.Functions.GetPlayerData()
-        local Job = Player.job.name
-        local Grade = Player.job.grade.level
+        local Job = ChkJb()
+        local Grade = ChkGr()
         if Job == Config.MechanicJob then
             if Grade >= Config.MinimumJobGrade then
                 Wait(100)
@@ -429,10 +464,8 @@ end)
 RegisterNetEvent('vehicleMileage:changeoilfilter')
 AddEventHandler('vehicleMileage:changeoilfilter', function()
     if Config.JobRequired then
-        local QBCore = exports['qb-core']:GetCoreObject()
-        local Player = QBCore.Functions.GetPlayerData()
-        local Job = Player.job.name
-        local Grade = Player.job.grade.level
+        local Job = ChkJb()
+        local Grade = ChkGr()
         if Job == Config.MechanicJob then
             if Grade >= Config.MinimumJobGrade then
                 Wait(100)
@@ -490,12 +523,9 @@ end)
 
 RegisterNetEvent('vehicleMileage:changeairfilter')
 AddEventHandler('vehicleMileage:changeairfilter', function()
-    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
-        local QBCore = exports['qb-core']:GetCoreObject()
-        local Player = QBCore.Functions.GetPlayerData()
-        local Job = Player.job.name
-        local Grade = Player.job.grade.level
+        local Job = ChkJb()
+        local Grade = ChkGr()
         if Job == Config.MechanicJob then
             if Grade >= Config.MinimumJobGrade then
                 Wait(100)
@@ -556,12 +586,9 @@ end)
 
 RegisterNetEvent('vehicleMileage:changetires')
 AddEventHandler('vehicleMileage:changetires', function()
-    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
-        local QBCore = exports['qb-core']:GetCoreObject()
-        local Player = QBCore.Functions.GetPlayerData()
-        local Job = Player.job.name
-        local Grade = Player.job.grade.level
+        local Job = ChkJb()
+        local Grade = ChkGr()
         if Job == Config.MechanicJob then
             if Grade >= Config.MinimumJobGrade then
                 Wait(100)
@@ -615,12 +642,9 @@ end)
 
 RegisterNetEvent('vehicleMileage:changebrakes')
 AddEventHandler('vehicleMileage:changebrakes', function()
-    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
-        local QBCore = exports['qb-core']:GetCoreObject()
-        local Player = QBCore.Functions.GetPlayerData()
-        local Job = Player.job.name
-        local Grade = Player.job.grade.level
+        local Job = ChkJb()
+        local Grade = ChkGr()
         if Job == Config.MechanicJob then
             if Grade >= Config.MinimumJobGrade then
                 Wait(100)
@@ -671,12 +695,9 @@ end)
 
 RegisterNetEvent('vehicleMileage:changeclutch')
 AddEventHandler('vehicleMileage:changeclutch', function()
-    if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned')) return end
     if Config.JobRequired then
-        local QBCore = exports['qb-core']:GetCoreObject()
-        local Player = QBCore.Functions.GetPlayerData()
-        local Job = Player.job.name
-        local Grade = Player.job.grade.level
+        local Job = ChkJb()
+        local Grade = ChkGr()
         if Job == Config.MechanicJob then
             if Grade >= Config.MinimumJobGrade then
                 Wait(100)
@@ -763,6 +784,21 @@ Citizen.CreateThread(function()
                         return IsVehicleOwned(plate)
                     end,
                     onSelect = function()
+                        if Config.JobRequired then
+                            local Job = ChkJb()
+                            local Grade = ChkGr()
+                            if Job == Config.MechanicJob then
+                                if Grade >= Config.MinimumJobGrade then
+                                    Wait(100)
+                                else
+                                    Notify(locale("error.low_grade"), "error")
+                                    return
+                                end
+                            else
+                                Notify(locale("error.not_mechanic"), "error")
+                                return
+                            end
+                        end
                         lib.showContext("vehicle_service_menu")
                     end
                 }
@@ -784,6 +820,21 @@ Citizen.CreateThread(function()
                             return IsVehicleOwned(plate)
                         end,
                         action = function()
+                        if Config.JobRequired then
+                            local Job = ChkJb()
+                            local Grade = ChkGr()
+                            if Job == Config.MechanicJob then
+                                if Grade >= Config.MinimumJobGrade then
+                                    Wait(100)
+                                else
+                                    Notify(locale("error.low_grade"), "error")
+                                    return
+                                end
+                            else
+                                Notify(locale("error.not_mechanic"), "error")
+                                return
+                            end
+                        end
                             lib.showContext("vehicle_service_menu")
                         end
                     }
@@ -1035,6 +1086,11 @@ if Config.ChangeWarnings then
     end)
 end
 
+RegisterNUICallback('closeWearMenu', function(_, cb)
+    SetNuiFocus(false, false)
+    cb({})
+end)
+
 RegisterCommand(Config.CheckWearCommand, function()
     if inVehicle and currentPlate then
         if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned'), 'error') return end
@@ -1059,6 +1115,8 @@ RegisterCommand(Config.CheckWearCommand, function()
 
         local clutchPercentage = math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
         
+
+        SetNuiFocus(true, false)
         SendNUIMessage({
             type = "updateWear",
             oilPercentage = oilPercentage,
@@ -1092,3 +1150,4 @@ RegisterCommand(Config.ToggleCommand, function()
         Notify(locale('error.not_in_vehicle'), 'error')
     end
 end, false)
+

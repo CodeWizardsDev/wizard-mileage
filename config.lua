@@ -29,7 +29,8 @@
 
 
 Config = {}
-Config.Debug = false                  -- When enabled, prints debug messages to the console for troubleshooting
+Config.Language = 'en'                -- Default UI language
+Config.Debug = true                  -- When enabled, prints debug messages to the console for troubleshooting
 Config.FrameWork = 'qb'               -- Choose your framework: "qb" for QBCore and QBox, "esx" for ESX, or "wizard" for Wizard Framework
 
 Config.Notify = 'ox'                  -- Choose your notification system: "wizard", "ox", "qb", "qbx" "okok", or "esx"

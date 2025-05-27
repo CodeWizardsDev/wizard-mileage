@@ -1,4 +1,10 @@
 {
+    "ui": {
+        "mileage": "Mileage:",
+        "unit_km": "Km",
+        "unit_miles": "Miles"
+    },
+    
     "target": {
         "changeoil": "Changing Oil...",
         "changeoilfilter": "Changing Oil Filter...",
