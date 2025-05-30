@@ -216,10 +216,15 @@ local function updateAirFilterPerformance(vehicle)
     local airFilterDistanceDriven = accDistance - lastAirFilterChange
     local airFilterWearRatio = math.min(1.0, airFilterDistanceDriven / airfilterchangedist)
     
+    -- Get the original drive force from the database
+    local plate = GetVehiclePlate(vehicle)
+    TriggerServerEvent('vehicleMileage:getOriginalDriveForce', plate)
+    
+    -- Get the original drive force from the database or use current value
     local currentAcceleration = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce")
-    
-    local reducedAcceleration = currentAcceleration * (1.0 - (Config.AccelerationReduction * airFilterWearRatio))
-    
+    originalDriveForce = originalDriveForce or currentAcceleration -- Use existing value if no DB value
+    TriggerServerEvent('vehicleMileage:saveOriginalDriveForce', plate, originalDriveForce)
+    local reducedAcceleration = originalDriveForce * (1.0 - (Config.AccelerationReduction * airFilterWearRatio))
     SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", reducedAcceleration)
 end
 local function updateTireWear(vehicle)
@@ -249,11 +254,7 @@ local function updateClutchWear(vehicle)
     
     -- When clutch is completely worn out
     if efficiency <= 0.2 then
-        -- Reduce power transfer significantly and affect acceleration
-        local currentForce = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce")
-        local reducedForce = currentForce * 0.1 -- Only 10% power transfer when clutch is worn
-        SetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce", reducedForce)
-
+        Citizen.InvokeNative(GetHashKey('SET_VEHICLE_CLUTCH') & 0xFFFFFFFF, vehicle, -1.0)
         -- Add random stalling effect when clutch is worn out
         if math.random() < Config.StallChance then -- chance to stall
             SetVehicleEngineOn(vehicle, false, true, true)
@@ -328,13 +329,28 @@ Citizen.CreateThread(function()
         else
             if inVehicle then
                 if currentPlate and IsVehicleOwned(currentPlate) then
-                    TriggerServerEvent('vehicleMileage:updateMileage', currentPlate, accDistance)
+                    -- Save current vehicle data before resetting
+                    local savedPlate = currentPlate
+                    local savedDistance = accDistance
+                    
+                    -- Trigger save event and wait for completion
+                    TriggerServerEvent('vehicleMileage:updateMileage', savedPlate, savedDistance)
+                    Wait(100) -- Small delay to ensure data is saved
                 end
+                -- Reset all cached vehicle data
                 inVehicle = false
                 lastPos = nil
                 accDistance = 0.0
                 currentPlate = nil
                 waitingForData = false
+                lastOilChange = 0.0
+                lastOilFilterChange = 0.0
+                lastAirFilterChange = 0.0
+                lastTireChange = 0.0
+                lastbrakeChange = 0.0
+                lastbrakeWear = 0.0
+                lastClutchChange = 0.0
+                lastClutchWear = 0.0
                 SendNUIMessage({
                     type = "toggleMileage",
                     visible = false
@@ -575,8 +591,6 @@ AddEventHandler('vehicleMileage:changeairfilter', function()
             local plate = GetVehicleNumberPlateText(closestVehicle)
             Notify(locale("info.air_filter_changed"), "success")
             TriggerServerEvent("vehicleMileage:updateAirFilter", plate)
-            SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fInitialDriveMaxFlatVel", Config.BaseTopSpeed)
-            SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fInitialDriveForce", Config.BaseAcceleration)
             SetVehicleDoorShut(closestVehicle, 4, false)
         else
             SetVehicleDoorShut(closestVehicle, 4, false)
@@ -928,7 +942,7 @@ Citizen.CreateThread(function()
 end)
 
 RegisterNetEvent('vehicleMileage:setData')
-AddEventHandler('vehicleMileage:setData', function(mileage, oilChange, filterChange, AirfilterChange, tireChange, brakeChange, brakeWear, clutchChange, clutchWear)
+AddEventHandler('vehicleMileage:setData', function(mileage, oilChange, filterChange, AirfilterChange, tireChange, brakeChange, brakeWear, clutchChange, clutchWear, origDriveForce)
     accDistance = mileage or 0.0
     lastOilChange = oilChange or 0.0
     lastOilFilterChange = filterChange or 0.0
@@ -938,6 +952,7 @@ AddEventHandler('vehicleMileage:setData', function(mileage, oilChange, filterCha
     lastbrakeWear = brakeWear or 0.0
     lastClutchChange = clutchChange or 0.0
     lastClutchWear = clutchWear or 0.0
+    originalDriveForce = origDriveForce
     waitingForData = false
     local displayedMileage = convertDistance(accDistance)
     SendNUIMessage({
@@ -945,6 +960,10 @@ AddEventHandler('vehicleMileage:setData', function(mileage, oilChange, filterCha
         mileage = displayedMileage,
         unit = (Config.Unit == "mile" and "miles" or "km")
     })
+end)
+RegisterNetEvent('vehicleMileage:setOriginalDriveForce')
+AddEventHandler('vehicleMileage:setOriginalDriveForce', function(driveForce)
+    originalDriveForce = driveForce
 end)
 RegisterNetEvent('vehicleMileage:Notify')
 AddEventHandler('vehicleMileage:Notify', function(message, type)

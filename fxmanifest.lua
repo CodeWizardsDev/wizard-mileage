@@ -3,8 +3,8 @@ games { 'gta5' }
 
 author 'The_Hs5'
 
-description 'Display vehicle mileage, Service veihcle'
-version '1.1.5'
+description 'Display vehicle mileage, Service vehicle'
+version '1.1.6'
 ui_page 'html/index.html'
 
 dependency {'oxmysql', 'ox_lib'}

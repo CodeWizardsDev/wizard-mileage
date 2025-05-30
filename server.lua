@@ -82,7 +82,8 @@ AddEventHandler('vehicleMileage:retrieveMileage', function(plate)
     if not plate then return end
     local query = [[
         SELECT mileage, last_oil_change, last_oil_filter_change, last_air_filter_change, 
-        last_tire_change, last_brakes_change, brake_wear, last_clutch_change, clutch_wear 
+        last_tire_change, last_brakes_change, brake_wear, last_clutch_change, clutch_wear,
+        original_drive_force
         FROM vehicle_mileage WHERE plate = ? LIMIT 1
     ]]
     exports.oxmysql:execute(query, {plate}, function(result)
@@ -95,6 +96,7 @@ AddEventHandler('vehicleMileage:retrieveMileage', function(plate)
         local brake_wear = 0.0
         local last_clutch_change = 0.0
         local clutch_wear = 0.0
+        local original_drive_force = nil
         if result and result[1] then
             mileage = tonumber(result[1].mileage) or 0.0
             lastOil = tonumber(result[1].last_oil_change) or 0.0
@@ -105,8 +107,36 @@ AddEventHandler('vehicleMileage:retrieveMileage', function(plate)
             brakeWear = tonumber(result[1].brake_wear) or 0.0
             lastClutch = tonumber(result[1].last_clutch_change) or 0.0
             clutchWear = tonumber(result[1].clutch_wear) or 0.0
+            original_drive_force = tonumber(result[1].original_drive_force)
         end
-        TriggerClientEvent('vehicleMileage:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear, lastClutch, clutchWear)
+        TriggerClientEvent('vehicleMileage:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear, lastClutch, clutchWear, original_drive_force)
+    end)
+end)
+RegisterNetEvent('vehicleMileage:saveOriginalDriveForce')
+AddEventHandler('vehicleMileage:saveOriginalDriveForce', function(plate, driveForce)
+    if not plate or not driveForce then return end
+    
+    local query = [[
+        UPDATE vehicle_mileage 
+        SET original_drive_force = ?
+        WHERE plate = ? AND original_drive_force IS NULL
+    ]]
+    
+    exports.oxmysql:execute(query, {driveForce, plate})
+end)
+RegisterNetEvent('vehicleMileage:getOriginalDriveForce')
+AddEventHandler('vehicleMileage:getOriginalDriveForce', function(plate)
+    if not plate then return end
+    local src = source
+    
+    local query = "SELECT original_drive_force FROM vehicle_mileage WHERE plate = ?"
+    exports.oxmysql:execute(query, {plate}, function(result)
+        if result and result[1] and result[1].original_drive_force then
+            local driveForce = tonumber(result[1].original_drive_force)
+            if driveForce then
+                TriggerClientEvent('vehicleMileage:setOriginalDriveForce', src, driveForce)
+            end
+        end
     end)
 end)
 
@@ -323,7 +353,7 @@ end)
 RegisterCommand(Config.CMCommand, function(source, args)
     if not args[1] then
         TriggerClientEvent('vehicleMileage:Notify', source, "No plate provided for mileage clear command", 'error')
-        print("No plate provided for mileage clear command")
+        debug("No plate provided for mileage clear command")
         return
     end
     local plate = args[1]
@@ -331,10 +361,10 @@ RegisterCommand(Config.CMCommand, function(source, args)
     exports.oxmysql:execute(query, {plate}, function(result)
         if result and result.affectedRows > 0 then
             TriggerClientEvent('vehicleMileage:Notify', source, "Mileage data cleared successfully for plate " .. plate, 'success')
-            print("Mileage data cleared successfully for plate " .. plate)
+            debug("Mileage data cleared successfully for plate " .. plate)
         else
             TriggerClientEvent('vehicleMileage:Notify', source, "No mileage data found for plate " .. plate, 'error')
-            print("No mileage data found for plate " .. plate)
+            debug("No mileage data found for plate " .. plate)
         end
     end)
 end, true)
