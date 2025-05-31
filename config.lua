@@ -32,7 +32,7 @@ Config = {}
 Config.Language = 'en'                -- Default UI language
 Config.Debug = true                  -- When enabled, prints debug messages to the console for troubleshooting
 Config.FrameWork = 'qb'               -- Choose your framework: "qb" for QBCore and QBox, "esx" for ESX
-Config.ProgressBar = 'qb'             -- Choose your progress bar: "qb" for QBCore and "ox" for ox_lib
+Config.ProgressBar = 'qb'             -- Choose your progress bar: "qb" for QBCore/QBox and "ox" for ox_lib
 
 Config.Notify = 'ox'                  -- Choose your notification system: "wizard", "ox", "qb", "qbx" "okok", or "esx"
 Config.Unit = 'km'                    -- Set distance unit: "km" for kilometers or "mile" for miles
