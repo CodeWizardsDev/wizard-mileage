@@ -63,6 +63,31 @@ local function Notify(message, type)
     if notifyFunc then notifyFunc() end
 end
 
+local function DisplayProgressBar(duration, label, config)
+    if Config.ProgressBar == 'qb' then
+        QBCore.Functions.Progressbar("vehicle_maintenance", label, duration, false, config.Cancelable, {
+            disableMovement = config.FreezePlayer,
+            disableCarMovement = config.FreezeCar,
+            disableMouse = false,
+            disableCombat = true,
+        }, {}, {}, {}, function() -- Done
+        end, function() -- Cancel
+        end)
+        return true
+    elseif Config.ProgressBar == 'ox' then
+        return lib.progressBar({
+            duration = duration,
+            label = label,
+            useWhileDead = false,
+            canCancel = config.Cancelable,
+            disable = {
+                car = config.FreezeCar,
+                move = config.FreezePlayer
+            }
+        })
+    end
+end
+
 if Config.Unit == "km" then
     oilchangedist = Config.OilChangeDistance * 1000
     oilfilterchangedist = Config.OilFilterDistance * 1000
@@ -430,7 +455,6 @@ AddEventHandler('vehicleMileage:changeoil', function()
             return
         end
     end
-
     local playerPed = PlayerPedId()
     local closestVehicle = GetClosestVehicle(5.0)
     if closestVehicle == 0 then
@@ -454,19 +478,9 @@ AddEventHandler('vehicleMileage:changeoil', function()
     Wait(1000)
         
     TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if lib.progressBar({
-        duration = Config.ChangeOil.Duration,
-        label = locale("progress.changingoil"),
-        useWhileDead = false,
-        canCancel = Config.ChangeOil.Cancelable,
-        disable = {
-            car = Config.ChangeOil.FreezeCar,
-            move = Config.ChangeOil.FreezePlayer
-        }
-        }) then
-            
+    
+    if DisplayProgressBar(Config.ChangeOil.Duration, locale("progress.changingoil"), Config.ChangeOil) then
         TriggerServerEvent('vehicleMileage:removeItem', 'engine_oil', 1)
-
         local plate = GetVehicleNumberPlateText(closestVehicle)
         Notify(locale("info.oil_changed"), "success")
         TriggerServerEvent("vehicleMileage:updateOilChange", plate)
@@ -514,19 +528,9 @@ AddEventHandler('vehicleMileage:changeoilfilter', function()
     TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
     Wait(1000)
     TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if lib.progressBar({
-        duration = Config.ChangeOilFilter.Duration,
-        label = locale("progress.changingoilfilter"),
-        useWhileDead = false,
-        canCancel = Config.ChangeOilFilter.Cancelable,
-        disable = {
-            car = Config.ChangeOilFilter.FreezeCar,
-            move = Config.ChangeOilFilter.FreezePlayer
-        }
-    }) then
 
+    if DisplayProgressBar(Config.ChangeOilFilter.Duration, locale("progress.changingoilfilter"), Config.ChangeOilFilter) then
         TriggerServerEvent('vehicleMileage:removeItem', 'oil_filter', 1)
-
         local plate = GetVehicleNumberPlateText(closestVehicle)
         Notify(locale("info.filter_changed"), "success")
         TriggerServerEvent("vehicleMileage:updateOilFilter", plate)
@@ -575,19 +579,8 @@ AddEventHandler('vehicleMileage:changeairfilter', function()
         TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
         Wait(1000)
         TaskPlayAnim(playerPed, animDict, Config.ChangeAirFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-        if lib.progressBar({
-            duration = Config.ChangeAirFilter.Duration,
-            label = locale("progress.changingairfilter"),
-            useWhileDead = false,
-            canCancel = Config.ChangeAirFilter.Cancelable,
-            disable = {
-                car = Config.ChangeAirFilter.FreezeCar,
-                move = Config.ChangeAirFilter.FreezePlayer
-            }
-        }) then
-
+        if DisplayProgressBar(Config.ChangeAirFilter.Duration, locale("progress.changingairfilter"), Config.ChangeAirFilter) then
             TriggerServerEvent('vehicleMileage:removeItem', 'air_filter', 1)
-            
             local plate = GetVehicleNumberPlateText(closestVehicle)
             Notify(locale("info.air_filter_changed"), "success")
             TriggerServerEvent("vehicleMileage:updateAirFilter", plate)
@@ -629,19 +622,8 @@ AddEventHandler('vehicleMileage:changetires', function()
             Wait(10)
         end
         TaskPlayAnim(playerPed, animDict, Config.ChangeTires.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-        if lib.progressBar({
-            duration = Config.ChangeTires.Duration,
-            label = locale("progress.changingtires"),
-            useWhileDead = false,
-            canCancel = Config.ChangeTires.Cancelable,
-            disable = {
-                car = Config.ChangeTires.FreezeCar,
-                move = Config.ChangeTires.FreezePlayer
-            }
-        }) then
-
+        if DisplayProgressBar(Config.ChangeTires.Duration, locale("progress.changingtires"), Config.ChangeTires) then
             TriggerServerEvent('vehicleMileage:removeItem', 'tires', 1)
-            
             local plate = GetVehicleNumberPlateText(closestVehicle)
             lastTireChange = accDistance
             for i = 0, 5 do
@@ -671,8 +653,7 @@ AddEventHandler('vehicleMileage:changebrakes', function()
             return
         end
     end
-    
-    
+
     local playerPed = PlayerPedId()
         local closestVehicle = GetClosestVehicle(5.0)
         if closestVehicle == 0 then
@@ -685,19 +666,8 @@ AddEventHandler('vehicleMileage:changebrakes', function()
             Wait(10)
         end
         TaskPlayAnim(playerPed, animDict, Config.ChangeBrakes.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-        if lib.progressBar({
-            duration = Config.ChangeBrakes.Duration,
-            label = locale("progress.changingbrakes"),
-            useWhileDead = false,
-            canCancel = Config.ChangeBrakes.Cancelable,
-            disable = {
-                car = Config.ChangeBrakes.FreezeCar,
-                move = Config.ChangeBrakes.FreezePlayer
-            }
-        }) then
-
+        if DisplayProgressBar(Config.ChangeBrakes.Duration, locale("progress.changingbrakes"), Config.ChangeBrakes) then
             TriggerServerEvent('vehicleMileage:removeItem', 'brake_parts', 1)
-            
             local plate = GetVehicleNumberPlateText(closestVehicle)
             Notify(locale("info.brakes_changed"), "success")
             TriggerServerEvent("vehicleMileage:updateBrakeChange", plate)
@@ -725,7 +695,6 @@ AddEventHandler('vehicleMileage:changeclutch', function()
         end
     end
     
-    
     local playerPed = PlayerPedId()
         local closestVehicle = GetClosestVehicle(5.0)
         if closestVehicle == 0 then
@@ -738,19 +707,8 @@ AddEventHandler('vehicleMileage:changeclutch', function()
             Wait(10)
         end
         TaskPlayAnim(playerPed, animDict, Config.ChangeClutch.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-        if lib.progressBar({
-            duration = Config.ChangeClutch.Duration,
-            label = locale("progress.changingclutch"),
-            useWhileDead = false,
-            canCancel = Config.ChangeClutch.Cancelable,
-            disable = {
-                car = Config.ChangeClutch.FreezeCar,
-                move = Config.ChangeClutch.FreezePlayer
-            }
-        }) then
-
+        if DisplayProgressBar(Config.ChangeClutch.Duration, locale("progress.changingclutch"), Config.ChangeClutch) then
             TriggerServerEvent('vehicleMileage:removeItem', 'clutch', 1)
-            
             local plate = GetVehicleNumberPlateText(closestVehicle)
             Notify(locale("info.clutch_changed"), "success")
             TriggerServerEvent("vehicleMileage:updateClutchChange", plate)
