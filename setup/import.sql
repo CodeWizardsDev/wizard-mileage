@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS vehicle_mileage (
   last_brakes_change DOUBLE NOT NULL DEFAULT 0,
   brake_wear DOUBLE NOT NULL DEFAULT 0,
   last_clutch_change DOUBLE NOT NULL DEFAULT 0,
-  clutch_wear DOUBLE NOT NULL DEFAULT 0
+  clutch_wear DOUBLE NOT NULL DEFAULT 0,
+  original_drive_force FLOAT DEFAULT NULL
 );
