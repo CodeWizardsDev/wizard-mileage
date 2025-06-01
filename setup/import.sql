@@ -11,3 +11,5 @@ CREATE TABLE IF NOT EXISTS vehicle_mileage (
   clutch_wear DOUBLE NOT NULL DEFAULT 0,
   original_drive_force FLOAT DEFAULT NULL
 );
+CREATE INDEX idx_vehicle_mileage_plate ON vehicle_mileage(plate);
+CREATE INDEX idx_vehicle_status ON vehicle_mileage(plate, mileage);
