@@ -1,6 +1,0 @@
-    engine_oil                   = { name = 'engine_oil', label = 'Engine Oil', weight = 4000, type = 'item', image = 'engine_oil.png', unique = false, useable = true, shouldClose = true, description = 'Engine oil for vehicle maintenance' },
-    oil_filter                   = { name = 'oil_filter', label = 'Oil Filter', weight = 500, type = 'item', image = 'oil_filter.png', unique = false, useable = true, shouldClose = true, description = 'Oil filter for vehicle maintenance' },
-    air_filter                   = { name = 'air_filter', label = 'Air Filter', weight = 300, type = 'item', image = 'air_filter.png', unique = false, useable = true, shouldClose = true, description = 'Air filter for vehicle maintenance' },
-    tires                        = { name = 'tires', label = 'Tires', weight = 2000, type = 'item', image = 'tires.png', unique = false, useable = true, shouldClose = true, description = 'Vehicle tires' },
-    brake_parts                  = { name = 'brake_parts', label = 'Brake Parts', weight = 1000, type = 'item', image = 'brake_parts.png', unique = false, useable = true, shouldClose = true, description = 'Vehicle brake parts' },
-    clutch                       = { name = 'clutch', label = 'Clutch', weight = 1500, type = 'item', image = 'clutch.png', unique = false, useable = true, shouldClose = true, description = 'Vehicle clutch' },
