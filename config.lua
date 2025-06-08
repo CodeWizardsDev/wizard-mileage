@@ -55,10 +55,7 @@ Config.CheckWearCommand = 'checkwear' -- Command to check vehicle parts conditio
 Config.CMCommand = 'clearmileage'     -- Command to reset vehicle mileage to zero
 Config.DatabaseCommand = 'mileagedb'    -- Command to open saved vehicled list with data
 
-Config.AdminRanks = {
-    'admin',
-    'god'
-}
+Config.AdminRank = 'admin'
 
 Config.Autosave = true                -- Enable automatic saving of vehicle mileage to database
 Config.AutosaveInterval = 10          -- How often to save mileage (in seconds)
