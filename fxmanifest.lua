@@ -3,7 +3,7 @@ games { 'gta5' }
 
 author 'The_Hs5'
 
-description 'Display vehicle mileage, Service vehicle parts'
+description 'Display vehicle mileage, Service vehicle'
 version '1.2.0'
 ui_page 'html/index.html'
 
