@@ -1,681 +1,473 @@
 :root {
-  --glass-bg: linear-gradient(135deg, #1a1a2ed7 0%, #16213ed7 100%);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --accent-blue: #4dabf7;
-  --accent-green: #69db7c;
-  --accent-orange: #ffa94d;
-  --accent-red: #ff6b6b;
-  --accent-purple: #9775fa;
-  --accent-yellow: #faed75;
-  --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --glass-bg: linear-gradient(135deg, #1a1a2ed7 0%, #16213ed7 100%);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --accent-blue: #4dabf7;
+    --accent-green: #69db7c;
+    --accent-orange: #ffa94d;
+    --accent-red: #ff6b6b;
+    --accent-purple: #9775fa;
+    --accent-yellow: #faed75;
+    --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow: hidden;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow: hidden;
 }
 
+/* ---------------- Mileage Meter ---------------- */
 #mileageDisplay {
-  position: fixed;
-  padding: 12px 24px;
-  background: var(--glass-bg);
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 500;
-  display: none;
-  align-items: center;
-  gap: 10px;
-  z-index: 1000;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: var(--transition);
+    position: fixed;
+    padding: 12px 24px;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
 }
 
-#mileageDisplay > span[data-locale="mileage"] {
-  display: inline-block;
-  position: relative;
-  top: 2px;
+#mileageDisplay>span[data-locale="mileage"] {
+    display: inline-block;
+    position: relative;
+    top: 2px;
 }
 
+
+/* ---------------- CheckWear UI ---------------- */
 .wear-container {
-  top: 10%;
-  right: 1%;
-  position: fixed;
-  padding: 24px;
-  background: var(--glass-bg);
-  border-radius: 16px;
-  border: 1px solid var(--glass-border);
-  width: 360px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: var(--transition);
-  display: none;
+    top: 10%;
+    right: 1%;
+    position: fixed;
+    padding: 24px;
+    background: var(--glass-bg);
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    width: 360px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+    display: none;
 }
 
 .wear-bar {
-  margin: 24px 0;
-  position: relative;
+    margin: 24px 0;
+    position: relative;
 }
 
 .wear-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 .wear-label-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .wear-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .progress-container {
-  position: relative;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
+    position: relative;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
 }
 
 .progress-bar {
-  position: relative;
-  height: 100%;
-  width: 100%;
+    position: relative;
+    height: 100%;
+    width: 100%;
 }
 
 .progress {
-  height: 100%;
-  border-radius: 3px;
-  transition: var(--transition);
-  position: relative;
+    height: 100%;
+    border-radius: 3px;
+    transition: var(--transition);
+    position: relative;
 }
 
 .progress::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, 
-    rgba(255,255,255,0) 0%, 
-    rgba(255,255,255,0.3) 50%, 
-    rgba(255,255,255,0) 100%);
-  animation: shine 2.5s infinite;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    animation: shine 2.5s infinite;
 }
 
 .progress-info {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
 }
 
 .status-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-left: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 8px;
 }
 
 .health-status {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.engine .wear-icon { background: rgba(77, 171, 247, 0.2); color: var(--accent-blue); }
-.tires .wear-icon { background: rgba(105, 219, 124, 0.2); color: var(--accent-green); }
-.brakes .wear-icon { background: rgba(255, 107, 107, 0.2); color: var(--accent-red); }
-.suspension .wear-icon { background: rgba(250, 237, 117, 0.2); color: var(--accent-yellow); }
-.transmission .wear-icon { background: rgba(151, 117, 250, 0.2); color: var(--accent-purple); }
+.engine .wear-icon {
+    background: rgba(77, 171, 247, 0.2);
+    color: var(--accent-blue);
+}
 
-.engine .progress { background: var(--accent-blue); }
-.tires .progress { background: var(--accent-green); }
-.brakes .progress { background: var(--accent-red); }
-.suspension .progress { background: var(--accent-yellow); }
-.transmission .progress { background: var(--accent-purple); }
+.tires .wear-icon {
+    background: rgba(105, 219, 124, 0.2);
+    color: var(--accent-green);
+}
 
-.engine .status-indicator { background: var(--accent-blue); }
-.tires .status-indicator { background: var(--accent-green); }
-.brakes .status-indicator { background: var(--accent-red); }
-.suspension .status-indicator { background: var(--accent-yellow); }
-.transmission .status-indicator { background: var(--accent-purple); }
+.brakes .wear-icon {
+    background: rgba(255, 107, 107, 0.2);
+    color: var(--accent-red);
+}
 
-.health-excellent { color: var(--accent-green); }
-.health-good { color: var(--accent-blue); }
-.health-warning { color: var(--accent-orange); }
-.health-critical { color: var(--accent-red); }
+.suspension .wear-icon {
+    background: rgba(250, 237, 117, 0.2);
+    color: var(--accent-yellow);
+}
+
+.transmission .wear-icon {
+    background: rgba(151, 117, 250, 0.2);
+    color: var(--accent-purple);
+}
+
+.engine .progress {
+    background: var(--accent-blue);
+}
+
+.tires .progress {
+    background: var(--accent-green);
+}
+
+.brakes .progress {
+    background: var(--accent-red);
+}
+
+.suspension .progress {
+    background: var(--accent-yellow);
+}
+
+.transmission .progress {
+    background: var(--accent-purple);
+}
+
+.engine .status-indicator {
+    background: var(--accent-blue);
+}
+
+.tires .status-indicator {
+    background: var(--accent-green);
+}
+
+.brakes .status-indicator {
+    background: var(--accent-red);
+}
+
+.suspension .status-indicator {
+    background: var(--accent-yellow);
+}
+
+.transmission .status-indicator {
+    background: var(--accent-purple);
+}
+
+.health-excellent {
+    color: var(--accent-green);
+}
+
+.health-good {
+    color: var(--accent-blue);
+}
+
+.health-warning {
+    color: var(--accent-orange);
+}
+
+.health-critical {
+    color: var(--accent-red);
+}
 
 .health-disabled .wear-icon {
-  background: gray !important;
-  color: #888 !important;
+    background: gray !important;
+    color: #888 !important;
 }
 
 .health-disabled .progress {
-  background: gray !important;
+    background: gray !important;
 }
 
 .health-disabled .percent {
-  color: red !important;
-  font-weight: bold;
+    color: red !important;
+    font-weight: bold;
 }
 
 .health-disabled .status-indicator {
-  background: gray !important;
+    background: gray !important;
 }
 
+
+/* ---------------- Customization UI ---------------- */
 #customizationUI {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--glass-bg);
-  border-radius: 20px;
-  border: 1px solid var(--glass-border);
-  width: 380px;
-  padding: 32px 36px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
-  color: var(--text-primary);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  display: none;
-  z-index: 1100;
-  transition: var(--transition);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--glass-bg);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    width: 380px;
+    padding: 32px 36px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    display: none;
+    z-index: 1100;
+    transition: var(--transition);
 }
 
 #customizationUI h1,
 #customizationUI h3 {
-  font-weight: 700;
-  font-size: 1.6rem;
-  margin-bottom: 20px;
-  color: var(--accent-red);
-  text-align: center;
-  letter-spacing: 1px;
+    font-weight: 700;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    color: var(--accent-red);
+    text-align: center;
+    letter-spacing: 1px;
 }
 
 #customizationUI label {
-  display: block;
-  margin: 14px 0 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: color 0.3s ease;
+    display: block;
+    margin: 14px 0 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: color 0.3s ease;
 }
 
 #customizationUI label:hover {
-  color: var(--accent-blue);
+    color: var(--accent-blue);
 }
 
 #customizationUI input[type="range"] {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.15);
-  outline: none;
-  transition: background 0.3s ease;
-  cursor: pointer;
-  margin-top: 6px;
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    outline: none;
+    transition: background 0.3s ease;
+    cursor: pointer;
+    margin-top: 6px;
 }
 
 #customizationUI input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-red);
-  cursor: pointer;
-  box-shadow: 0 0 8px var(--accent-red);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-  margin-top: -7px;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-red);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--accent-red);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    margin-top: -7px;
 }
 
 #customizationUI input[type="range"]:hover::-webkit-slider-thumb {
-  background: var(--accent-blue);
-  box-shadow: 0 0 12px var(--accent-blue);
+    background: var(--accent-blue);
+    box-shadow: 0 0 12px var(--accent-blue);
 }
 
 #customizationUI input[type="range"]::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-red);
-  cursor: pointer;
-  box-shadow: 0 0 8px var(--accent-red);
-  border: none;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-red);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--accent-red);
+    border: none;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 #customizationUI input[type="range"]:hover::-moz-range-thumb {
-  background: var(--accent-blue);
-  box-shadow: 0 0 12px var(--accent-blue);
+    background: var(--accent-blue);
+    box-shadow: 0 0 12px var(--accent-blue);
 }
 
 #customizationUI .checkbox-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  margin: 12px 0;
-  position: relative;
-  padding-left: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
-  transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    margin: 12px 0;
+    position: relative;
+    padding-left: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 
 #customizationUI .checkbox-label input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
 }
 
 #customizationUI .checkbox-label .slider {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 22px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 34px;
-  transition: background-color 0.4s;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 22px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 34px;
+    transition: background-color 0.4s;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 #customizationUI .checkbox-label .slider::before {
-  content: "";
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 2px;
-  top: 2px;
-  background-color: white;
-  border-radius: 50%;
-  transition: transform 0.4s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    top: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.4s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-#customizationUI .checkbox-label input[type="checkbox"]:checked + .slider {
-  background-color: var(--accent-red);
-  box-shadow: 0 0 8px var(--accent-red);
+#customizationUI .checkbox-label input[type="checkbox"]:checked+.slider {
+    background-color: var(--accent-red);
+    box-shadow: 0 0 8px var(--accent-red);
 }
 
-#customizationUI .checkbox-label input[type="checkbox"]:checked + .slider::before {
-  transform: translateX(18px);
-}
-
-#customizationUI .pos-inputs {
-  display: flex;
-  gap: 16px;
-  margin-top: 8px;
-}
-
-#customizationUI .pos-inputs input[type="number"] {
-  flex: 1;
-  padding: 6px 8px;
-  border: 1.5px solid var(--glass-border);
-  border-radius: 6px;
-  background-color: var(--glass-bg);
-  color: var(--text-primary);
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  outline: none;
-  box-shadow: none;
-  width: 50%;
-}
-
-#customizationUI .pos-inputs input[type="number"]:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 8px var(--accent-blue);
-}
-
-#customizationUI button {
-  margin-top: 24px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
-  transition: background 0.4s, box-shadow 0.4s;
-}
-
-#customizationUI #closeUIButton {
-  margin-left: 10px; 
-  background: #dc3545;
-}
-
-#customizationUI button:hover {
-  background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.8);
-}
-
-#customizationUI button:active {
-  transform: scale(0.98);
-  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.5);
-}
-
-@media (max-width: 420px) {
-  #customizationUI {
-    width: 90%;
-    padding: 24px 20px;
-  }
-  #customizationUI .pos-inputs {
-    flex-direction: column;
-  }
-  #customizationUI .pos-inputs input[type="number"] {
-    width: 100%;
-  }
-}
-
-.mileage-icon {
-  color: gray;
-  font-size: 1.2rem;
-  vertical-align: middle;
-  margin-right: 6px;
-  transition: color 0.4s ease;
-}
-
-.mileage-icon.yellow {
-  color: var(--accent-yellow);
-}
-
-.mileage-icon.red {
-  color: var(--accent-red);
-}
-
-.mileage-icon.flashing {
-  animation: pulse 1.5s infinite;
-  color: var(--accent-red);
-}
-
-.health-disabled .wear-icon {
-  background: gray !important;
-  color: #888 !important;
-}
-
-.health-disabled .progress {
-  background: gray !important;
-}
-
-.health-disabled .percent {
-  color: red !important;
-  font-weight: bold;
-}
-
-.health-disabled .status-indicator {
-  background: gray !important;
-}
-
-#customizationUI {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--glass-bg);
-  border-radius: 20px;
-  border: 1px solid var(--glass-border);
-  width: 380px;
-  padding: 32px 36px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
-  color: var(--text-primary);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  display: none;
-  z-index: 1100;
-  transition: var(--transition);
-}
-
-#customizationUI h1,
-#customizationUI h3 {
-  font-weight: 700;
-  font-size: 1.6rem;
-  margin-bottom: 20px;
-  color: var(--accent-red);
-  text-align: center;
-  letter-spacing: 1px;
-}
-
-#customizationUI label {
-  display: block;
-  margin: 14px 0 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-#customizationUI label:hover {
-  color: var(--accent-blue);
-}
-
-#customizationUI input[type="range"] {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.15);
-  outline: none;
-  transition: background 0.3s ease;
-  cursor: pointer;
-  margin-top: 6px;
-}
-
-#customizationUI input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-red);
-  cursor: pointer;
-  box-shadow: 0 0 8px var(--accent-red);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-  margin-top: -7px;
-}
-
-#customizationUI input[type="range"]:hover::-webkit-slider-thumb {
-  background: var(--accent-blue);
-  box-shadow: 0 0 12px var(--accent-blue);
-}
-
-#customizationUI input[type="range"]::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-red);
-  cursor: pointer;
-  box-shadow: 0 0 8px var(--accent-red);
-  border: none;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-#customizationUI input[type="range"]:hover::-moz-range-thumb {
-  background: var(--accent-blue);
-  box-shadow: 0 0 12px var(--accent-blue);
-}
-
-#customizationUI .checkbox-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  margin: 12px 0;
-  position: relative;
-  padding-left: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
-  transition: color 0.3s ease;
-}
-
-#customizationUI .checkbox-label input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-#customizationUI .checkbox-label .slider {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 22px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 34px;
-  transition: background-color 0.4s;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-}
-
-#customizationUI .checkbox-label .slider::before {
-  content: "";
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 2px;
-  top: 2px;
-  background-color: white;
-  border-radius: 50%;
-  transition: transform 0.4s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-#customizationUI .checkbox-label input[type="checkbox"]:checked + .slider {
-  background-color: var(--accent-red);
-  box-shadow: 0 0 8px var(--accent-red);
-}
-
-#customizationUI .checkbox-label input[type="checkbox"]:checked + .slider::before {
-  transform: translateX(18px);
+#customizationUI .checkbox-label input[type="checkbox"]:checked+.slider::before {
+    transform: translateX(18px);
 }
 
 #customizationUI .pos-inputs {
-  display: flex;
-  gap: 16px;
-  margin-top: 8px;
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
 }
 
 #customizationUI .pos-inputs input[type="number"] {
-  flex: 1;
-  padding: 6px 8px;
-  border: 1.5px solid var(--glass-border);
-  border-radius: 6px;
-  background-color: var(--glass-bg);
-  color: var(--text-primary);
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  outline: none;
-  box-shadow: none;
-  width: 50%;
+    flex: 1;
+    padding: 6px 8px;
+    border: 1.5px solid var(--glass-border);
+    border-radius: 6px;
+    background-color: var(--glass-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    box-shadow: none;
+    width: 50%;
 }
 
 #customizationUI .pos-inputs input[type="number"]:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 8px var(--accent-blue);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px var(--accent-blue);
 }
 
 #customizationUI button {
-  margin-top: 24px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
-  transition: background 0.4s, box-shadow 0.4s;
+    margin-top: 24px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
+    transition: background 0.4s, box-shadow 0.4s;
 }
 
 #customizationUI #closeUIButton {
-  margin-left: 10px; 
-  background: #dc3545;
+    margin-left: 10px;
+    background: #dc3545;
 }
 
 #customizationUI button:hover {
-  background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.8);
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.8);
 }
 
 #customizationUI button:active {
-  transform: scale(0.98);
-  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.5);
+    transform: scale(0.98);
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.5);
 }
 
 @media (max-width: 420px) {
-  #customizationUI {
-    width: 90%;
-    padding: 24px 20px;
-  }
-  #customizationUI .pos-inputs {
-    flex-direction: column;
-  }
-  #customizationUI .pos-inputs input[type="number"] {
-    width: 100%;
-  }
+    #customizationUI {
+        width: 90%;
+        padding: 24px 20px;
+    }
+
+    #customizationUI .pos-inputs {
+        flex-direction: column;
+    }
+
+    #customizationUI .pos-inputs input[type="number"] {
+        width: 100%;
+    }
 }
 
-.mileage-icon {
-  color: gray;
-  font-size: 1.2rem;
-  vertical-align: middle;
-  margin-right: 6px;
-  transition: color 0.4s ease;
-}
 
-.mileage-icon.yellow {
-  color: var(--accent-yellow);
-}
-
-.mileage-icon.red {
-  color: var(--accent-red);
-}
-
-.mileage-icon.flashing {
-  animation: pulse 1.5s infinite;
-  color: var(--accent-red);
-}
-
+/* ---------------- Database management ---------------- */
 .database-menu {
   position: fixed;
   top: 10%;
@@ -870,256 +662,107 @@ body {
   animation: pulse 1.5s infinite;
 }
 
-.health-disabled .wear-icon {
-  background: gray !important;
-  color: #888 !important;
-}
 
-.health-disabled .progress {
-  background: gray !important;
-}
-
-.health-disabled .percent {
-  color: red !important;
-  font-weight: bold;
-}
-
-.health-disabled .status-indicator {
-  background: gray !important;
-}
-
-#customizationUI {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--glass-bg);
-  border-radius: 20px;
-  border: 1px solid var(--glass-border);
-  width: 380px;
-  padding: 32px 36px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
-  color: var(--text-primary);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  display: none;
-  z-index: 1100;
-  transition: var(--transition);
-}
-
-#customizationUI h1,
-#customizationUI h3 {
-  font-weight: 700;
-  font-size: 1.6rem;
-  margin-bottom: 20px;
-  color: var(--accent-red);
-  text-align: center;
-  letter-spacing: 1px;
-}
-
-#customizationUI label {
-  display: block;
-  margin: 14px 0 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-#customizationUI label:hover {
-  color: var(--accent-blue);
-}
-
-#customizationUI input[type="range"] {
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.15);
-  outline: none;
-  transition: background 0.3s ease;
-  cursor: pointer;
-  margin-top: 6px;
-}
-
-#customizationUI input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-red);
-  cursor: pointer;
-  box-shadow: 0 0 8px var(--accent-red);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-  margin-top: -7px;
-}
-
-#customizationUI input[type="range"]:hover::-webkit-slider-thumb {
-  background: var(--accent-blue);
-  box-shadow: 0 0 12px var(--accent-blue);
-}
-
-#customizationUI input[type="range"]::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent-red);
-  cursor: pointer;
-  box-shadow: 0 0 8px var(--accent-red);
-  border: none;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-#customizationUI input[type="range"]:hover::-moz-range-thumb {
-  background: var(--accent-blue);
-  box-shadow: 0 0 12px var(--accent-blue);
-}
-
-#customizationUI .checkbox-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  margin: 12px 0;
-  position: relative;
-  padding-left: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
-  transition: color 0.3s ease;
-}
-
-#customizationUI .checkbox-label input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-#customizationUI .checkbox-label .slider {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 22px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 34px;
-  transition: background-color 0.4s;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-}
-
-#customizationUI .checkbox-label .slider::before {
-  content: "";
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 2px;
-  top: 2px;
-  background-color: white;
-  border-radius: 50%;
-  transition: transform 0.4s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-#customizationUI .checkbox-label input[type="checkbox"]:checked + .slider {
-  background-color: var(--accent-red);
-  box-shadow: 0 0 8px var(--accent-red);
-}
-
-#customizationUI .checkbox-label input[type="checkbox"]:checked + .slider::before {
-  transform: translateX(18px);
-}
-
-#customizationUI .pos-inputs {
-  display: flex;
-  gap: 16px;
-  margin-top: 8px;
-}
-
-#customizationUI .pos-inputs input[type="number"] {
-  flex: 1;
-  padding: 6px 8px;
-  border: 1.5px solid var(--glass-border);
-  border-radius: 6px;
-  background-color: var(--glass-bg);
-  color: var(--text-primary);
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  outline: none;
-  box-shadow: none;
-  width: 50%;
-}
-
-#customizationUI .pos-inputs input[type="number"]:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 8px var(--accent-blue);
-}
-
-#customizationUI button {
-  margin-top: 24px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
-  transition: background 0.4s, box-shadow 0.4s;
-}
-
-#customizationUI #closeUIButton {
-  margin-left: 10px; 
-  background: #dc3545;
-}
-
-#customizationUI button:hover {
-  background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.8);
-}
-
-#customizationUI button:active {
-  transform: scale(0.98);
-  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.5);
-}
-
-@media (max-width: 420px) {
-  #customizationUI {
-    width: 90%;
-    padding: 24px 20px;
-  }
-  #customizationUI .pos-inputs {
-    flex-direction: column;
-  }
-  #customizationUI .pos-inputs input[type="number"] {
-    width: 100%;
-  }
-}
-
+/* ---------------- Mileage Icon ---------------- */
 .mileage-icon {
-  color: gray;
-  font-size: 1.2rem;
-  vertical-align: middle;
-  margin-right: 6px;
-  transition: color 0.4s ease;
+    color: gray;
+    font-size: 1.2rem;
+    vertical-align: middle;
+    margin-right: 6px;
+    transition: color 0.4s ease;
 }
 
 .mileage-icon.yellow {
-  color: var(--accent-yellow);
+    color: var(--accent-yellow);
 }
 
 .mileage-icon.red {
-  color: var(--accent-red);
+    color: var(--accent-red);
 }
 
 .mileage-icon.flashing {
-  animation: pulse 1.5s infinite;
-  color: var(--accent-red);
+    animation: pulse 1.5s infinite;
+    color: var(--accent-red);
+}
+
+
+/* ---------------- Confirmation modal ---------------- */
+.custom-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1300;
+}
+
+.custom-confirm-content {
+    background: var(--glass-bg);
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    padding: 24px 32px;
+    width: 320px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    text-align: center;
+}
+
+.custom-confirm-content p {
+    font-size: 1.1rem;
+    margin-bottom: 24px;
+}
+
+.custom-confirm-buttons {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.confirm-ok-btn,
+.confirm-cancel-btn {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.confirm-ok-btn {
+    background: var(--accent-green);
+    color: white;
+    box-shadow: 0 6px 15px rgba(59, 136, 60, 0.6);
+}
+
+.confirm-ok-btn:hover {
+    background: #3b883dcc;
+    box-shadow: 0 8px 20px rgba(59, 136, 60, 0.8);
+}
+
+.confirm-ok-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 10px rgba(59, 136, 60, 0.5);
+}
+
+.confirm-cancel-btn {
+    background: var(--accent-red);
+    color: white;
+    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
+}
+
+.confirm-cancel-btn:hover {
+    background: #913434cc;
+    box-shadow: 0 8px 20px rgba(145, 52, 52, 0.8);
+}
+
+.confirm-cancel-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 10px rgba(145, 52, 52, 0.5);
 }
