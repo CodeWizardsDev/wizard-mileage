@@ -1,115 +1,10 @@
-local mileageVisible = false
-local allowSmartGearDetect = true
-local inVehicle = false
-local lastPos = nil
-local accDistance = 0.0
-local currentPlate = nil
-local waitingForData = false
-local lastOilChange = 0.0
-local lastOilFilterChange = 0.0
-local lastAirFilterChange = 0.0
-local lastTireChange = 0.0
-local lastbrakeChange = 0.0
-local lastbrakeWear = 0.0
-local lastClutchChange = 0.0
-local lastClutchWear = 0.0
-local lastSuspensionChange = 0.0
-local suspensionWear = 0.0
-local lastSparkPlugChange = 0.0
-local sparkPlugWear = 0.0
-local cachedClutchWear = 0.0
-local cachedBrakeWear = 0.0
-local clutchWearDirty = false
-local brakeWearDirty = false
+---------------- Main data ----------------
+local mileageVisible, inVehicle, waitingForData, clutchWearDirty, brakeWearDirty, allowSmartGearDetect, mileageUIVisible, lastPos, currentPlate, oilchangedist, oilfilterchangedist, airfilterchangedist, tirechangedist = false, false, false, false, false, true, true, nil, nil, nil, nil, nil, nil
+local accDistance, lastOilChange, lastOilFilterChange, lastAirFilterChange, lastTireChange, lastbrakeChange, lastbrakeWear, lastClutchChange, lastClutchWear, lastSuspensionChange, suspensionWear, lastSparkPlugChange, sparkPlugWear, cachedClutchWear, cachedBrakeWear, mileageUIPosX, mileageUIPosY, checkwearUIPosX, checkwearUIPosY, mileageUISize, checkwearUISize, lastEngineCriticalNotify = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0
+local adminCallbacks, vehicleListCallbacks = {}, {} 
 
-local adminCallbacks = {}
-local vehicleListCallbacks = {}
 
-local function sendCachedWearData()
-    if inVehicle and currentPlate then
-        if clutchWearDirty then
-            TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', currentPlate, cachedClutchWear)
-            clutchWearDirty = false
-        end
-        if brakeWearDirty then
-            TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWear', currentPlate, cachedBrakeWear)
-            brakeWearDirty = false
-        end
-    end
-end
-
-exports('GetVehicleMileage', function()
-    return accDistance
-end)
-
-exports('GetVehicleLastPartsChange', function()
-    return {
-        sparkPlugChange = lastSparkPlugChange,
-        oilChange = lastOilChange,
-        oilFilterChange = lastOilFilterChange,
-        airFilterChange = lastAirFilterChange,
-        tireChange = lastTireChange,
-        brakeChange = lastbrakeChange,
-        suspensionChange = lastSuspensionChange,
-        clutchChange = lastClutchChange,
-    }
-end)
-
-exports('GetVehiclePartsWear', function()
-    return {
-        brakeWear = lastbrakeWear,
-        clutchWear = lastClutchWear,
-        suspensionWear = suspensionWear,
-        sparkPlugWear = sparkPlugWear
-    }
-end)
-
-exports('SetVehicleMileage', function(mileage)
-    accDistance = mileage or accDistance
-end)
-
-exports('SetVehicleLastPartsChange', function(partsChange)
-    lastOilChange = partsChange.oilChange or lastOilChange
-    lastOilFilterChange = partsChange.oilFilterChange or lastOilFilterChange
-    lastAirFilterChange = partsChange.airFilterChange or lastAirFilterChange
-    lastTireChange = partsChange.tireChange or lastTireChange
-    lastbrakeChange = partsChange.brakeChange or lastbrakeChange
-    lastClutchChange = partsChange.clutchChange or lastClutchChange
-    lastSuspensionChange = partsChange.suspensionChange or lastSuspensionChange
-    lastSparkPlugChange = partsChange.sparkPlugChange or lastSparkPlugChange
-end)
-
-exports('SetVehiclePartsWear', function(partsWear)
-    lastbrakeWear = partsWear.brakeWear or lastbrakeWear
-    lastClutchWear = partsWear.clutchWear or lastClutchWear
-end)
-
-AddEventHandler('onClientResourceStart', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
-    end
-end)
-
-AddEventHandler('playerSpawned', function()
-    TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
-end)
-
-local mileageUIVisible = true
-local mileageUISize = 1.0
-local checkwearUISize = 1.0
-local mileageUIPosX = 0.0
-local mileageUIPosY = 0.0
-local checkwearUIPosX = 0.0
-local checkwearUIPosY = 0.0
-
-local GetEntityCoords = GetEntityCoords
-local PlayerPedId = PlayerPedId
-local IsPedInAnyVehicle = IsPedInAnyVehicle
-local GetVehiclePedIsIn = GetVehiclePedIsIn
-local DoesEntityExist = DoesEntityExist
-local lastEngineCriticalNotify = 0
-local oilchangedist, oilfilterchangedist, airfilterchangedist, tirechangedist = nil, nil, nil, nil
-
+---------------- Framework initialize ----------------
 if Config.FrameWork == 'esx' then
     ESX = exports["es_extended"]:getSharedObject()
     RegisterNetEvent('esx:playerLoaded')
@@ -136,223 +31,9 @@ else
         return Player.job.grade.level
     end
 end
-local function Notify(message, type)
-    if not message or not type then return end
-    
-    local notifyConfig = {
-        wizard = function() exports['wizard-notify']:Send('Wizard Mileage', message, 5000, type) end,
-        okok = function() exports['okokNotify']:Alert('Wizard Mileage', message, 5000, type, false) end,
-        qbx = function() exports.qbx_core:Notify(message, type, 5000) end,
-        qb = function() TriggerEvent('QBCore:Notify', source, message, type) end,
-        esx = function() exports['esx_notify']:Notify(message, type, 5000, 'Wizard Mileage') end,
-        ox = function() lib.notify{title = 'Wizard Mileage', description = message, type = type} end
-    }
-    
-    local notifyFunc = notifyConfig[Config.Notify]
-    if notifyFunc then notifyFunc() end
-end
-
-RegisterNetEvent('wizard_vehiclemileage:client:requestAdminCheck')
-AddEventHandler('wizard_vehiclemileage:client:requestAdminCheck', function(cbId)
-    -- For standalone, check ACE permission 'admin' locally
-    local isAdmin = IsPlayerAceAllowed(PlayerId(), "admin")
-    TriggerServerEvent('wizard_vehiclemileage:server:isAdmin', cbId)
-    -- Also trigger local callback immediately
-    TriggerEvent('wizard_vehiclemileage:client:isAdminCallback', cbId, isAdmin)
-end)
-
-RegisterNetEvent('wizard_vehiclemileage:client:isAdminCallback')
-AddEventHandler('wizard_vehiclemileage:client:isAdminCallback', function(cbId, isAdmin)
-    if adminCallbacks[cbId] then
-        adminCallbacks[cbId](isAdmin)
-        adminCallbacks[cbId] = nil
-    end
-end)
-
-local function TriggerAdminCallback(cb)
-    local cbId = math.random(100000, 999999)
-    adminCallbacks[cbId] = cb
-    TriggerServerEvent('wizard_vehiclemileage:server:isAdmin', cbId)
-end
-
-RegisterNetEvent('wizard_vehiclemileage:client:getAllVehiclesCallback')
-AddEventHandler('wizard_vehiclemileage:client:getAllVehiclesCallback', function(cbId, vehicles)
-    if vehicleListCallbacks[cbId] then
-        vehicleListCallbacks[cbId](vehicles)
-        vehicleListCallbacks[cbId] = nil
-    end
-end)
-
-local function TriggerVehicleListCallback(cb)
-    local cbId = math.random(100000, 999999)
-    vehicleListCallbacks[cbId] = cb
-    TriggerServerEvent('wizard_vehiclemileage:server:getAllVehicles', cbId)
-end
-
-RegisterCommand(Config.CustomizeCommand, function()
-    if inVehicle and currentPlate then
-        if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned'), 'error') return end
-        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
-        SetNuiFocus(true, true)
-        SendNUIMessage({
-            type = "openCustomization"
-        })
-    else
-        Notify(locale('error.not_in_vehicle'), 'error')
-    end
-end)
-
--- Register command for opening vehicle mileage database menu
-RegisterCommand(Config.DatabaseCommand, function()
-    TriggerAdminCallback(function(isAdmin)
-        if isAdmin then
-            SetNuiFocus(true, true)
-            SendNUIMessage({
-                type = 'openDatabaseMenu'
-            })
-            -- Request vehicle list from server
-            TriggerVehicleListCallback(function(vehicles)
-                SendNUIMessage({
-                    type = 'vehicleList',
-                    vehicles = vehicles
-                })
-            end)
-        else
-            Notify('You do not have permission to open this menu.', 'error')
-        end
-    end)
-end)
-
--- NUI callback to request vehicle list
-RegisterNUICallback('requestVehicleList', function(data, cb)
-    TriggerVehicleListCallback(function(vehicles)
-        SendNUIMessage({
-            type = 'vehicleList',
-            vehicles = vehicles
-        })
-    end)
-end)
-
--- NUI callback to update vehicle data
-RegisterNUICallback('updateVehicleData', function(data, cb)
-    if data and data.vehicle then
-        local vehicle = data.vehicle
-        -- Ensure all fields are present, default to 0 if missing
-        vehicle.last_oil_change = vehicle.last_oil_change or 0
-        vehicle.last_oil_filter_change = vehicle.last_oil_filter_change or 0
-        vehicle.last_air_filter_change = vehicle.last_air_filter_change or 0
-        vehicle.last_tire_change = vehicle.last_tire_change or 0
-        vehicle.last_brakes_change = vehicle.last_brakes_change or 0
-        vehicle.brake_wear = vehicle.brake_wear or 0
-        vehicle.last_clutch_change = vehicle.last_clutch_change or 0
-        vehicle.clutch_wear = vehicle.clutch_wear or 0
-        vehicle.last_suspension_change = vehicle.last_suspension_change or 0
-        vehicle.last_spark_plug_change = vehicle.last_spark_plug_change or 0
-
-        TriggerServerEvent('wizard_vehiclemileage:server:updateVehicleData', vehicle)
-        -- Wait for server confirmation before requesting updated vehicle list
-        -- Remove immediate vehicle list request here
-        cb({success = true})
-    else
-        cb({success = false, error = 'Invalid data'})
-    end
-end)
-
-RegisterNetEvent('wizard_vehiclemileage:client:vehicleDataUpdated')
-AddEventHandler('wizard_vehiclemileage:client:vehicleDataUpdated', function()
-    -- Request updated vehicle list from server after update confirmation
-    TriggerVehicleListCallback(function(vehicles)
-        SendNUIMessage({
-            type = 'vehicleList',
-            vehicles = vehicles
-        })
-    end)
-end)
-
--- NUI callback to delete vehicle
-RegisterNUICallback('notify', function(data, cb)
-    if data and data.message and data.type then
-        Notify(data.message, data.type)
-        cb({success = true})
-    else
-        cb({success = false, error = 'Invalid data'})
-    end
-end)
-
--- NUI callback to delete vehicle
-RegisterNUICallback('deleteVehicle', function(data, cb)
-    if data and data.plate then
-        TriggerServerEvent('wizard_vehiclemileage:server:deleteVehicle', data.plate)
-        cb({success = true})
-    else
-        cb({success = false, error = 'Invalid plate'})
-    end
-end)
-
-RegisterNUICallback('closeMenu', function(data, cb)
-    SetNuiFocus(false, false)
-    cb({})
-end)
-
-RegisterNUICallback('savePlayerSettings', function(data, cb)
-    SetNuiFocus(false, false)
-    TriggerServerEvent('wizard_vehiclemileage:server:savePlayerSettings', data)
-    SendNUIMessage({
-        type = "closeCustomization"
-    })
-    cb({})
-end)
 
 
-RegisterNetEvent('wizard_vehiclemileage:client:setPlayerSettings')
-AddEventHandler('wizard_vehiclemileage:client:setPlayerSettings', function(settings)
-    if not settings then return end
-    mileageUIVisible = settings.mileage_visible
-    mileageUISize = settings.mileage_size
-    checkwearUISize = settings.checkwear_size
-    mileageUIPosX = settings.mileage_pos_x
-    mileageUIPosY = settings.mileage_pos_y
-    checkwearUIPosX = settings.checkwear_pos_x
-    checkwearUIPosY = settings.checkwear_pos_y
-
-    SendNUIMessage({
-        type = "updateCustomization",
-        mileageVisible = mileageUIVisible,
-        mileageSize = mileageUISize,
-        checkwearSize = checkwearUISize,
-        mileagePosX = mileageUIPosX,
-        mileagePosY = mileageUIPosY,
-        checkwearPosX = checkwearUIPosX,
-        checkwearPosY = checkwearUIPosY,
-        removePositionalClass = true
-    })
-end)
-
-local function DisplayProgressBar(duration, label, config)
-    if Config.ProgressBar == 'qb' then
-        QBCore.Functions.Progressbar("vehicle_maintenance", label, duration, false, config.Cancelable, {
-            disableMovement = config.FreezePlayer,
-            disableCarMovement = config.FreezeCar,
-            disableMouse = false,
-            disableCombat = true,
-        }, {}, {}, {}, function()
-        end, function()
-        end)
-        return true
-    elseif Config.ProgressBar == 'ox' then
-        return lib.progressBar({
-            duration = duration,
-            label = label,
-            useWhileDead = false,
-            canCancel = config.Cancelable,
-            disable = {
-                car = config.FreezeCar,
-                move = config.FreezePlayer
-            }
-        })
-    end
-end
-
+---------------- Mileage unit initialize ----------------
 if Config.Unit == "km" then
     sparkPlugchangedist = Config.SparkPlugChangeDistance * 1000
     oilchangedist = Config.OilChangeDistance * 1000
@@ -366,6 +47,9 @@ elseif Config.Unit == "mile" then
     airfilterchangedist = Config.AirFilterDistance * 1609.34
     tirechangedist = Config.TireWearDistance * 1609.34
 end
+
+
+---------------- Bought vehicles detection ----------------
 if Config.BoughtVehiclesOnly then
     local ownershipCache = {}
     function IsVehicleOwned(plate)
@@ -398,6 +82,57 @@ else
     end
 end
 
+
+---------------- Functions ----------------
+local function Notify(message, type)
+    if not message or not type then return end
+    
+    local notifyConfig = {
+        wizard = function() exports['wizard-notify']:Send('Wizard Mileage', message, 5000, type) end,
+        okok = function() exports['okokNotify']:Alert('Wizard Mileage', message, 5000, type, false) end,
+        qbx = function() exports.qbx_core:Notify(message, type, 5000) end,
+        qb = function() TriggerEvent('QBCore:Notify', source, message, type) end,
+        esx = function() exports['esx_notify']:Notify(message, type, 5000, 'Wizard Mileage') end,
+        ox = function() lib.notify{title = 'Wizard Mileage', description = message, type = type} end
+    }
+    
+    local notifyFunc = notifyConfig[Config.Notify]
+    if notifyFunc then notifyFunc() end
+end
+local function TriggerAdminCallback(cb)
+    local cbId = math.random(100000, 999999)
+    adminCallbacks[cbId] = cb
+    TriggerServerEvent('wizard_vehiclemileage:server:isAdmin', cbId)
+end
+local function TriggerVehicleListCallback(cb)
+    local cbId = math.random(100000, 999999)
+    vehicleListCallbacks[cbId] = cb
+    TriggerServerEvent('wizard_vehiclemileage:server:getAllVehicles', cbId)
+end
+local function DisplayProgressBar(duration, label, config)
+    if Config.ProgressBar == 'qb' then
+        QBCore.Functions.Progressbar("vehicle_maintenance", label, duration, false, config.Cancelable, {
+            disableMovement = config.FreezePlayer,
+            disableCarMovement = config.FreezeCar,
+            disableMouse = false,
+            disableCombat = true,
+        }, {}, {}, {}, function()
+        end, function()
+        end)
+        return true
+    elseif Config.ProgressBar == 'ox' then
+        return lib.progressBar({
+            duration = duration,
+            label = label,
+            useWhileDead = false,
+            canCancel = config.Cancelable,
+            disable = {
+                car = config.FreezeCar,
+                move = config.FreezePlayer
+            }
+        })
+    end
+end
 local function checkInventoryItem(item)
     if not Config.InventoryItems then return true end
     local hasItem = false
@@ -666,9 +401,22 @@ local function openServiceMenu()
         })
     end
 end
+local function sendCachedWearData()
+    if inVehicle and currentPlate then
+        if clutchWearDirty then
+            TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', currentPlate, cachedClutchWear)
+            clutchWearDirty = false
+        end
+        if brakeWearDirty then
+            TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWear', currentPlate, cachedBrakeWear)
+            brakeWearDirty = false
+        end
+    end
+end
 
-if Config.WearTracking then weartrckSP = true end
 
+---------------- Threads ----------------
+    -- Main thread
 Citizen.CreateThread(function()
     SendNUIMessage({
         type = "Configuration",
@@ -773,6 +521,7 @@ Citizen.CreateThread(function()
         end
     end
 end)
+    -- Clutch wear tracking
 Citizen.CreateThread(function()
     if not Config.WearTracking.Clutch then return end
     local prevGear = 0
@@ -808,6 +557,7 @@ Citizen.CreateThread(function()
         end
     end
 end)
+    -- Brake wear tracking
 Citizen.CreateThread(function()
     if not Config.WearTracking.Brakes then return end
     while true do
@@ -831,6 +581,7 @@ Citizen.CreateThread(function()
         end
     end
 end)
+    -- Targettings script handler
 Citizen.CreateThread(function()
     if not Config.UseTarget then
         return
@@ -987,10 +738,10 @@ Citizen.CreateThread(function()
         })
     end
 end)
+    -- Update CheckWear UI
 Citizen.CreateThread(function()
     while true do
         Wait(5000)
-
         if Config.WearTracking.SparkPlugs then
             sparkPlugDistanceDriven = accDistance - lastSparkPlugChange
             sparkPlugLifeRemaining = math.max(0, sparkPlugchangedist - sparkPlugDistanceDriven)
@@ -1041,6 +792,26 @@ Citizen.CreateThread(function()
     end
 end)
 
+
+---------------- Net Events ----------------
+    -- Admin checking
+RegisterNetEvent('wizard_vehiclemileage:client:requestAdminCheck')
+AddEventHandler('wizard_vehiclemileage:client:requestAdminCheck', function(cbId)
+    -- For standalone, check ACE permission 'admin' locally
+    local isAdmin = IsPlayerAceAllowed(PlayerId(), "admin")
+    TriggerServerEvent('wizard_vehiclemileage:server:isAdmin', cbId)
+    -- Also trigger local callback immediately
+    TriggerEvent('wizard_vehiclemileage:client:isAdminCallback', cbId, isAdmin)
+end)
+RegisterNetEvent('wizard_vehiclemileage:client:isAdminCallback')
+AddEventHandler('wizard_vehiclemileage:client:isAdminCallback', function(cbId, isAdmin)
+    if adminCallbacks[cbId] then
+        adminCallbacks[cbId](isAdmin)
+        adminCallbacks[cbId] = nil
+    end
+end)
+
+    -- Change spark plugs
 RegisterNetEvent('wizard_vehiclemileage:client:changesparkplug')
 AddEventHandler('wizard_vehiclemileage:client:changesparkplug', function()
     if Config.JobRequired then
@@ -1085,7 +856,7 @@ AddEventHandler('wizard_vehiclemileage:client:changesparkplug', function()
     end
     ClearPedTasks(playerPed)
 end)
-
+    -- Change oil
 RegisterNetEvent('wizard_vehiclemileage:client:changeoil')
 AddEventHandler('wizard_vehiclemileage:client:changeoil', function()
     if Config.JobRequired then
@@ -1137,7 +908,7 @@ AddEventHandler('wizard_vehiclemileage:client:changeoil', function()
     end
     ClearPedTasks(playerPed)
 end)
-
+    -- Change oil filter
 RegisterNetEvent('wizard_vehiclemileage:client:changeoilfilter')
 AddEventHandler('wizard_vehiclemileage:client:changeoilfilter', function()
     if Config.InventoryItems and not checkInventoryItem(Config.Items.OilFilter) then
@@ -1189,7 +960,7 @@ AddEventHandler('wizard_vehiclemileage:client:changeoilfilter', function()
     end
     ClearPedTasks(playerPed)
 end)
-
+    -- Change air filter
 RegisterNetEvent('wizard_vehiclemileage:client:changeairfilter')
 AddEventHandler('wizard_vehiclemileage:client:changeairfilter', function()
     if Config.JobRequired then
@@ -1241,7 +1012,7 @@ AddEventHandler('wizard_vehiclemileage:client:changeairfilter', function()
     end
     ClearPedTasks(playerPed)
 end)
-
+    -- Change tires
 RegisterNetEvent('wizard_vehiclemileage:client:changetires')
 AddEventHandler('wizard_vehiclemileage:client:changetires', function()
     if Config.JobRequired then
@@ -1288,7 +1059,7 @@ AddEventHandler('wizard_vehiclemileage:client:changetires', function()
     end
     ClearPedTasks(playerPed)
 end)
-
+    -- Change brakes
 RegisterNetEvent('wizard_vehiclemileage:client:changebrakes')
 AddEventHandler('wizard_vehiclemileage:client:changebrakes', function()
     if Config.JobRequired then
@@ -1332,7 +1103,7 @@ AddEventHandler('wizard_vehiclemileage:client:changebrakes', function()
     end
     ClearPedTasks(playerPed)
 end)
-
+    -- Change suspension
 RegisterNetEvent('wizard_vehiclemileage:client:changesuspension')
 AddEventHandler('wizard_vehiclemileage:client:changesuspension', function()
     if Config.JobRequired then
@@ -1377,7 +1148,7 @@ AddEventHandler('wizard_vehiclemileage:client:changesuspension', function()
     end
     ClearPedTasks(playerPed)
 end)
-
+    -- Change clutch
 RegisterNetEvent('wizard_vehiclemileage:client:changeclutch')
 AddEventHandler('wizard_vehiclemileage:client:changeclutch', function()
     if Config.JobRequired then
@@ -1422,26 +1193,7 @@ AddEventHandler('wizard_vehiclemileage:client:changeclutch', function()
         end
         ClearPedTasks(playerPed)
 end)
-
-
-
-RegisterNetEvent('wizard_vehiclemileage:client:updateClutchWT')
-AddEventHandler('wizard_vehiclemileage:client:updateClutchWT', function()
-    if not IsVehicleOwned(currentPlate) then return end
-    
-    lastClutchWear = lastClutchWear + Config.ClutchWearRate
-    if lastClutchWear > Config.MaxClutchWear then
-        lastClutchWear = Config.MaxClutchWear
-    end
-    TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', currentPlate, lastClutchWear)
-    updateClutchWear(veh)
-end)
-
-RegisterNetEvent('wizard_vehiclemileage:client:smartGearDetect')
-AddEventHandler('wizard_vehiclemileage:client:smartGearDetect', function(data)
-    allowSmartGearDetect = data
-end)
-
+    -- Get mileage data from database
 RegisterNetEvent('wizard_vehiclemileage:client:setData')
 AddEventHandler('wizard_vehiclemileage:client:setData', function(mileage, oilChange, filterChange, AirfilterChange, tireChange, brakeChange, brakeWear, clutchChange, clutchWear, origDriveForce, lastSuspensionChangeVal, suspensionWearVal, lastSparkPlugChangeVal, sparkPlugWearVal)
     accDistance = mileage or 0.0
@@ -1466,6 +1218,50 @@ AddEventHandler('wizard_vehiclemileage:client:setData', function(mileage, oilCha
         unit = (Config.Unit == "mile" and "miles" or "km")
     })
 end)
+    -- Get vehicle list from database
+RegisterNetEvent('wizard_vehiclemileage:client:vehicleDataUpdated')
+AddEventHandler('wizard_vehiclemileage:client:vehicleDataUpdated', function()
+    TriggerVehicleListCallback(function(vehicles)
+        SendNUIMessage({
+            type = 'vehicleList',
+            vehicles = vehicles
+        })
+    end)
+end)
+RegisterNetEvent('wizard_vehiclemileage:client:getAllVehiclesCallback')
+AddEventHandler('wizard_vehiclemileage:client:getAllVehiclesCallback', function(cbId, vehicles)
+    if vehicleListCallbacks[cbId] then
+        vehicleListCallbacks[cbId](vehicles)
+        vehicleListCallbacks[cbId] = nil
+    end
+end)
+
+    -- Get player settings from database
+RegisterNetEvent('wizard_vehiclemileage:client:setPlayerSettings')
+AddEventHandler('wizard_vehiclemileage:client:setPlayerSettings', function(settings)
+    if not settings then return end
+    mileageUIVisible = settings.mileage_visible
+    mileageUISize = settings.mileage_size
+    checkwearUISize = settings.checkwear_size
+    mileageUIPosX = settings.mileage_pos_x
+    mileageUIPosY = settings.mileage_pos_y
+    checkwearUIPosX = settings.checkwear_pos_x
+    checkwearUIPosY = settings.checkwear_pos_y
+
+    SendNUIMessage({
+        type = "updateCustomization",
+        mileageVisible = mileageUIVisible,
+        mileageSize = mileageUISize,
+        checkwearSize = checkwearUISize,
+        mileagePosX = mileageUIPosX,
+        mileagePosY = mileageUIPosY,
+        checkwearPosX = checkwearUIPosX,
+        checkwearPosY = checkwearUIPosY,
+        removePositionalClass = true
+    })
+end)
+
+    -- Set the original handeling data
 RegisterNetEvent('wizard_vehiclemileage:client:setOriginalDriveForce')
 AddEventHandler('wizard_vehiclemileage:client:setOriginalDriveForce', function(driveForce)
     originalDriveForce = driveForce
@@ -1478,11 +1274,35 @@ RegisterNetEvent('wizard_vehiclemileage:client:setOriginalSusForce')
 AddEventHandler('wizard_vehiclemileage:client:setOriginalSusForce', function(susForce)
     originalSuspensionForce = susForce
 end)
-RegisterNetEvent('wizard_vehiclemileage:client:Notify')
-AddEventHandler('wizard_vehiclemileage:client:Notify', function(message, type)
-    Notify(message, type)
+
+    -- FOR 'wizard_manualtransmission' SCRIPT
+RegisterNetEvent('wizard_vehiclemileage:client:updateClutchWT')
+AddEventHandler('wizard_vehiclemileage:client:updateClutchWT', function()
+    if not IsVehicleOwned(currentPlate) then return end
+    
+    lastClutchWear = lastClutchWear + Config.ClutchWearRate
+    if lastClutchWear > Config.MaxClutchWear then
+        lastClutchWear = Config.MaxClutchWear
+    end
+    TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', currentPlate, lastClutchWear)
+    updateClutchWear(veh)
+end)
+RegisterNetEvent('wizard_vehiclemileage:client:smartGearDetect')
+AddEventHandler('wizard_vehiclemileage:client:smartGearDetect', function(data)
+    allowSmartGearDetect = data
 end)
 
+    -- Script data synchronize
+AddEventHandler('onClientResourceStart', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+    end
+end)
+AddEventHandler('playerSpawned', function()
+    TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+end)
+
+---------------- Autosave system ----------------
 if Config.Autosave then
     local autosaveinvl = Config.AutosaveInterval * 1000
     Citizen.CreateThread(function()
@@ -1494,6 +1314,9 @@ if Config.Autosave then
         end
     end)
 end
+
+
+---------------- Warning system ----------------
 if Config.ChangeWarnings then
     local components = {
         oil = {
@@ -1637,11 +1460,87 @@ if Config.ChangeWarnings then
     end)
 end
 
-RegisterNUICallback('closeDB', function(_, cb)
+
+---------------- NUI Callbacks ----------------
+    -- UI Notifications
+RegisterNUICallback('notify', function(data, cb)
+    if data and data.message and data.type then
+        Notify(data.message, data.type)
+        cb({success = true})
+    else
+        cb({success = false, error = 'Invalid data'})
+    end
+end)
+    -- Request vehicles
+RegisterNUICallback('requestVehicleList', function(data, cb)
+    TriggerVehicleListCallback(function(vehicles)
+        SendNUIMessage({
+            type = 'vehicleList',
+            vehicles = vehicles
+        })
+    end)
+end) 
+    -- Update vehicle data
+RegisterNUICallback('updateVehicleData', function(data, cb)
+    if data and data.vehicle then
+        local vehicle = data.vehicle
+        vehicle.last_oil_change = vehicle.last_oil_change or 0
+        vehicle.last_oil_filter_change = vehicle.last_oil_filter_change or 0
+        vehicle.last_air_filter_change = vehicle.last_air_filter_change or 0
+        vehicle.last_tire_change = vehicle.last_tire_change or 0
+        vehicle.last_brakes_change = vehicle.last_brakes_change or 0
+        vehicle.brake_wear = vehicle.brake_wear or 0
+        vehicle.last_clutch_change = vehicle.last_clutch_change or 0
+        vehicle.clutch_wear = vehicle.clutch_wear or 0
+        vehicle.last_suspension_change = vehicle.last_suspension_change or 0
+        vehicle.last_spark_plug_change = vehicle.last_spark_plug_change or 0
+
+        TriggerServerEvent('wizard_vehiclemileage:server:updateVehicleData', vehicle)
+        cb({success = true})
+    else
+        cb({success = false, error = 'Invalid data'})
+    end
+end)
+    -- Delete vehicle data
+RegisterNUICallback('deleteVehicle', function(data, cb)
+    if data and data.plate then
+        TriggerServerEvent('wizard_vehiclemileage:server:deleteVehicle', data.plate)
+        cb({success = true})
+    else
+        cb({success = false, error = 'Invalid plate'})
+    end
+end)
+    -- Save player settings
+RegisterNUICallback('savePlayerSettings', function(data, cb)
+    SetNuiFocus(false, false)
+    TriggerServerEvent('wizard_vehiclemileage:server:savePlayerSettings', data)
+    SendNUIMessage({
+        type = "closeCustomization"
+    })
+    cb({})
+end)
+    -- Close UI
+RegisterNUICallback('closeMenu', function(data, cb)
     SetNuiFocus(false, false)
     cb({})
 end)
 
+
+---------------- Commands ----------------
+    -- Mileage UI Customization
+RegisterCommand(Config.CustomizeCommand, function()
+    if inVehicle and currentPlate then
+        if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned'), 'error') return end
+        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+        SetNuiFocus(true, true)
+        SendNUIMessage({
+            type = "openCustomization"
+        })
+    else
+        Notify(locale('error.not_in_vehicle'), 'error')
+    end
+end)
+    -- Check parts wear
 RegisterCommand(Config.CheckWearCommand, function()
     if inVehicle and currentPlate then
         if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned'), 'error') return end
@@ -1700,19 +1599,84 @@ RegisterCommand(Config.CheckWearCommand, function()
         Notify(locale('error.not_in_vehicle'), 'error')
     end
 end, false)
+    -- Database management
+RegisterCommand(Config.DatabaseCommand, function()
+    TriggerAdminCallback(function(isAdmin)
+        if isAdmin then
+            SetNuiFocus(true, true)
+            SendNUIMessage({
+                type = 'openDatabaseMenu'
+            })
+            -- Request vehicle list from server
+            TriggerVehicleListCallback(function(vehicles)
+                SendNUIMessage({
+                    type = 'vehicleList',
+                    vehicles = vehicles
+                })
+            end)
+        else
+            Notify('You do not have permission to open this menu.', 'error')
+        end
+    end)
+end)
 
 
+---------------- Exports ----------------
+    -- Get vehicle mileage
+exports('GetVehicleMileage', function()
+    return accDistance
+end)
+    -- Set vehicle mileage
+exports('SetVehicleMileage', function(mileage)
+    accDistance = mileage or accDistance
+end)
+    -- Get vehicle last parts change
+exports('GetVehicleLastPartsChange', function()
+    return {
+        sparkPlugChange = lastSparkPlugChange,
+        oilChange = lastOilChange,
+        oilFilterChange = lastOilFilterChange,
+        airFilterChange = lastAirFilterChange,
+        tireChange = lastTireChange,
+        brakeChange = lastbrakeChange,
+        suspensionChange = lastSuspensionChange,
+        clutchChange = lastClutchChange,
+    }
+end)
+    -- Set vehicle last parts change
+exports('SetVehicleLastPartsChange', function(partsChange)
+    lastOilChange = partsChange.oilChange or lastOilChange
+    lastOilFilterChange = partsChange.oilFilterChange or lastOilFilterChange
+    lastAirFilterChange = partsChange.airFilterChange or lastAirFilterChange
+    lastTireChange = partsChange.tireChange or lastTireChange
+    lastbrakeChange = partsChange.brakeChange or lastbrakeChange
+    lastClutchChange = partsChange.clutchChange or lastClutchChange
+    lastSuspensionChange = partsChange.suspensionChange or lastSuspensionChange
+    lastSparkPlugChange = partsChange.sparkPlugChange or lastSparkPlugChange
+end)
+    -- Get vehicle parts wear
+exports('GetVehiclePartsWear', function()
+    return {
+        brakeWear = lastbrakeWear,
+        clutchWear = lastClutchWear,
+        suspensionWear = suspensionWear,
+        sparkPlugWear = sparkPlugWear
+    }
+end)
+    -- Set vehicle parts wear
+exports('SetVehiclePartsWear', function(partsWear)
+    lastbrakeWear = partsWear.brakeWear or lastbrakeWear
+    lastClutchWear = partsWear.clutchWear or lastClutchWear
+end)
 
 
--- Command examples to use registered exports
--- Example: Get current vehicle mileage (client-side)
+---------------- Exports Examples ----------------
+--[[
     -- /getMileage
 RegisterCommand('getMileage', function()
     local mileage = exports['wizard-mileage']:GetVehicleMileage()
     print("Current vehicle mileage: " .. mileage)
 end)
-
--- Example: Set vehicle mileage (client-side)
     -- /setMileage <number>
 RegisterCommand('setMileage', function(source, args)
     local mileage = tonumber(args[1])
@@ -1723,8 +1687,6 @@ RegisterCommand('setMileage', function(source, args)
         print("Usage: /setMileage <number>")
     end
 end)
-
--- Example: Get last parts change data (client-side)
     -- /getLastPartsChange (sp, oil, oilf, airf, tire, brake, sus, clutch)
 RegisterCommand('getLastPartsChange', function(source, args)
     if not args[1] then
@@ -1754,8 +1716,6 @@ RegisterCommand('getLastPartsChange', function(source, args)
         print("Available parts: sp, oil, oilf, airf, tire, brake, sus, clutch")
     end
 end)
-
--- Example: Set last parts change data (client-side)
     -- /setLastPartsChange (sp, oil, oilf, airf, tire, brake, sus, clutch) <mileage>
 RegisterCommand('setLastPartsChange', function(source, args)
     if #args ~= 2 then
@@ -1805,8 +1765,6 @@ RegisterCommand('setLastPartsChange', function(source, args)
     exports['wizard-mileage']:SetVehicleLastPartsChange(partsChange)
     print("Last parts change data updated for " .. partName .. " to mileage " .. partMileage)
 end)
-
--- Example: Get current parts wear (client-side)
     -- /getPartsWear (sp, oil, oilf, airf, tire, brake, sus, clutch)
 RegisterCommand('getPartsWear', function(source, args)
     if not args[1] then
@@ -1836,8 +1794,6 @@ RegisterCommand('getPartsWear', function(source, args)
         print("Available parts: sp, oil, oilf, airf, tire, brake, sus, clutch")
     end
 end)
-
--- Example: Set parts wear data (client-side)
     -- /setPartsWear (brake, clutch) <wear>
 RegisterCommand('setPartsWear', function(source, args)
     if #args ~= 2 then
@@ -1869,3 +1825,4 @@ RegisterCommand('setPartsWear', function(source, args)
     exports['wizard-mileage']:SetVehiclePartsWear(partsWear)
     print("Parts wear data updated for " .. partName .. " to wear value " .. wearValue)
 end)
+]]
