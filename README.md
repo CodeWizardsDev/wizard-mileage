@@ -4,6 +4,8 @@
     <br> 
 </p>
 
+# [WIKI PAGE](https://code-wizards.gitbook.io/codewizards/mileage-system/informations)
+
 ## 📝 Table of Contents
 
 - [ShowCase](#showcase)
@@ -199,7 +201,7 @@ This guide will help you set up the script easily!
 1. Download the folder and remove the -main suffix from it. The folder name should be wizard-mileage
 
 ### Installing
-[GUIDE](https://github.com/CodeWizardsDev/wizard-mileage/blob/main/setup/README.md)
+[GUIDE](https://code-wizards.gitbook.io/codewizards/installation)
 
 ### Configuration
 1. Open the `config.lua` file in the wizard-mileage folder.
