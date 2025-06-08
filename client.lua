@@ -202,27 +202,6 @@ RegisterCommand(Config.CustomizeCommand, function()
     end
 end)
 
--- Register command for opening vehicle mileage database menu
-RegisterCommand(Config.DatabaseCommand, function()
-    TriggerAdminCallback(function(isAdmin)
-        if isAdmin then
-            SetNuiFocus(true, true)
-            SendNUIMessage({
-                type = 'openDatabaseMenu'
-            })
-            -- Request vehicle list from server
-            TriggerVehicleListCallback(function(vehicles)
-                SendNUIMessage({
-                    type = 'vehicleList',
-                    vehicles = vehicles
-                })
-            end)
-        else
-            Notify('You do not have permission to open this menu.', 'error')
-        end
-    end)
-end)
-
 -- NUI callback to request vehicle list
 RegisterNUICallback('requestVehicleList', function(data, cb)
     TriggerVehicleListCallback(function(vehicles)
