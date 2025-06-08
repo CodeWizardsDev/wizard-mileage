@@ -4,16 +4,16 @@
     <br> 
 </p>
 
-# [WIKI PAGE](https://code-wizards.gitbook.io/codewizards/mileage-system/informations)
-
 ## 📝 Table of Contents
 
+- [WIKI PAGE](https://code-wizards.gitbook.io/codewizards/mileage-system/informations)
 - [ShowCase](#showcase)
 - [Todo](#todo)
 - [Dependencies](#dependencies)
 - [Features Scope](#feature_scope)
 - [Setting up](#getting_started)
 - [Authors](#authors)
+- [Translations](#trans)
 
 ## 🖼️ ShowCase <a name = "showcase"></a>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
@@ -192,6 +192,31 @@
   - Military vehicles
   - Commercial vehicles
 
+### Vehicle Mileage Database UI
+- Interactive vehicle mileage database panel accessible in-game
+- Displays a list of vehicles with plate numbers and current mileage
+- Allows editing of vehicle data including:
+  - Mileage
+  - Last oil change
+  - Last oil filter change
+  - Last air filter change
+  - Last tire change
+  - Last brakes change and brake wear
+  - Last clutch change and clutch wear
+  - Last suspension change
+  - Last spark plug change
+- Validation to ensure data consistency (e.g., last change values not exceeding mileage)
+- Supports deleting vehicles with user confirmation
+- Real-time updates and notifications for successful or failed operations
+- Custom confirmation modal for user actions
+
+### Mileage UI Customizer
+- Allows players to toggle visibility of mileage and wear displays
+- Provides sliders to adjust size of mileage meter and wear bars
+- Allows precise positioning of UI elements via X and Y coordinates inputs
+- Supports dragging UI elements to reposition them interactively
+- Saves player customization settings persistently
+- Enhances user experience with customizable and flexible UI layout
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
@@ -218,6 +243,13 @@ This guide will help you set up the script easily!
 ## ✍️ Authors <a name = "authors"></a>
 
 - @The_Hs5
+
+## 🌐 Translations <a name = "trans"></a>
+
+- English, Persian, Netherlands: @The_Hs5
+- German: @Sascha
+- Arabic: @abonan
+- French: @junior
 
 ## Support
 For support, join our Discord server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
