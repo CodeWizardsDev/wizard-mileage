@@ -1,7 +1,18 @@
+---------------- Main data ----------------
+local luaFileNames = {'client.lua', 'config.lua', 'server.lua'}
+
+
+---------------- Functions ----------------
 local function debug(data)
     if Config.Debug then print("^7[^6Wizard Mileage^7] ^5" .. data) end
 end
-
+local function isAdmin(source)
+    local src = source
+    if IsPlayerAceAllowed(src, Config.AdminRank) then
+        return true
+    end
+    return false
+end
 local function loadPlayerSettings(playerId, cb)
     Wait(150)
     debug("Loading mileage UI settings for " .. playerId)
@@ -29,7 +40,6 @@ local function loadPlayerSettings(playerId, cb)
         end
     end)
 end
-
 local function savePlayerSettings(playerId, settings)
     debug("Updating mileage UI settings for " .. playerId)
     local query = [[
@@ -55,24 +65,6 @@ local function savePlayerSettings(playerId, settings)
         settings.checkwear_pos_y or 0
     })
 end
-
-RegisterNetEvent('wizard_vehiclemileage:server:loadPlayerSettings')
-AddEventHandler('wizard_vehiclemileage:server:loadPlayerSettings', function()
-    local src = source
-    local playerId = GetPlayerIdentifier(src, 0)
-    loadPlayerSettings(playerId, function(settings)
-        TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
-    end)
-end)
-
-RegisterNetEvent('wizard_vehiclemileage:server:savePlayerSettings')
-AddEventHandler('wizard_vehiclemileage:server:savePlayerSettings', function(settings)
-    local src = source
-    local playerId = GetPlayerIdentifier(src, 0)
-    savePlayerSettings(playerId, settings)
-    TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
-end)
-
 local function fetchUrl(url)
     local response = {}
     local res, code = nil, nil
@@ -101,7 +93,6 @@ local function fetchUrl(url)
         return nil
     end
 end
-
 local function compareVersions(v1, v2)
     local function splitVersion(v)
         local t = {}
@@ -123,7 +114,6 @@ local function compareVersions(v1, v2)
     end
     return 0
 end
-
 local function AreLuaFilesLoaded(resourceName, luaFileNames)
     local resourcePath = GetResourcePath(resourceName)
     if resourcePath then
@@ -138,13 +128,6 @@ local function AreLuaFilesLoaded(resourceName, luaFileNames)
         return nil
     end
 end
-
-local luaFileNames = {
-    'client.lua',
-    'config.lua',
-    'server.lua',
-}
-
 local function checkVersion()
     local currentVersion = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
     local latestVersionUrl = "https://raw.githubusercontent.com/CodeWizardsDev/wizard-mileage/refs/heads/main/version.txt"
@@ -180,15 +163,11 @@ local function checkVersion()
         end
     end
     print("\n\n")
-end
-end
-
-AddEventHandler('onResourceStart', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        checkVersion()
     end
-end)
+end
 
+
+---------------- Inventory initialize ----------------
 if Config.InventoryScript == 'qb' then
     QBCore = exports['qb-core']:GetCoreObject()
     QBCore.Functions.CreateUseableItem(Config.Items.SparkPlug, function(source, item)
@@ -284,33 +263,29 @@ elseif Config.InventoryScript == 'esx' then
     end)
 end
 
--- Admin permission check callback
-local function isAdmin(source)
-    local src = source
-    -- Check ACE permission 'admin'
-    if IsPlayerAceAllowed(src, "admin") then
-        return true
-    end
-    -- Check player identifiers against Config.AdminRanks (assuming steam hex or license)
-    local identifiers = GetPlayerIdentifiers(src)
-    for _, id in ipairs(identifiers) do
-        for _, adminId in ipairs(Config.AdminRanks) do
-            if string.find(id:lower(), adminId:lower()) then
-                return true
-            end
-        end
-    end
-    return false
-end
 
+---------------- Net Events ----------------
 RegisterNetEvent('wizard_vehiclemileage:server:isAdmin')
 AddEventHandler('wizard_vehiclemileage:server:isAdmin', function(cbId)
     local src = source
     local admin = isAdmin(src)
     TriggerClientEvent('wizard_vehiclemileage:client:isAdminCallback', src, cbId, admin)
 end)
-
--- Callback to get all vehicles from vehicle_mileage table
+RegisterNetEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+AddEventHandler('wizard_vehiclemileage:server:loadPlayerSettings', function()
+    local src = source
+    local playerId = GetPlayerIdentifier(src, 0)
+    loadPlayerSettings(playerId, function(settings)
+        TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
+    end)
+end)
+RegisterNetEvent('wizard_vehiclemileage:server:savePlayerSettings')
+AddEventHandler('wizard_vehiclemileage:server:savePlayerSettings', function(settings)
+    local src = source
+    local playerId = GetPlayerIdentifier(src, 0)
+    savePlayerSettings(playerId, settings)
+    TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
+end)
 RegisterNetEvent('wizard_vehiclemileage:server:getAllVehicles')
 AddEventHandler('wizard_vehiclemileage:server:getAllVehicles', function(cbId)
     local src = source
@@ -319,8 +294,6 @@ AddEventHandler('wizard_vehiclemileage:server:getAllVehicles', function(cbId)
         TriggerClientEvent('wizard_vehiclemileage:client:getAllVehiclesCallback', src, cbId, result or {})
     end)
 end)
-
--- Event to update vehicle data
 RegisterNetEvent('wizard_vehiclemileage:server:updateVehicleData')
 AddEventHandler('wizard_vehiclemileage:server:updateVehicleData', function(vehicleData)
     if not vehicleData or not vehicleData.plate then return end
@@ -366,22 +339,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateVehicleData', function(vehic
         end
     end)
 end)
-
--- Event to delete vehicle data
 RegisterNetEvent('wizard_vehiclemileage:server:deleteVehicle')
 AddEventHandler('wizard_vehiclemileage:server:deleteVehicle', function(plate)
     if not plate then return end
     local query = "DELETE FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate})
 end)
-
--- Command to open vehicle mileage database menu
-RegisterCommand(Config.DatabaseCommand, function(source, args, rawCommand)
-    local src = source
-    local cbId = math.random(100000, 999999)
-    TriggerClientEvent('wizard_vehiclemileage:client:requestAdminCheck', src, cbId)
-end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:removeItem')
 AddEventHandler('wizard_vehiclemileage:server:removeItem', function(item, amount)
     local src = source
@@ -403,7 +366,6 @@ AddEventHandler('wizard_vehiclemileage:server:removeItem', function(item, amount
         end
     end
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:getOriginalSuspensionValue')
 AddEventHandler('wizard_vehiclemileage:server:getOriginalSuspensionValue', function(plate)
     if not plate then return end
@@ -427,7 +389,6 @@ AddEventHandler('wizard_vehiclemileage:server:getOriginalSuspensionValue', funct
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateSuspensionWear')
 AddEventHandler('wizard_vehiclemileage:server:updateSuspensionWear', function(plate, suspensionWear)
     if not plate or type(suspensionWear) ~= "number" then return end
@@ -435,7 +396,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateSuspensionWear', function(pl
     exports.oxmysql:execute(query, {suspensionWear, plate}, function(rowsChanged)
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateSuspensionChange')
 AddEventHandler('wizard_vehiclemileage:server:updateSuspensionChange', function(plate)
     if not plate then return end
@@ -454,7 +414,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateSuspensionChange', function(
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateSparkPlugWear')
 AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugWear', function(plate, sparkPlugWear)
     if not plate or type(sparkPlugWear) ~= "number" then return end
@@ -462,7 +421,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugWear', function(pla
     exports.oxmysql:execute(query, {sparkPlugWear, plate}, function(rowsChanged)
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateSparkPlugChange')
 AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugChange', function(plate)
     if not plate then return end
@@ -481,7 +439,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugChange', function(p
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalSuspensionForce')
 AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionForce', function(plate, force)
     if not plate or not force then return end
@@ -493,7 +450,6 @@ AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionForce', func
     exports.oxmysql:execute(query, {force, plate}, function(rowsChanged)
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalSuspensionRaise')
 AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', function(plate, raise)
     if not plate or not raise then return end
@@ -505,7 +461,6 @@ AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', func
     exports.oxmysql:execute(query, {raise, plate}, function(rowsChanged)
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:retrieveMileage')
 AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
     local src = source
@@ -550,7 +505,6 @@ AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
         TriggerClientEvent('wizard_vehiclemileage:client:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear, lastClutch, clutchWear, original_drive_force, lastSuspensionChange, suspensionWear, lastSparkPlugChange, sparkPlugWear)
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalDriveForce')
 AddEventHandler('wizard_vehiclemileage:server:saveOriginalDriveForce', function(plate, driveForce)
     if not plate or not driveForce then return end
@@ -563,7 +517,6 @@ AddEventHandler('wizard_vehiclemileage:server:saveOriginalDriveForce', function(
     
     exports.oxmysql:execute(query, {driveForce, plate})
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:getOriginalDriveForce')
 AddEventHandler('wizard_vehiclemileage:server:getOriginalDriveForce', function(plate)
     if not plate then return end
@@ -579,7 +532,6 @@ AddEventHandler('wizard_vehiclemileage:server:getOriginalDriveForce', function(p
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateMileage')
 AddEventHandler('wizard_vehiclemileage:server:updateMileage', function(plate, mileage)
     if not plate or type(mileage) ~= "number" then
@@ -602,7 +554,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateMileage', function(plate, mi
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateOilChange')
 AddEventHandler('wizard_vehiclemileage:server:updateOilChange', function(plate)
     if not plate then return end
@@ -621,7 +572,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateOilChange', function(plate)
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateOilFilter')
 AddEventHandler('wizard_vehiclemileage:server:updateOilFilter', function(plate)
     if not plate then return end
@@ -640,7 +590,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateOilFilter', function(plate)
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateAirFilter')
 AddEventHandler('wizard_vehiclemileage:server:updateAirFilter', function(plate)
     if not plate then return end
@@ -659,7 +608,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateAirFilter', function(plate)
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateTireChange')
 AddEventHandler('wizard_vehiclemileage:server:updateTireChange', function(plate)
     if not plate then return end
@@ -678,7 +626,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateTireChange', function(plate)
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeWear')
 AddEventHandler('wizard_vehiclemileage:server:updateBrakeWear', function(plate, brakeWear)
     if not plate or type(brakeWear) ~= "number" then  return  end
@@ -692,7 +639,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateBrakeWear', function(plate, 
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeChange')
 AddEventHandler('wizard_vehiclemileage:server:updateBrakeChange', function(plate)
     if not plate then 
@@ -714,7 +660,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateBrakeChange', function(plate
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateClutchWear')
 AddEventHandler('wizard_vehiclemileage:server:updateClutchWear', function(plate, clutchWear)
     if not plate or type(clutchWear) ~= "number" then return end
@@ -728,7 +673,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateClutchWear', function(plate,
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:updateClutchChange')
 AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(plate)
     if not plate then 
@@ -750,7 +694,6 @@ AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(plat
         end
     end)
 end)
-
 RegisterNetEvent('wizard_vehiclemileage:server:checkOwnership')
 AddEventHandler('wizard_vehiclemileage:server:checkOwnership', function(plate)
     local src = source
@@ -763,6 +706,15 @@ AddEventHandler('wizard_vehiclemileage:server:checkOwnership', function(plate)
     end)
 end)
 
+AddEventHandler('onResourceStart', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        checkVersion()
+    end
+end)
+
+
+---------------- Exports ----------------
+    -- Get vehicle mileage
 exports('GetVehicleMileage', function(plate, cb)
     if not plate or not cb then return end
     local query = [[
@@ -776,7 +728,7 @@ exports('GetVehicleMileage', function(plate, cb)
         end
     end)
 end)
-
+    -- Set vehicle mileage
 exports('SetVehicleMileage', function(plate, mileage)
     if not plate or type(mileage) ~= "number" then return end
     local query = [[
@@ -786,7 +738,7 @@ exports('SetVehicleMileage', function(plate, mileage)
     ]]
     exports.oxmysql:execute(query, {plate, mileage, mileage})
 end)
-
+    -- Get vehicle last parts change
 exports('GetVehicleLastPartsChange', function(plate, cb)
     if not plate or not cb then return end
     local query = [[
@@ -812,7 +764,7 @@ exports('GetVehicleLastPartsChange', function(plate, cb)
         end
     end)
 end)
-
+    -- Set vehicle last parts change
 exports('SetVehicleLastPartsChange', function(plate, partsChange)
     if not plate or type(partsChange) ~= "table" then return end
     local queries = {}
@@ -865,7 +817,7 @@ exports('SetVehicleLastPartsChange', function(plate, partsChange)
         exports.oxmysql:execute(query, {param1, param2})
     end
 end)
-
+    -- Get vehicle parts wear
 exports('GetVehiclePartsWear', function(plate, cb)
     if not plate or not cb then return end
     local query = [[
@@ -885,7 +837,7 @@ exports('GetVehiclePartsWear', function(plate, cb)
         end
     end)
 end)
-
+    -- Set vehicle parts wear
 exports('SetVehiclePartsWear', function(plate, partsWear)
     if not plate or type(partsWear) ~= "table" then return end
     local queries = {}
@@ -910,9 +862,8 @@ exports('SetVehiclePartsWear', function(plate, partsWear)
 end)
 
 
-
-
--- Command examples to use registered exports
+---------------- Exports Examples ----------------
+--[[
 -- Example: Get vehicle mileage from server export
 RegisterCommand('serverGetMileage', function(source, args)
     if not args[1] then
@@ -925,8 +876,6 @@ RegisterCommand('serverGetMileage', function(source, args)
         print("Mileage for vehicle " .. plate .. ": " .. mileage)
     end)
 end)
-
--- Example: Set vehicle mileage on server
     -- /serverSetMileage <plate> <mileage>
 RegisterCommand('serverSetMileage', function(source, args)
     if not args[1] or not args[2] then
@@ -939,8 +888,6 @@ RegisterCommand('serverSetMileage', function(source, args)
     exports['wizard-mileage']:SetVehicleMileage(plate, mileage)
     print("Set mileage for vehicle " .. plate .. " to " .. mileage)
 end)
-
--- Example: Get last parts change data from server
     -- /serverGetLastPartsChange <plate> (sp, oil, oilf, airf, tire, brake, sus, clutch)
 RegisterCommand('serverGetLastPartsChange', function(source, args)
     if #args < 2 then
@@ -977,8 +924,6 @@ RegisterCommand('serverGetLastPartsChange', function(source, args)
         end
     end)
 end)
-
--- Example: Set last parts change data on server (modified to accept part and mileage args)
     -- /serverSetLastPartsChange <plate> (sp, oil, oilf, airf, tire, brake, sus, clutch) <mileage>
 RegisterCommand('serverSetLastPartsChange', function(source, args)
     if #args < 3 then
@@ -1029,8 +974,6 @@ RegisterCommand('serverSetLastPartsChange', function(source, args)
     exports['wizard-mileage']:SetVehicleLastPartsChange(plate, partsChange)
     print("Last parts change data of " .. plate .. " updated for " .. partName .. " to mileage " .. partMileage)
 end)
-
--- Example: Get parts wear data from server
     -- /serverGetPartsWear <plate> (sp, oil, oilf, airf, tire, brake, sus, clutch)
 RegisterCommand('serverGetPartsWear', function(source, args)
     if #args < 2 then
@@ -1067,8 +1010,6 @@ RegisterCommand('serverGetPartsWear', function(source, args)
         end
     end)
 end)
-
--- Example: Set parts wear data on server
     -- /serverSetPartsWear <plate> (brake, clutch) <wear>
 RegisterCommand('serverSetPartsWear', function(source, args)
     if #args < 3 then
@@ -1101,3 +1042,4 @@ RegisterCommand('serverSetPartsWear', function(source, args)
     exports['wizard-mileage']:SetVehiclePartsWear(plate, partsWear)
     print("Updated parts wear data for vehicle " .. plate .. " part " .. partName .. " to wear " .. wearValue)
 end)
+]]--
