@@ -1,0 +1,69 @@
+{
+    "ui": {
+        "mileage": "Mileage:",
+        "unit_km": "Km",
+        "unit_miles": "Miles"
+    },
+    
+    "target": {
+        "changeoil": "Changer l’huile… ",
+        "changeoilfilter": "Changer le filtre à huile… ",
+        "changeairfilter": "Changer le filtre à air… ",
+        "changetires": "Changer les pneus… ",
+        "changebrakes": "Changer les freins",
+        "changeclutch": "Changer l’embrayage",
+        "changesuspension": "Changer la suspension",
+        "changesparkplug": "Changer les bougies d’allumage"
+    },
+    "progress": {
+        "changingoil": "Changement d’huile en cours…",
+        "changingoilfilter": "Changement du filtre à huile en cours…",
+        "changingairfilter": "Changement du filtre à air en cours…",
+        "changingtires": "Changement des pneus en cours…",
+        "changingbrakes": "Changement des freins en cours…",
+        "changingclutch": "Changement de l’embrayage en cours…",
+        "changingsuspension": "Changement de la suspension en cours…",
+        "changingsparkplug": "Changement des bougies d’allumage en cours…"
+    },
+    "info": {
+        "oil_changed": "L’huile du véhicule a été changée avec succès",
+        "filter_changed": "Le filtre à huile du véhicule a été changé avec succès",
+        "air_filter_changed": "Le filtre à air du véhicule a été changé avec succès",
+        "tire_changed": "Les pneus du véhicule ont été changés avec succès",
+        "brakes_changed": "Les freins du véhicule ont été changés avec succès",
+        "clutch_changed": "L’embrayage du véhicule a été changé avec succès",
+        "suspension_changed": "La suspension du véhicule a été changée avec succès",
+        "spark_plug_changed": "Les bougies d’allumage du véhicule ont été changées avec succès"
+    },
+    "warning": {
+        "remaining_oil": "Durée de vie de l’huile à",
+        "remaining_filter": "Durée de vie du filtre à huile à",
+        "remaining_air_filter": "Durée de vie du filtre à air à",
+        "remaining_tire": "Durée de vie des pneus à",
+        "remaining_brakes": "Durée de vie des freins à",
+        "remaining_clutch": "Durée de vie de l’embrayage à",
+        "remaining_suspension": "Durée de vie de la suspension à",
+        "remaining_spark_plug": "Durée de vie des bougies d’allumage à",
+        "remaining": "restant",
+        "replace_need": "Remplacement nécessaire !",
+        "replace_soon": "À remplacer bientôt !",
+        "replace_immediately": "Remplacer immédiatement !",
+        "engine_critical": "Le moteur est gravement endommagé en raison d’un manque d’entretien de l’huile !",
+        "stalled": "Le moteur a calé à cause d’un embrayage usé !",
+        "spark_plug_misfire": "Le moteur fait des ratés à cause de bougies d’allumage défectueuses !"
+    },
+    "error": {
+        "not_mechanic": "Tu dois être mécanicien",
+        "low_grade": "Tu n’es pas assez qualifié pour ça",
+        "not_in_vehicle": "Tu dois être dans un véhicule",
+        "not_owned": "Ce véhicule n’appartient à personne",
+        "no_oil": "Tu n’as pas d’huile moteur",
+        "no_oil_filter": "Tu n’as pas de filtre à huile",
+        "no_air_filter": "Tu n’as pas de filtre à air",
+        "no_tires": "Tu n’as pas de pneus de rechange",
+        "no_brake_parts": "Tu n’as pas de pièces de frein",
+        "no_clutch": "Tu n’as pas de pièces d’embrayage",
+        "no_suspension_parts": "Tu n’as pas de pièces de suspension",
+        "no_spark_plug": "Tu n’as pas de bougies d’allumage"
+    }
+}

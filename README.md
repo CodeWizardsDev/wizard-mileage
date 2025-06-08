@@ -42,46 +42,75 @@
 - Real-time mileage tracking for owned vehicles
 - Configurable distance units (kilometers or miles)
 - Customizable mileage display position on screen
-- Automatic mileage saving to database
+- Automatic mileage saving to database with configurable autosave interval
 - Command to reset vehicle mileage
+- Option to track only player-owned vehicles
+- Support for multiple vehicle database tables (QBCore, ESX, custom)
+
 ### Oil System
 - Oil life monitoring based on distance traveled
 - Configurable oil change intervals
 - Engine damage simulation when oil maintenance is neglected
 - Visual warnings for low oil life
-- Oil change service interaction for mechanics
+- Oil change service interaction for mechanics with progress bar and animation
+- Cancelable maintenance procedures
+
+### Spark Plug System
+- Spark plug wear tracking based on distance
+- Maintenance interval configuration
+- Engine misfire simulation when spark plugs are worn
+- Spark plug replacement service with progress bar and animation
+- Warning notifications for spark plug maintenance
+- Cancelable maintenance procedures
+
 ### Oil Filter System
 - Separate tracking for oil filter life
 - Independent oil filter change intervals
 - Engine performance impact when filter is worn
-- Service option for filter replacement
+- Service option for filter replacement with progress bar and animation
 - Warning system for filter maintenance
+- Cancelable maintenance procedures
+
 ### Air Filter System
 - Air filter condition monitoring
 - Performance impact on vehicle when filter is dirty:
   - Reduced top speed
   - Decreased acceleration
-- Air filter replacement service
+- Air filter replacement service with progress bar and animation
 - Warning notifications for filter maintenance
+- Cancelable maintenance procedures
+
 ### Tire System
 - Tire wear tracking based on distance
 - Impact on vehicle handling and grip
-- Configurable tire wear rates
-- Tire replacement service
+- Configurable tire wear rates and grip values
+- Tire replacement service with progress bar and animation
 - Visual wear indicators and warnings
+- Cancelable maintenance procedures
+
 ### Brake System
 - Progressive brake wear simulation
 - Impact on braking efficiency
-- Brake maintenance service
+- Brake maintenance service with progress bar and animation
 - Warning system for brake condition
 - Configurable wear rates and efficiency loss
+- Cancelable maintenance procedures
+
 ### Clutch System
 - Clutch wear tracking based on gear changes
 - Impact on vehicle performance
-- Engine Stalls when clutch is worn out
-- Clutch replacement service
+- Engine stalls chance when clutch is worn out
+- Clutch replacement service with progress bar and animation
 - Warning system for clutch condition
 - Configurable wear rates and performance loss
+- Cancelable maintenance procedures
+
+### Suspension System
+- Suspension wear tracking and replacement service
+- Configurable wear rates and maximum wear values
+- Progress bar and animation for suspension service
+- Cancelable maintenance procedures
+
 ### Mechanic Interactions
 1. Approach a vehicle
 2. Use the target system (ox_target or qb-target)
@@ -92,43 +121,48 @@
    - Change Tires
    - Service Brakes
    - Replace Clutch
+   - Service Suspension
 4. Each interaction requires appropriate inventory items
 5. Progress bars and animations for maintenance actions
+6. Cancelable maintenance procedures
+
 ### Job Requirements
 - Mechanic job required for maintenance (configurable)
 - Minimum job grade requirement (configurable)
 - Job name configurable in config.lua
 - Supports both ox_target and qb-target systems
+
 ### Inventory System
 - Integrated inventory support for:
+  - Spark Plugs
   - Engine Oil
   - Oil Filter
   - Air Filter
   - Tires
   - Brake Parts
+  - Suspension Parts
   - Clutch Parts
 - Supports multiple inventory systems:
   - ox_inventory
   - qb-inventory
+  - Quasar inventory
+  - CodeM inventory
   - ESX inventory
 - Configurable item weights and descriptions
 - Items can be used directly from inventory
 - Automatic item removal after use
+
+### Multiple Menu Support
+- Supports multiple menu systems:
+  - ox_lib
+  - QBCore/QBox menu
+
 ### HUD Features
 - Real-time mileage display
 - Configurable position (top-left, top-right, bottom-left, bottom-right)
-- Component wear display when using /checkwear
+- Component wear display when using /checkwear command
 - Warning notifications for maintenance needs
-### Job Requirements
-- If enabled, only players with the mechanic job can perform maintenance
-- Job name configurable in config.lua
-- Supports both ox_target and qb-target systems
-### Maintenance Interface
-- Target-based interaction system
-- Progress bars for maintenance actions
-- Cancelable maintenance procedures
-- Animation support for maintenance actions
-- Job-based restrictions for mechanics
+
 ### Notification System
 - Multiple notification system support:
   - QBox
@@ -139,11 +173,23 @@
   - ox_lib notify
 - Configurable warning intervals
 - Multi-language support
+
 ### Database Integration
 - Automatic mileage saving
 - Persistent maintenance history
 - Vehicle ownership verification
 - Supports multiple vehicle database structures
+
+### Disabled Vehicle Classes
+- Option to disable mileage tracking and maintenance for specific vehicle classes such as:
+  - Cycles
+  - Boats
+  - Helicopters
+  - Planes
+  - Trains
+  - Military vehicles
+  - Commercial vehicles
+
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
