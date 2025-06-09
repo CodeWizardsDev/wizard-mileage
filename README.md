@@ -14,6 +14,8 @@
 - [Setting up](#getting_started)
 - [Authors](#authors)
 - [Translations](#trans)
+- [Support](#support)
+- [License](#license)
 
 ## 🖼️ ShowCase <a name = "showcase"></a>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
@@ -246,13 +248,13 @@ This guide will help you set up the script easily!
 
 ## 🌐 Translations <a name = "trans"></a>
 
-- English, Persian: @The_Hs5
+- English, Persian, Netherlands: @The_Hs5
 - German: @Sascha
 - Arabic: @abonan
 - French: @junior
-- Dutch: @meneer-Duck
 
-## Support
+## 🤝 Support <a name = "support"></a>
 For support, join our Discord server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
-## License
+
+## License <a name = "license"></a>
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
