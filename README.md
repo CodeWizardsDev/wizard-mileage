@@ -248,10 +248,11 @@ This guide will help you set up the script easily!
 
 ## 🌐 Translations <a name = "trans"></a>
 
-- English, Persian, Netherlands: @The_Hs5
+- English, Persian: @The_Hs5
 - German: @Sascha
 - Arabic: @abonan
 - French: @junior
+- Dutch: @meneer-Duck
 
 ## 🤝 Support <a name = "support"></a>
 For support, join our Discord server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
