@@ -1,9 +1,2 @@
-Added Vehicle Mileage Database UI
-Added Mileage UI Customizer
-Added an oil can icon behind the mileage text in the UI
-Added update checker system
-Added script files checker system
-
-Updated Mileage meter display
-
-Performance improvements and bug fixes!
+Some improvements
+quasar inventory support fixed
