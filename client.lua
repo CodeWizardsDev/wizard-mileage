@@ -1,8 +1,7 @@
 ---------------- Main data ----------------
-local mileageVisible, inVehicle, waitingForData, clutchWearDirty, brakeWearDirty, allowSmartGearDetect, mileageUIVisible, lastPos, currentPlate, oilchangedist, oilfilterchangedist, airfilterchangedist, tirechangedist = false, false, false, false, false, true, true, nil, nil, nil, nil, nil, nil
+local mileageVisible, inVehicle, waitingForData, clutchWearDirty, brakeWearDirty, allowSmartGearDetect, mileageUIVisible, lastPos, currentPlate, oilchangedist, oilfilterchangedist, airfilterchangedist, tirechangedist, isOutdated = false, false, false, false, false, true, true, nil, nil, nil, nil, nil, nil, nil
 local accDistance, lastOilChange, lastOilFilterChange, lastAirFilterChange, lastTireChange, lastbrakeChange, lastbrakeWear, lastClutchChange, lastClutchWear, lastSuspensionChange, suspensionWear, lastSparkPlugChange, sparkPlugWear, cachedClutchWear, cachedBrakeWear, mileageUIPosX, mileageUIPosY, checkwearUIPosX, checkwearUIPosY, mileageUISize, checkwearUISize, lastEngineCriticalNotify = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0
 local adminCallbacks, vehicleListCallbacks = {}, {} 
-
 
 ---------------- Framework initialize ----------------
 if Config.FrameWork == 'esx' then
@@ -11,6 +10,7 @@ if Config.FrameWork == 'esx' then
     AddEventHandler('esx:playerLoaded', function(xPlayer)
 	    ESX.PlayerData = xPlayer
 	    ESX.PlayerLoaded = true
+        TriggerServerEvent("wizard_vehiclemileage:server:getupdate")
     end)
     function ChkJb()
         ESX = exports["es_extended"]:getSharedObject()
@@ -22,6 +22,10 @@ if Config.FrameWork == 'esx' then
     end
 else
     QBCore = exports['qb-core']:GetCoreObject()
+    RegisterNetEvent("QBCore:Client:OnPlayerLoaded")
+    AddEventHandler("QBCore:Client:OnPlayerLoaded", function()
+        TriggerServerEvent("wizard_vehiclemileage:server:getupdate")
+    end)
     function ChkJb()
         local Player = QBCore.Functions.GetPlayerData()
         return Player.job.name
@@ -84,6 +88,20 @@ end
 
 
 ---------------- Functions ----------------
+local function updateCheck(isOutdated, currentVersion, latestVersion)
+    while isOutdated == nil do Wait(100) end
+    if isOutdated == true then
+        TriggerEvent('chat:addMessage', {
+            color = {255, 0, 255},
+            args = {'Wizard Mileage', "^5Your script version ^2(" .. currentVersion .. ") ^5is outdated. Latest version is ^2" .. latestVersion}
+        })
+    elseif isOutdated == false then 
+        TriggerEvent('chat:addMessage', {
+            color = {255, 0, 255},
+            args = {'Wizard Mileage', "^5Script is up to date"}
+        })
+    end
+end
 local function Notify(message, type)
     if not message or not type then return end
     
@@ -1293,6 +1311,10 @@ AddEventHandler('wizard_vehiclemileage:client:smartGearDetect', function(data)
 end)
 
     -- Script data synchronize
+RegisterNetEvent('wizard_vehiclemileage:client:setOutdated')
+AddEventHandler('wizard_vehiclemileage:client:setOutdated', function(data, currentVersion, latestVersion)
+    updateCheck(data, currentVersion, latestVersion)
+end)
 AddEventHandler('onClientResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
         TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
