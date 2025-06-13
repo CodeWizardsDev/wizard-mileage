@@ -265,6 +265,19 @@ end
 
 
 ---------------- Net Events ----------------
+RegisterNetEvent("wizard_vehiclemileage:server:getupdate")
+AddEventHandler("wizard_vehiclemileage:server:getupdate", function()
+    local src = source
+    local currentVersion = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
+    local latestVersionUrl = "https://raw.githubusercontent.com/CodeWizardsDev/wizard-mileage/refs/heads/main/version.txt"
+    local latestVersion = fetchUrl(latestVersionUrl)
+    if compareVersions(currentVersion, latestVersion) < 0 then
+        isOutdated = true
+    else
+        isOutdated = false
+    end
+    TriggerClientEvent("wizard_vehiclemileage:client:setOutdated", src, isOutdated, currentVersion, latestVersion)
+end)
 RegisterNetEvent('wizard_vehiclemileage:server:isAdmin')
 AddEventHandler('wizard_vehiclemileage:server:isAdmin', function(cbId)
     local src = source
