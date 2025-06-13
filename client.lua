@@ -142,9 +142,9 @@ local function checkInventoryItem(item)
         local hasItem = exports['codem-inventory']:HasItem(item, 1)
     elseif Config.InventoryScript == 'quasar' then
         local PlayerInv = exports['qs-inventory']:getUserInventory()
-        for itemName, itemData in pairs(inventory) do
-            if itemName == item then
-                hasItem = true
+        for _, itemData in pairs(PlayerInv) do
+                if itemData.name == item and itemData.amount > 0 then
+                    hasItem = true
                 break
             end
         end
