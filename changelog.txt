@@ -1,6 +1,7 @@
 1.2.1
 Some improvements
-quasar inventory support fixed
-update checker system improved
+Quasar inventory support fixed
+Update checker system improved
 
 1.2.2
+Some readability improvements
