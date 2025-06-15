@@ -5,3 +5,4 @@ Update checker system improved
 
 1.2.2
 Some readability improvements for the code
+Some performance improvements
