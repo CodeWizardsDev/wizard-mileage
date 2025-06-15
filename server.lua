@@ -1,11 +1,31 @@
 ---------------- Main data ----------------
+--[[
+    These variables define the main Lua files that make up the Wizard Mileage resource.
+    They are used for version checking, file integrity, and to ensure all necessary files are present and loaded.
+    If you add, remove, or rename Lua files in this resource, update this list accordingly.
+    Customers can reference this variable to understand which files are essential for the script to function.
+--]]
 local luaFileNames = {'client.lua', 'config.lua', 'server.lua'}
 
 
+
 ---------------- Functions ----------------
+--[[
+    This function prints debug messages to the server console if debugging is enabled in the config.
+    It is used throughout the script to help with troubleshooting and to provide detailed logs
+    about script actions, database queries, and server events. Customers can enable or disable
+    debug output by setting Config.Debug to true or false in the config file.
+--]]
 local function debug(data)
     if Config.Debug then print("^7[^6Wizard Mileage^7] ^5" .. data) end
 end
+
+--[[
+    This function checks if the given player is an admin based on the configured admin rank.
+    It is used to restrict access to admin-only features, such as the vehicle database or maintenance overrides.
+    Returns true if the player has the required ace permission, otherwise returns false.
+    Customers can adjust the required rank in the config file (Config.AdminRank).
+--]]
 local function isAdmin(source)
     local src = source
     if IsPlayerAceAllowed(src, Config.AdminRank) then
@@ -13,6 +33,14 @@ local function isAdmin(source)
     end
     return false
 end
+
+--[[
+    This function loads the player's UI customization settings from the database.
+    If settings exist for the given player ID, they are returned via the callback.
+    If no settings are found, default UI settings from the config are inserted into the database and returned.
+    This ensures every player always has a valid set of UI preferences.
+    Customers can reference this function to understand how player-specific UI settings are managed and stored.
+--]]
 local function loadPlayerSettings(playerId, cb)
     Wait(150)
     debug("Loading mileage UI settings for " .. playerId)
@@ -40,6 +68,13 @@ local function loadPlayerSettings(playerId, cb)
         end
     end)
 end
+
+--[[
+    This function saves the player's UI customization settings to the database.
+    It updates or inserts the settings based on the player's ID, ensuring that their preferences are stored persistently.
+    The function takes a player ID and a settings table containing the UI preferences.
+    Customers can use this function to understand how player-specific UI settings are saved and updated in the database.
+--]]
 local function savePlayerSettings(playerId, settings)
     debug("Updating mileage UI settings for " .. playerId)
     local query = [[
@@ -65,6 +100,14 @@ local function savePlayerSettings(playerId, settings)
         settings.checkwear_pos_y or 0
     })
 end
+
+--[[
+    This function fetches the content of a URL using either cURL or PerformHttpRequest.
+    It returns the response body if the request is successful (HTTP status code 200).
+    If cURL is enabled via the convar "use_curl", it uses cURL to fetch the URL.
+    Otherwise, it falls back to PerformHttpRequest for compatibility with FiveM's HTTP request system.
+    Customers can use this function to retrieve external data, such as version information or changelogs.
+--]]
 local function fetchUrl(url)
     local response = {}
     local res, code = nil, nil
@@ -93,6 +136,15 @@ local function fetchUrl(url)
         return nil
     end
 end
+
+--[[
+    This function compares two version strings (v1 and v2) and returns:
+    - -1 if v1 < v2
+    - 0 if v1 == v2
+    - 1 if v1 > v2
+    It splits the version strings into numeric components and compares them one by one.
+    Customers can use this function to check if their script version is up to date compared to the latest version.
+]]
 local function compareVersions(v1, v2)
     local function splitVersion(v)
         local t = {}
@@ -114,6 +166,14 @@ local function compareVersions(v1, v2)
     end
     return 0
 end
+
+--[[
+    This function checks if the specified Lua files are loaded in the current resource.
+    It takes a resource name and a list of Lua file names, and returns a table indicating
+    whether each file is loaded (true) or not (false).
+    If the resource path cannot be determined, it prints an error message.
+    Customers can use this function to verify that all necessary Lua files are loaded correctly.
+--]]
 local function AreLuaFilesLoaded(resourceName, luaFileNames)
     local resourcePath = GetResourcePath(resourceName)
     if resourcePath then
@@ -128,6 +188,14 @@ local function AreLuaFilesLoaded(resourceName, luaFileNames)
         return nil
     end
 end
+
+--[[
+    This function checks the current script version against the latest version available online.
+    It fetches the latest version and changelog from GitHub, compares it with the current version,
+    and prints a message to the server console indicating whether the script is up to date or outdated.
+    If the script is outdated, it also prints the latest version and changelog.
+    Customers can use this function to ensure they are running the latest version of the Wizard Mileage script.
+]]
 local function checkVersion()
     local currentVersion = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
     local latestVersionUrl = "https://raw.githubusercontent.com/CodeWizardsDev/wizard-mileage/refs/heads/main/version.txt"
@@ -167,7 +235,14 @@ local function checkVersion()
 end
 
 
+
 ---------------- Inventory initialize ----------------
+--[[
+    This section initializes the inventory system based on the configured inventory script.
+    It creates usable items for vehicle maintenance parts, allowing players to use these items
+    to perform maintenance tasks on their vehicles.
+    Customers can modify the item names and behaviors in the config file to suit their server's needs.
+--]]
 if Config.InventoryScript == 'qb' then
     QBCore = exports['qb-core']:GetCoreObject()
     QBCore.Functions.CreateUseableItem(Config.Items.SparkPlug, function(source, item)
@@ -264,7 +339,14 @@ elseif Config.InventoryScript == 'esx' then
 end
 
 
+
 ---------------- Net Events ----------------
+--[[
+    This section registers various server-side events that handle different functionalities of the Wizard Mileage script.
+    These events include checking for updates, loading and saving player settings, updating vehicle data,
+    and handling vehicle maintenance tasks such as oil changes, tire changes, and more.
+    Customers can reference these events to understand how to interact with the script and extend its functionality.
+--]]
 RegisterNetEvent("wizard_vehiclemileage:server:getupdate")
 AddEventHandler("wizard_vehiclemileage:server:getupdate", function()
     local src = source
@@ -278,12 +360,24 @@ AddEventHandler("wizard_vehiclemileage:server:getupdate", function()
     end
     TriggerClientEvent("wizard_vehiclemileage:client:setOutdated", src, isOutdated, currentVersion, latestVersion)
 end)
+
+--[[
+    This event checks if the player is an admin and returns the result to the client.
+    It uses the isAdmin function to determine if the player has the required ace permission.
+    Customers can use this event to restrict access to certain features based on admin status.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:isAdmin')
 AddEventHandler('wizard_vehiclemileage:server:isAdmin', function(cbId)
     local src = source
     local admin = isAdmin(src)
     TriggerClientEvent('wizard_vehiclemileage:client:isAdminCallback', src, cbId, admin)
 end)
+
+--[[
+    This event loads the player's UI settings from the database and sends them to the client.
+    If no settings are found, it inserts default settings into the database.
+    Customers can use this event to manage player-specific UI preferences for the mileage display.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:loadPlayerSettings')
 AddEventHandler('wizard_vehiclemileage:server:loadPlayerSettings', function()
     local src = source
@@ -292,6 +386,12 @@ AddEventHandler('wizard_vehiclemileage:server:loadPlayerSettings', function()
         TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
     end)
 end)
+
+--[[
+    This event saves the player's UI settings to the database.
+    It takes a settings table from the client and updates or inserts it into the mileage_settings table.
+    Customers can use this event to allow players to customize their UI preferences for the mileage display.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:savePlayerSettings')
 AddEventHandler('wizard_vehiclemileage:server:savePlayerSettings', function(settings)
     local src = source
@@ -299,6 +399,12 @@ AddEventHandler('wizard_vehiclemileage:server:savePlayerSettings', function(sett
     savePlayerSettings(playerId, settings)
     TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
 end)
+
+--[[
+    This event retrieves all vehicles' mileage data from the database and sends it to the client.
+    It executes a SQL query to select all records from the vehicle_mileage table and returns the result.
+    Customers can use this event to display a list of all vehicles and their mileage data in the UI.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:getAllVehicles')
 AddEventHandler('wizard_vehiclemileage:server:getAllVehicles', function(cbId)
     local src = source
@@ -307,6 +413,13 @@ AddEventHandler('wizard_vehiclemileage:server:getAllVehicles', function(cbId)
         TriggerClientEvent('wizard_vehiclemileage:client:getAllVehiclesCallback', src, cbId, result or {})
     end)
 end)
+
+--[[
+    This event retrieves the mileage data for a specific vehicle based on its plate number.
+    It executes a SQL query to select the record from the vehicle_mileage table where the plate matches.
+    The result is sent back to the client for display or further processing.
+    Customers can use this event to fetch and display mileage data for individual vehicles.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateVehicleData')
 AddEventHandler('wizard_vehiclemileage:server:updateVehicleData', function(vehicleData)
     if not vehicleData or not vehicleData.plate then return end
@@ -352,12 +465,24 @@ AddEventHandler('wizard_vehiclemileage:server:updateVehicleData', function(vehic
         end
     end)
 end)
+
+--[[
+    This event deletes a vehicle's mileage data from the database based on its plate number.
+    It executes a SQL query to remove the record from the vehicle_mileage table where the plate matches.
+    Customers can use this event to allow players or admins to delete vehicle records from the mileage database.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:deleteVehicle')
 AddEventHandler('wizard_vehiclemileage:server:deleteVehicle', function(plate)
     if not plate then return end
     local query = "DELETE FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate})
 end)
+
+--[[
+    This event adds an item to the player's inventory.
+    It checks if the item and amount are valid, then uses the configured inventory script to add the item.
+    Customers can use this event to manage vehicle maintenance items in players' inventories.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:removeItem')
 AddEventHandler('wizard_vehiclemileage:server:removeItem', function(item, amount)
     local src = source
@@ -379,6 +504,13 @@ AddEventHandler('wizard_vehiclemileage:server:removeItem', function(item, amount
         end
     end
 end)
+
+--[[
+    This event retrieves the original suspension values for a vehicle based on its plate number.
+    It executes two SQL queries to get the original suspension raise and force from the vehicle_mileage table.
+    The results are sent back to the client to set the original suspension values.
+    Customers can use this event to manage vehicle suspension settings in the mileage system.
+]]
 RegisterNetEvent('wizard_vehiclemileage:server:getOriginalSuspensionValue')
 AddEventHandler('wizard_vehiclemileage:server:getOriginalSuspensionValue', function(plate)
     if not plate then return end
@@ -402,6 +534,12 @@ AddEventHandler('wizard_vehiclemileage:server:getOriginalSuspensionValue', funct
         end
     end)
 end)
+
+--[[
+    This event updates the wear level of the vehicle's brakes in the database.
+    It takes the plate number and brake wear value, then executes an SQL update query.
+    Customers can use this event to track brake wear and manage vehicle maintenance.
+]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateSuspensionWear')
 AddEventHandler('wizard_vehiclemileage:server:updateSuspensionWear', function(plate, suspensionWear)
     if not plate or type(suspensionWear) ~= "number" then return end
@@ -409,6 +547,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateSuspensionWear', function(pl
     exports.oxmysql:execute(query, {suspensionWear, plate}, function(rowsChanged)
     end)
 end)
+
+--[[
+    This event updates the last suspension change mileage for a vehicle in the database.
+    It retrieves the current mileage from the vehicle_mileage table and updates the last_suspension_change field.
+    Customers can use this event to track when the suspension was last changed for maintenance records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateSuspensionChange')
 AddEventHandler('wizard_vehiclemileage:server:updateSuspensionChange', function(plate)
     if not plate then return end
@@ -427,6 +571,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateSuspensionChange', function(
         end
     end)
 end)
+
+--[[
+    This event updates the wear level of the vehicle's spark plugs in the database.
+    It takes the plate number and spark plug wear value, then executes an SQL update query.
+    Customers can use this event to track spark plug wear and manage vehicle maintenance.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateSparkPlugWear')
 AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugWear', function(plate, sparkPlugWear)
     if not plate or type(sparkPlugWear) ~= "number" then return end
@@ -434,6 +584,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugWear', function(pla
     exports.oxmysql:execute(query, {sparkPlugWear, plate}, function(rowsChanged)
     end)
 end)
+
+--[[
+    This event updates the last spark plug change mileage for a vehicle in the database.
+    It retrieves the current mileage from the vehicle_mileage table and updates the last_spark_plug_change field.
+    Customers can use this event to track when the spark plugs were last changed for maintenance records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateSparkPlugChange')
 AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugChange', function(plate)
     if not plate then return end
@@ -452,6 +608,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugChange', function(p
         end
     end)
 end)
+
+--[[
+    This event saves the original suspension force for a vehicle in the database.
+    It updates the original_suspension_force field for the specified plate if it is currently NULL.
+    Customers can use this event to store the original suspension settings for vehicles.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalSuspensionForce')
 AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionForce', function(plate, force)
     if not plate or not force then return end
@@ -463,6 +625,13 @@ AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionForce', func
     exports.oxmysql:execute(query, {force, plate}, function(rowsChanged)
     end)
 end)
+
+--[[
+    This event saves the original suspension raise value for a vehicle in the database.
+    It updates the original_suspension_raise field for the specified plate.
+    Customers can use this event to store the original suspension raise setting for vehicles,
+    which can be useful for restoring or comparing suspension modifications.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalSuspensionRaise')
 AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', function(plate, raise)
     if not plate or not raise then return end
@@ -474,6 +643,15 @@ AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', func
     exports.oxmysql:execute(query, {raise, plate}, function(rowsChanged)
     end)
 end)
+
+--[[
+    This event retrieves all mileage and maintenance data for a specific vehicle from the database.
+    It queries the vehicle_mileage table using the provided plate number and collects all relevant fields,
+    including mileage, last maintenance actions, wear levels, and original drive/suspension values.
+    The results are sent back to the client using the 'wizard_vehiclemileage:client:setData' event.
+    Customers can reference this event to understand how vehicle data is loaded and synchronized between
+    the server and client for accurate UI and gameplay updates.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:retrieveMileage')
 AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
     local src = source
@@ -518,6 +696,13 @@ AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
         TriggerClientEvent('wizard_vehiclemileage:client:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear, lastClutch, clutchWear, original_drive_force, lastSuspensionChange, suspensionWear, lastSparkPlugChange, sparkPlugWear)
     end)
 end)
+
+--[[
+    This event saves the original drive force value for a vehicle in the database.
+    It updates the original_drive_force field for the specified plate, but only if it is currently NULL.
+    Customers can use this event to store the original drive force setting for vehicles,
+    which can be useful for restoring or comparing drive force modifications.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalDriveForce')
 AddEventHandler('wizard_vehiclemileage:server:saveOriginalDriveForce', function(plate, driveForce)
     if not plate or not driveForce then return end
@@ -530,6 +715,14 @@ AddEventHandler('wizard_vehiclemileage:server:saveOriginalDriveForce', function(
     
     exports.oxmysql:execute(query, {driveForce, plate})
 end)
+
+--[[
+    This event retrieves the original drive force value for a specific vehicle from the database.
+    It queries the vehicle_mileage table using the provided plate number and returns the original_drive_force value.
+    If a value is found, it is sent back to the client using the 'wizard_vehiclemileage:client:setOriginalDriveForce' event.
+    Customers can reference this event to understand how original drive force values are loaded and synchronized
+    between the server and client for accurate vehicle performance restoration or comparison.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:getOriginalDriveForce')
 AddEventHandler('wizard_vehiclemileage:server:getOriginalDriveForce', function(plate)
     if not plate then return end
@@ -545,6 +738,13 @@ AddEventHandler('wizard_vehiclemileage:server:getOriginalDriveForce', function(p
         end
     end)
 end)
+
+--[[
+    This event updates the mileage value for a specific vehicle in the database.
+    It inserts a new record if the vehicle does not exist, or updates the mileage if it does.
+    The function checks for valid input and logs the result for debugging purposes.
+    Customers can reference this event to understand how vehicle mileage is stored and updated.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateMileage')
 AddEventHandler('wizard_vehiclemileage:server:updateMileage', function(plate, mileage)
     if not plate or type(mileage) ~= "number" then
@@ -567,6 +767,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateMileage', function(plate, mi
         end
     end)
 end)
+
+--[[
+    This event updates the last oil change mileage for a vehicle in the database.
+    It retrieves the current mileage for the specified plate and sets the last_oil_change field to that value.
+    Customers can use this event to track when the oil was last changed for maintenance records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateOilChange')
 AddEventHandler('wizard_vehiclemileage:server:updateOilChange', function(plate)
     if not plate then return end
@@ -585,6 +791,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateOilChange', function(plate)
         end
     end)
 end)
+
+--[[
+    This event updates the last oil filter change mileage for a vehicle in the database.
+    It retrieves the current mileage for the specified plate and sets the last_oil_filter_change field to that value.
+    Customers can use this event to track when the oil filter was last changed for maintenance records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateOilFilter')
 AddEventHandler('wizard_vehiclemileage:server:updateOilFilter', function(plate)
     if not plate then return end
@@ -603,6 +815,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateOilFilter', function(plate)
         end
     end)
 end)
+
+--[[
+    This event updates the last air filter change mileage for a vehicle in the database.
+    It retrieves the current mileage for the specified plate and sets the last_air_filter_change field to that value.
+    Customers can use this event to track when the air filter was last changed for maintenance records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateAirFilter')
 AddEventHandler('wizard_vehiclemileage:server:updateAirFilter', function(plate)
     if not plate then return end
@@ -621,6 +839,12 @@ AddEventHandler('wizard_vehiclemileage:server:updateAirFilter', function(plate)
         end
     end)
 end)
+
+--[[
+    This event updates the last tire change mileage for a vehicle in the database.
+    It retrieves the current mileage for the specified plate and sets the last_tire_change field to that value.
+    Customers can use this event to track when the tires were last changed for maintenance records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateTireChange')
 AddEventHandler('wizard_vehiclemileage:server:updateTireChange', function(plate)
     if not plate then return end
@@ -639,6 +863,13 @@ AddEventHandler('wizard_vehiclemileage:server:updateTireChange', function(plate)
         end
     end)
 end)
+
+--[[
+    This event updates the wear level of the vehicle's brakes in the database.
+    It takes the plate number and brake wear value, then executes an SQL update query.
+    If the update is successful, a debug message is printed with the new value.
+    Customers can use this event to track brake wear and manage vehicle maintenance.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeWear')
 AddEventHandler('wizard_vehiclemileage:server:updateBrakeWear', function(plate, brakeWear)
     if not plate or type(brakeWear) ~= "number" then  return  end
@@ -652,6 +883,13 @@ AddEventHandler('wizard_vehiclemileage:server:updateBrakeWear', function(plate, 
         end
     end)
 end)
+
+--[[
+    This event updates the last brake change mileage and resets brake wear for a vehicle in the database.
+    It retrieves the current mileage for the specified plate and sets the last_brakes_change field to that value,
+    while also resetting brake_wear to 0.0. This is used to track when the brakes were last changed and to
+    reset their wear level after maintenance. Customers can use this event to maintain accurate brake service records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeChange')
 AddEventHandler('wizard_vehiclemileage:server:updateBrakeChange', function(plate)
     if not plate then 
@@ -673,6 +911,13 @@ AddEventHandler('wizard_vehiclemileage:server:updateBrakeChange', function(plate
         end
     end)
 end)
+
+--[[
+    This event updates the wear level of the vehicle's clutch in the database.
+    It takes the plate number and clutch wear value, then executes an SQL update query.
+    If the update is successful, a debug message is printed with the new value.
+    Customers can use this event to track clutch wear and manage vehicle maintenance.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateClutchWear')
 AddEventHandler('wizard_vehiclemileage:server:updateClutchWear', function(plate, clutchWear)
     if not plate or type(clutchWear) ~= "number" then return end
@@ -686,6 +931,13 @@ AddEventHandler('wizard_vehiclemileage:server:updateClutchWear', function(plate,
         end
     end)
 end)
+
+--[[
+    This event updates the last clutch change mileage and resets clutch wear for a vehicle in the database.
+    It retrieves the current mileage for the specified plate and sets the last_clutch_change field to that value,
+    while also resetting clutch_wear to 0.0. This is used to track when the clutch was last changed and to
+    reset its wear level after maintenance. Customers can use this event to maintain accurate clutch service records.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateClutchChange')
 AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(plate)
     if not plate then 
@@ -707,6 +959,13 @@ AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(plat
         end
     end)
 end)
+
+--[[
+    This event checks if a vehicle with the given plate is owned by a player.
+    It queries the ownership table defined in Config.VehDB to see if the plate exists.
+    The result is sent back to the client as a boolean value.
+    Customers can use this event to verify vehicle ownership for features like mileage tracking or maintenance.
+--]]
 RegisterNetEvent('wizard_vehiclemileage:server:checkOwnership')
 AddEventHandler('wizard_vehiclemileage:server:checkOwnership', function(plate)
     local src = source
@@ -719,6 +978,7 @@ AddEventHandler('wizard_vehiclemileage:server:checkOwnership', function(plate)
     end)
 end)
 
+
 AddEventHandler('onResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
         checkVersion()
@@ -726,8 +986,12 @@ AddEventHandler('onResourceStart', function(resourceName)
 end)
 
 
+
 ---------------- Exports ----------------
-    -- Get vehicle mileage
+--[[
+    Exports for other scripts to interact with vehicle mileage and maintenance data.
+    Provides functions to get/set mileage, parts change history, and wear levels.
+--]]
 exports('GetVehicleMileage', function(plate, cb)
     if not plate or not cb then return end
     local query = [[
@@ -741,7 +1005,12 @@ exports('GetVehicleMileage', function(plate, cb)
         end
     end)
 end)
-    -- Set vehicle mileage
+
+--[[
+    Set vehicle mileage.
+    Can be used to set the mileage directly, e.g., for testing or resetting.
+    If no mileage is provided, it uses the current accumulated distance.
+--]]
 exports('SetVehicleMileage', function(plate, mileage)
     if not plate or type(mileage) ~= "number" then return end
     local query = [[
@@ -751,7 +1020,19 @@ exports('SetVehicleMileage', function(plate, mileage)
     ]]
     exports.oxmysql:execute(query, {plate, mileage, mileage})
 end)
-    -- Get vehicle last parts change
+
+--[[
+    Get vehicle last parts change data.
+    Returns a table with the last change mileage for each part.
+    - sparkPlugChange: Last spark plug change mileage
+    - oilChange: Last oil change mileage
+    - oilFilterChange: Last oil filter change mileage
+    - airFilterChange: Last air filter change mileage
+    - tireChange: Last tire change mileage
+    - brakeChange: Last brake change mileage
+    - suspensionChange: Last suspension change mileage
+    - clutchChange: Last clutch change mileage
+--]]
 exports('GetVehicleLastPartsChange', function(plate, cb)
     if not plate or not cb then return end
     local query = [[
@@ -777,7 +1058,12 @@ exports('GetVehicleLastPartsChange', function(plate, cb)
         end
     end)
 end)
-    -- Set vehicle last parts change
+
+--[[
+    Set vehicle last parts change data.
+    Can be used to set the last change mileage for each part, e.g., for testing or resetting.
+    If no mileage is provided for a part, it retains the current value.
+--]]
 exports('SetVehicleLastPartsChange', function(plate, partsChange)
     if not plate or type(partsChange) ~= "table" then return end
     local queries = {}
@@ -830,7 +1116,15 @@ exports('SetVehicleLastPartsChange', function(plate, partsChange)
         exports.oxmysql:execute(query, {param1, param2})
     end
 end)
-    -- Get vehicle parts wear
+
+--[[
+    Get vehicle parts wear data.
+    Returns a table with the current wear levels for each part.
+    - brakeWear: Current brake wear level
+    - clutchWear: Current clutch wear level
+    - suspensionWear: Current suspension wear level
+    - sparkPlugWear: Current spark plug wear level
+]]
 exports('GetVehiclePartsWear', function(plate, cb)
     if not plate or not cb then return end
     local query = [[
@@ -850,7 +1144,12 @@ exports('GetVehiclePartsWear', function(plate, cb)
         end
     end)
 end)
-    -- Set vehicle parts wear
+
+--[[
+    Set vehicle parts wear data.
+    Can be used to set the wear levels for each part, e.g., for testing or resetting.
+    If no wear level is provided for a part, it retains the current value.
+--]]
 exports('SetVehiclePartsWear', function(plate, partsWear)
     if not plate or type(partsWear) ~= "table" then return end
     local queries = {}
@@ -873,6 +1172,7 @@ exports('SetVehiclePartsWear', function(plate, partsWear)
         exports.oxmysql:execute(query, {param1, param2})
     end
 end)
+
 
 
 ---------------- Exports Examples ----------------
