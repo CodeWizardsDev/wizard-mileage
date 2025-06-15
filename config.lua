@@ -17,10 +17,22 @@
 --          Thank you for downloading our script! we're glad to help you to make your server better:)
 --          Feel free to contact us if you have any problem/idea for this script! 
 --
---          Script Wiki: https://code-wizards.gitbook.io/codewizards/mileage-system/informations
---
---          CodeWizards Discord Server: https://discord.gg/ZBvacHyczY
---          CodeWizards Github: https://github.com/CodeWizardsDev
+--          This file controls all settings for the Wizard Mileage System.
+--          Adjust these options to fit your server's framework, inventory, UI, maintenance logic, and gameplay needs.
+
+--          📚 Documentation:
+--              - Wiki:    https://code-wizards.gitbook.io/codewizards/mileage-system/informations
+--              - Discord: https://discord.gg/ZBvacHyczY
+--              - GitHub:  https://github.com/CodeWizardsDev
+
+--          🛠️ Quick Reference:
+--              - Language, Framework, Inventory, Progress Bar, Menu, Notifications, Units
+--              - UI Defaults, Commands, Admin Settings, Autosave, Ownership, Job Requirements
+--              - Targeting, Warnings, Wear Tracking, Maintenance Intervals, Items
+--              - Animation/Interaction Configs, Disabled Vehicle Classes
+
+--          💡 Tip: 
+--              All changes require a server restart or resource restart to take effect.
 
 
 
@@ -28,205 +40,202 @@
 
 
 Config = {}
-Config.Language = 'en'                -- Default UI language
-Config.Debug = true                   -- When enabled, prints debug messages to the console for troubleshooting
-Config.FrameWork = 'qb'               -- Choose your framework: "qb" for QBCore/QBox, "esx" for ESX
-Config.InventoryItems = true          -- Enable inventory items for vehicle parts and tools
-Config.InventoryScript = 'ox'         -- Choose inventory system: 'ox' for ox_inventory, 'codem', 'quasar', 'qb' for qb-inventory, or 'esx' for esx built in inventory
-Config.ProgressBar = 'ox'             -- Choose your progress bar: "qb" for QBCore/QBox and "ox" for ox_lib
-Config.Menu = 'ox'                    -- Choose your menu: "ox" for ox_lib, "qb" for QBCore/QBox
 
-Config.Notify = 'ox'                  -- Choose your notification system: "wizard", "ox", "qb", "qbx" "okok", or "esx"
-Config.Unit = 'km'                    -- Set distance unit: "km" for kilometers or "mile" for miles
+-- ████████████████ GENERAL SETTINGS ████████████████
+Config.Language         = 'en'      -- UI language (see locales folder)
+Config.Debug            = true      -- Enable debug messages in console
+Config.FrameWork        = 'qb'      -- "qb" (QBCore/QBox) or "esx" (ESX)
+Config.InventoryItems   = true      -- Require inventory items for maintenance
+Config.InventoryScript  = 'ox'      -- 'ox', 'codem', 'quasar', 'qb', or 'esx'
+Config.ProgressBar      = 'ox'      -- "ox" or "qb"
+Config.Menu             = 'ox'      -- "ox" or "qb"
+Config.Notify           = 'ox'      -- "wizard", "ox", "qb", "qbx", "okok", "esx"
+Config.Unit             = 'km'      -- "km" or "mile" for distance
 
-Config.DefaultUI = {                  -- Default UI Settings for players
-    mileage_visible = 1,              -- Mileage UI visibility, 1 = visible, 0 = hidden
-    mileage_size = 1,                 -- Scale of Mileage UI, 1 = default scale
-    checkwear_size = 1,               -- Scale of CheckWear UI, 1 = default scale
-    mileage_pos_x = 1660,             -- X position of Mileage UI
-    mileage_pos_y = 1012,             -- Y position of Mileage UI
-    checkwear_pos_x = 1495.75,        -- X position of CheckWear UI
-    checkwear_pos_y = 72.75           -- Y position of CheckWear UI
+
+
+-- ████████████████ UI & COMMANDS ████████████████
+
+Config.DefaultUI = {
+    mileage_visible     = 1,        -- 1 = visible, 0 = hidden
+    mileage_size        = 1,        -- UI scale
+    checkwear_size      = 1,        -- CheckWear UI scale
+    mileage_pos_x       = 1660,     -- Mileage UI X position
+    mileage_pos_y       = 1012,     -- Mileage UI Y position
+    checkwear_pos_x     = 1495.75,  -- CheckWear UI X position
+    checkwear_pos_y     = 72.75     -- CheckWear UI Y position
 }
 
-Config.CustomizeCommand = 'mileageui' -- Command to open UI customizer
-Config.CheckWearCommand = 'checkwear' -- Command to check vehicle parts condition (oil, filters, tires, etc.)
-Config.CMCommand = 'clearmileage'     -- Command to reset vehicle mileage to zero
-Config.DatabaseCommand = 'mileagedb'    -- Command to open saved vehicled list with data
+Config.CustomizeCommand = 'mileageui'   -- Open UI customizer
+Config.CheckWearCommand = 'checkwear'   -- Check vehicle part condition
+Config.CMCommand        = 'clearmileage'-- Reset vehicle mileage
+Config.DatabaseCommand  = 'mileagedb'   -- Open vehicle data list
 
-Config.AdminRank = 'admin'
+Config.AdminRank        = 'admin'       -- Admin rank for database access
 
-Config.Autosave = true                -- Enable automatic saving of vehicle mileage to database
-Config.AutosaveInterval = 10          -- How often to save mileage (in seconds)
 
-Config.BoughtVehiclesOnly = true      -- If true, only tracks mileage for player-owned vehicles
-Config.VehDB = 'player_vehicles'      -- Database table name for vehicle ownership
-                                        -- Use:
-                                        -- 'player_vehicles' for QBCore & QBox
-                                        -- 'owned_vehicles' for ESX
-                                        -- or any custom vehicle database table name
 
-Config.JobRequired = true             -- If true, only below job can service vehicle parts
-Config.MechanicJob = 'mechanic'       -- Job name for mechanics in your server
-Config.MinimumJobGrade = 2            -- Minimum job grade required to service vehicle parts
+-- ████████████████ AUTOSAVE & OWNERSHIP ████████████████
 
-Config.UseTarget = true               -- Enable targeting system for vehicle maintenance
-Config.Targeting = 'ox'               -- Choose targeting system: 'ox' for ox_target, 'qb' for qb-target
+Config.Autosave         = true          -- Enable autosave for mileage
+Config.AutosaveInterval = 10            -- Autosave interval (seconds)
+Config.BoughtVehiclesOnly = true        -- Only track owned vehicles
+Config.VehDB            = 'player_vehicles' -- Vehicle ownership table
 
-Config.ChangeWarnings = true          -- Enable notifications when vehicle parts need maintenance
-Config.WarningsInterval = 30          -- How often to check and warn about vehicle maintenance (in seconds)
 
+
+-- ████████████████ JOB & TARGETING ████████████████
+
+Config.JobRequired      = true          -- Only mechanics can service vehicles
+Config.MechanicJob      = 'mechanic'    -- Mechanic job name
+Config.MinimumJobGrade  = 2             -- Minimum mechanic grade
+Config.UseTarget        = true          -- Enable targeting system
+Config.Targeting        = 'ox'          -- "ox" or "qb"
+
+
+
+-- ████████████████ WARNINGS & WEAR TRACKING ████████████████
+
+Config.ChangeWarnings   = true          -- Enable maintenance warnings
+Config.WarningsInterval = 30            -- Warning check interval (seconds)
 
 Config.WearTracking = {
-    SparkPlugs = true,                -- Track spark plug wear and update Database
-    Oil = true,                       -- Track oil/oilfilter wear and update Database
-    AirFilter = true,                 -- Track air filter wear and update Database
-    Tires = true,                     -- Track tire wear and update Database
-    Brakes = true,                    -- Track brake wear and update Database
-    Suspension = true,                -- Track suspension wear and update Database
-    Clutch = true,                    -- Track clutch wear and update Database
+    SparkPlugs  = true,    -- Track spark plug wear
+    Oil         = true,    -- Track oil/oil filter wear
+    AirFilter   = true,    -- Track air filter wear
+    Tires       = true,    -- Track tire wear
+    Brakes      = true,    -- Track brake wear
+    Suspension  = true,    -- Track suspension wear
+    Clutch      = true     -- Track clutch wear
 }
 
 
-Config.SparkPlugChangeDistance = 50   -- Distance in km/miles before spark plug change is needed
-Config.MaxSparkPlugWear = 0.02        -- Maximum spark plug wear value
-Config.MissfireChance = 0.3           -- Chance of engine missfire when spark plugs are worn out (30%)
 
-Config.OilChangeDistance = 50         -- Distance in km/miles before oil change is needed
-Config.OilFilterDistance = 40         -- Distance in km/miles before oil filter change is needed
-Config.EngineDamageRate = 0.5         -- How quickly engine takes damage from poor maintenance (0.0 to 1.0)
+-- ████████████████ MAINTENANCE INTERVALS & EFFECTS ████████████████
 
-Config.AirFilterDistance = 100        -- Distance in km/miles before air filter change is needed
-Config.MaxSpeedReduction = 0.2        -- Maximum speed reduction when air filter is worn (20%)
-Config.AccelerationReduction = 0.3    -- Maximum acceleration reduction when air filter is worn (30%)
+Config.SparkPlugChangeDistance = 50     -- Distance before spark plug change (km/miles)
+Config.MaxSparkPlugWear        = 0.02   -- Max spark plug wear value
+Config.MissfireChance          = 0.3    -- Chance of misfire when worn (0-1)
 
-Config.TireWearDistance = 250         -- Distance in km/miles before tires need replacement
-Config.BaseTireGrip = 2.5             -- Maximum tire grip when new
-Config.MinTireGrip = 0.5              -- Minimum tire grip when completely worn
+Config.OilChangeDistance       = 50     -- Distance before oil change
+Config.OilFilterDistance       = 40     -- Distance before oil filter change
+Config.EngineDamageRate        = 0.5    -- Engine damage rate from poor maintenance
 
-Config.BrakeWearRate = 0.08           -- How quickly brakes wear out
-Config.MaxBrakeWear = 100.0           -- Maximum brake wear value
-Config.BrakeEfficiencyLoss = 1.0      -- How much braking power is lost when worn
-Config.BaseBrakeForce = 1.0           -- Base brake force multiplier
+Config.AirFilterDistance       = 100    -- Distance before air filter change
+Config.MaxSpeedReduction       = 0.2    -- Max speed reduction (0-1)
+Config.AccelerationReduction   = 0.3    -- Max acceleration reduction (0-1)
 
-Config.SuspensionChangeDistance = 300 -- Distance in km/miles before suspension needs replacement
-Config.MaxSuspensionWear = 1.0        -- Maximum suspension wear value
+Config.TireWearDistance        = 250    -- Distance before tire change
+Config.BaseTireGrip            = 2.5    -- New tire grip
+Config.MinTireGrip             = 0.5    -- Worn tire grip
 
-Config.ClutchWearRate = 0.1           -- How quickly clutch wears out during gear shifts
-Config.MaxClutchWear = 100.0          -- Maximum clutch wear value
-Config.ClutchEfficiencyLoss = 0.8     -- How much power is lost when clutch is worn (80%)
-Config.BaseClutchForce = 1.0          -- Base clutch force multiplier
-Config.StallChance = 0.4              -- Chance of engine stalling when clutch is worn (40%)
+Config.BrakeWearRate           = 0.08   -- Brake wear rate
+Config.MaxBrakeWear            = 100.0  -- Max brake wear value
+Config.BrakeEfficiencyLoss     = 1.0    -- Braking power loss when worn
+Config.BaseBrakeForce          = 1.0    -- Base brake force
+
+Config.SuspensionChangeDistance= 300    -- Distance before suspension change
+Config.MaxSuspensionWear       = 1.0    -- Max suspension wear value
+
+Config.ClutchWearRate          = 0.1    -- Clutch wear rate
+Config.MaxClutchWear           = 100.0  -- Max clutch wear value
+Config.ClutchEfficiencyLoss    = 0.8    -- Power loss when clutch is worn
+Config.BaseClutchForce         = 1.0    -- Base clutch force
+Config.StallChance             = 0.4    -- Stall chance when clutch is worn
+
+
+
+-- ████████████████ ITEM NAMES (INVENTORY) ████████████████
 
 Config.Items = {
-    SparkPlug = "spark_plugs",        -- Item name for spark plugs
-    EngineOil = "engine_oil",         -- Item name for engine oil
-    OilFilter = "oil_filter",         -- Item name for oil filter
-    AirFilter = "air_filter",         -- Item name for air filter
-    Tires = "tires",                  -- Item name for tires
-    BrakeParts = "brake_parts",       -- Item name for brake parts
-    SusParts = "suspension_parts",    -- Item name for suspension parts
-    Clutch = "clutch",                -- Item name for clutch
+    SparkPlug   = "spark_plugs",
+    EngineOil   = "engine_oil",
+    OilFilter   = "oil_filter",
+    AirFilter   = "air_filter",
+    Tires       = "tires",
+    BrakeParts  = "brake_parts",
+    SusParts    = "suspension_parts",
+    Clutch      = "clutch"
 }
 
--- Configuration table for spark plug replacement interaction
+
+
+-- ████████████████ INTERACTION ANIMATION CONFIGS ████████████████
+
 Config.ChangeSparkPlug = {
-    Animation = "fixing_a_ped",
-    AnimationDict = "mini@repair",
-    Duration = 5000,
-
-    FreezeCar = true,
-    FreezePlayer = true,
-
-    Cancelable = true,
+    Animation       = "fixing_a_ped",
+    AnimationDict   = "mini@repair",
+    Duration        = 5000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for oil change interaction
-Config.ChangeOil  = {
-    Animation = "fixing_a_ped",       -- Animation name to play during oil change
-    AnimationDict = "mini@repair",    -- Animation dictionary containing the animation
-    Duration = 10000,                 -- Duration of oil change animation in milliseconds (10 seconds)
-
-    FreezeCar = true,                 -- If true, prevents vehicle movement during oil change
-    FreezePlayer = true,              -- If true, prevents player movement during oil change
-
-    Cancelable = true,                -- If true, allows players to cancel the oil change action
+Config.ChangeOil = {
+    Animation       = "fixing_a_ped",
+    AnimationDict   = "mini@repair",
+    Duration        = 10000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for oil filter change interaction
-Config.ChangeOilFilter  = {
-    Animation = "fixing_a_player",
-    AnimationDict = "mini@repair",
-    Duration = 5000,
-
-    FreezeCar = true,
-    FreezePlayer = true,
-
-    Cancelable = true,
+Config.ChangeOilFilter = {
+    Animation       = "fixing_a_player",
+    AnimationDict   = "mini@repair",
+    Duration        = 5000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for air filter change interaction
-Config.ChangeAirFilter  = {
-    Animation = "work2_base",
-    AnimationDict = "missmechanic",
-    Duration = 3000,
-
-    FreezeCar = true,
-    FreezePlayer = true,
-
-    Cancelable = true,
+Config.ChangeAirFilter = {
+    Animation       = "work2_base",
+    AnimationDict   = "missmechanic",
+    Duration        = 3000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for tire filter change interaction
 Config.ChangeTires = {
-    Animation = "car_bomb_mechanic",
-    AnimationDict = "mp_car_bomb",
-    Duration = 7000,
-
-    FreezeCar = true,
-    FreezePlayer = true,
-
-    Cancelable = true,
+    Animation       = "car_bomb_mechanic",
+    AnimationDict   = "mp_car_bomb",
+    Duration        = 7000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for brakes service interaction
 Config.ChangeBrakes = {
-    Animation = "machinic_loop_mechandplayer",
-    AnimationDict = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@",
-    Duration = 5000,
-
-    FreezeCar = true,
-    FreezePlayer = true,
-
-    Cancelable = true,
+    Animation       = "machinic_loop_mechandplayer",
+    AnimationDict   = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@",
+    Duration        = 5000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for suspension service interaction
 Config.ChangeSuspension = {
-    Animation = "car_bomb_mechanic",
-    AnimationDict = "mp_car_bomb",
-    Duration = 7000,
-
-    FreezeCar = true,
-    FreezePlayer = true,
-
-    Cancelable = true,
+    Animation       = "car_bomb_mechanic",
+    AnimationDict   = "mp_car_bomb",
+    Duration        = 7000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for clutch change interaction
 Config.ChangeClutch = {
-    Animation = "fixing_a_ped",
-    AnimationDict = "mini@repair",
-
-    Duration = 15000,                   -- 15 seconds for clutch change
-
-    FreezeCar = true,
-    FreezePlayer = true,
-
-    Cancelable = true,
+    Animation       = "fixing_a_ped",
+    AnimationDict   = "mini@repair",
+    Duration        = 15000,
+    FreezeCar       = true,
+    FreezePlayer    = true,
+    Cancelable      = true
 }
 
--- Configuration table for disabled vehicle classes
+-- ████████████████ DISABLED VEHICLE CLASSES ████████████████
+-- Set to true to disable mileage/wear for that class (see GTA vehicle class IDs)
 Config.DisabledVehicleClasses = {
     --[0] = true,   -- Compacts  
     --[1] = true,   -- Sedans  
