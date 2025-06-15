@@ -813,14 +813,6 @@ end)
 
 ---------------- Net Events ----------------
     -- Admin checking
-RegisterNetEvent('wizard_vehiclemileage:client:requestAdminCheck')
-AddEventHandler('wizard_vehiclemileage:client:requestAdminCheck', function(cbId)
-    -- For standalone, check ACE permission 'admin' locally
-    local isAdmin = IsPlayerAceAllowed(PlayerId(), "admin")
-    TriggerServerEvent('wizard_vehiclemileage:server:isAdmin', cbId)
-    -- Also trigger local callback immediately
-    TriggerEvent('wizard_vehiclemileage:client:isAdminCallback', cbId, isAdmin)
-end)
 RegisterNetEvent('wizard_vehiclemileage:client:isAdminCallback')
 AddEventHandler('wizard_vehiclemileage:client:isAdminCallback', function(cbId, isAdmin)
     if adminCallbacks[cbId] then
