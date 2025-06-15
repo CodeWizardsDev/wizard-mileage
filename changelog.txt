@@ -1,3 +1,4 @@
+1.0.
 Some improvements
 quasar inventory support fixed
 update checker system improved
