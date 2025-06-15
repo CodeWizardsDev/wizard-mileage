@@ -71,6 +71,10 @@ Config.CheckWearCommand = 'checkwear'   -- Check vehicle part condition
 Config.CMCommand        = 'clearmileage'-- Reset vehicle mileage
 Config.DatabaseCommand  = 'mileagedb'   -- Open vehicle data list
 
+
+
+-- ████████████████ ADMIN SETTINGS ████████████████
+
 Config.AdminRank        = 'admin'       -- Admin rank for database access
 
 
