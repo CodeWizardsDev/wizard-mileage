@@ -44,12 +44,12 @@ Config = {}
 -- ████████████████ GENERAL SETTINGS ████████████████
 Config.Language         = 'en'      -- UI language (see locales folder)
 Config.Debug            = true      -- Enable debug messages in console
-Config.FrameWork        = 'qb'      -- "qb" (QBCore/QBox) or "esx" (ESX)
+Config.FrameWork        = 'qb'      -- "qb" (QBCore/QBox) or "esx" (ESX) or "nd" (ND Core)
 Config.InventoryItems   = true      -- Require inventory items for maintenance
 Config.InventoryScript  = 'ox'      -- 'ox', 'codem', 'quasar', 'qb', or 'esx'
 Config.ProgressBar      = 'ox'      -- "ox" or "qb"
 Config.Menu             = 'ox'      -- "ox" or "qb"
-Config.Notify           = 'ox'      -- "wizard", "ox", "qb", "qbx", "okok", "esx"
+Config.Notify           = 'ox'      -- "wizard", "ox", "qb", "qbx", "okok", "esx", "nd"
 Config.Unit             = 'km'      -- "km" or "mile" for distance
 
 
@@ -104,13 +104,21 @@ Config.ChangeWarnings   = true          -- Enable maintenance warnings
 Config.WarningsInterval = 30            -- Warning check interval (seconds)
 
 Config.WearTracking = {
-    SparkPlugs  = true,    -- Track spark plug wear
-    Oil         = true,    -- Track oil/oil filter wear
-    AirFilter   = true,    -- Track air filter wear
-    Tires       = true,    -- Track tire wear
-    Brakes      = true,    -- Track brake wear
-    Suspension  = true,    -- Track suspension wear
-    Clutch      = true     -- Track clutch wear
+    SparkPlugs  = true,                 -- Track spark plug wear
+    Oil         = true,                 -- Track oil/oil filter wear
+    AirFilter   = true,                 -- Track air filter wear
+    Tires       = true,                 -- Track tire wear
+    Brakes      = true,                 -- Track brake wear
+    Suspension  = true,                 -- Track suspension wear
+    Clutch      = true                  -- Track clutch wear
+}
+
+Config.CheckVehicle = {
+    Animation = "base",
+    AnimDict  = "amb@world_human_clipboard@male@base",
+
+    Object    = "prop_notepad_01",      -- Object to attach to the player
+    Bone      = 60309                   -- Target bone to attach the object to
 }
 
 
@@ -239,7 +247,7 @@ Config.ChangeClutch = {
 }
 
 -- ████████████████ DISABLED VEHICLE CLASSES ████████████████
--- Set to true to disable mileage/wear for that class (see GTA vehicle class IDs)
+-- Set to true to disable mileage/wear for that class
 Config.DisabledVehicleClasses = {
     --[0] = true,   -- Compacts  
     --[1] = true,   -- Sedans  
@@ -250,11 +258,17 @@ Config.DisabledVehicleClasses = {
     --[6] = true,   -- Sports  
     --[7] = true,   -- Super 
     --[8] = true,   -- Motorcycles
+    --[9] = true,   -- OFf-Road
+    --[10] = true,  -- Industrial
+    --[11] = true,  -- Utility
+    --[12] = true,  -- Vans
     [13] = true,    -- Cycles
     [14] = true,    -- Boats
     [15] = true,    -- Helicopters
     [16] = true,    -- Planes
     [21] = true,    -- Trains
     [19] = true,    -- Military vehicles
-    [20] = true     -- Commercial vehicles
+    [20] = true,    -- Commercial vehicles
+    [21] = true,    -- Trains
+    [22] = true     -- Open Wheel
 }
