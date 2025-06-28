@@ -40,6 +40,7 @@
         "spark_plug_changed": "Les bougies d’allumage du véhicule ont été changées avec succès"
     },
     "warning": {
+        "checking_veh": "Vérification du véhicule...",
         "remaining_oil": "Durée de vie de l’huile à",
         "remaining_filter": "Durée de vie du filtre à huile à",
         "remaining_air_filter": "Durée de vie du filtre à air à",
@@ -60,7 +61,11 @@
         "not_mechanic": "Tu dois être mécanicien",
         "low_grade": "Tu n’es pas assez qualifié pour ça",
         "not_in_vehicle": "Tu dois être dans un véhicule",
+        "in_vehicle": "Vous devez sortir de votre véhicule",
+        "not_found": "Véhicule introuvable",
+        "plate_not_found": "Plaque du véhicule introuvable",
         "not_owned": "Ce véhicule n’appartient à personne",
+
         "no_oil": "Tu n’as pas d’huile moteur",
         "no_oil_filter": "Tu n’as pas de filtre à huile",
         "no_air_filter": "Tu n’as pas de filtre à air",
