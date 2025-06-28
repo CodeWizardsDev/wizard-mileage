@@ -258,6 +258,7 @@ This guide will help you set up the script easily!
 - Arabic: @abonan
 - French: @junior
 - Dutch: @meneer-Duck
+- Other Langs: AI
 
 ## 🤝 Support <a name = "support"></a>
 For support, join our Discord server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
