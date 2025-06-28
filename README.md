@@ -36,9 +36,14 @@
 
 ## ⛓️ Dependencie <a name = "dependencies"></a>
 
-- [oxmysql](https://github.com/overextended/oxmysql)
-- [ox_lib](https://github.com/overextended/ox_lib)
-- [ox_target](https://github.com/overextended/ox_target) or [qb-target](https://github.com/qbcore-framework/qb-target)
+- FrameWork: `QBox` or `QBCore` or `ESX` or `ND_Core`
+- SQL: [`oxmysql`](https://github.com/overextended/oxmysql)
+- NEEDED: [`ox_lib`](https://github.com/overextended/ox_lib)
+- Target: [`ox_target`](https://github.com/overextended/ox_target) or [`qb-target`](https://github.com/qbcore-framework/qb-target)
+- Inventory: `ox` or `codem` or `quasar` or `qb` or `esx`
+- Menu: `ox` or `QB` or `QBox`
+- ProgressBar: `ox` or `QB` or `QBox`
+- Notify: `wizard` or `ox` or `qb` or `qbx` or `okok` or `esx` or `nd`
 
 ## 🚀 Features Scope <a name = "feature_scope"></a>
 
