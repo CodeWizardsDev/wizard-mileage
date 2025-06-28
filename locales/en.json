@@ -40,6 +40,7 @@
         "spark_plug_changed": "Vehicle Spark Plugs have been successfully changed"
     },
     "warning": {
+        "checking_veh": "Checking vehicle...",
         "remaining_oil": "Oil life at",
         "remaining_filter": "Oil filter life at",
         "remaining_air_filter": "Air filter life at",
@@ -60,6 +61,9 @@
         "not_mechanic": "You must be a mechanic to do this",
         "low_grade": "You are not skillfull enough to do this",
         "not_in_vehicle": "You must be in a vehicle",
+        "in_vehicle": "You must exit your vehicle",
+        "not_found": "Vehicle not found",
+        "plate_not_found": "Vehicle plate not found",
         "not_owned": "This vehicle is not owned by anyone",
 
         "no_oil": "You don't have engine oil",

@@ -1,0 +1,78 @@
+{
+    "__author":"@AI",
+
+
+
+    "ui": {
+        "mileage": "Kilometre:",
+        "unit_km": "Km",
+        "unit_miles": "Mil"
+    },
+    
+    "target": {
+        "changeoil": "Yağ Değiştiriliyor...",
+        "changeoilfilter": "Yağ Filtresi Değiştiriliyor...",
+        "changeairfilter": "Hava Filtresi Değiştiriliyor...",
+        "changetires": "Lastikler Değiştiriliyor...",
+        "changebrakes": "Frenler Değiştiriliyor",
+        "changeclutch": "Debriyaj Değiştiriliyor",
+        "changesuspension": "Süspansiyon Değiştiriliyor",
+        "changesparkplug": "Buji Değiştiriliyor"
+    },
+    "progress": {
+        "changingoil": "Yağ Değiştiriliyor...",
+        "changingoilfilter": "Yağ Filtresi Değiştiriliyor...",
+        "changingairfilter": "Hava Filtresi Değiştiriliyor...",
+        "changingtires": "Lastikler Değiştiriliyor...",
+        "changingbrakes": "Frenler Değiştiriliyor...",
+        "changingclutch": "Debriyaj Değiştiriliyor...",
+        "changingsuspension": "Süspansiyon Değiştiriliyor...",
+        "changingsparkplug": "Buji Değiştiriliyor..."
+    },
+    "info": {
+        "oil_changed": "Araç yağı başarıyla değiştirildi",
+        "filter_changed": "Araç yağ filtresi başarıyla değiştirildi",
+        "air_filter_changed": "Araç hava filtresi başarıyla değiştirildi",
+        "tire_changed": "Araç lastikleri başarıyla değiştirildi",
+        "brakes_changed": "Araç frenleri başarıyla değiştirildi",
+        "clutch_changed": "Araç debriyajı başarıyla değiştirildi",
+        "suspension_changed": "Araç süspansiyonu başarıyla değiştirildi",
+        "spark_plug_changed": "Araç bujileri başarıyla değiştirildi"
+    },
+    "warning": {
+        "checking_veh": "Araç kontrol ediliyor...",
+        "remaining_oil": "Yağ ömrü",
+        "remaining_filter": "Yağ filtresi ömrü",
+        "remaining_air_filter": "Hava filtresi ömrü",
+        "remaining_tire": "Lastik ömrü",
+        "remaining_brakes": "Fren ömrü",
+        "remaining_clutch": "Debriyaj ömrü",
+        "remaining_suspension": "Süspansiyon ömrü",
+        "remaining_spark_plug": "Buji ömrü",
+        "remaining": "kaldı",
+        "replace_need": "Değişim gerekli!",
+        "replace_soon": "Yakında değiştirin!",
+        "replace_immediately": "Hemen değiştirin!",
+        "engine_critical": "Motor, yağ bakımı eksikliğinden kritik şekilde hasar gördü!",
+        "stalled": "Debriyaj aşındığı için motor durdu!",
+        "spark_plug_misfire": "Arızalı bujiler nedeniyle motor tekliyor!"
+    },
+    "error": {
+        "not_mechanic": "Bunu yapmak için tamirci olmalısın",
+        "low_grade": "Bunu yapmak için yeterli yeteneğe sahip değilsin",
+        "not_in_vehicle": "Bir araçta olmalısın",
+        "in_vehicle": "Araçtan inmelisin",
+        "not_found": "Araç bulunamadı",
+        "plate_not_found": "Araç plakası bulunamadı",
+        "not_owned": "Bu araç kimseye ait değil",
+
+        "no_oil": "Motor yağına sahip değilsin",
+        "no_oil_filter": "Yağ filtresine sahip değilsin",
+        "no_air_filter": "Hava filtresine sahip değilsin",
+        "no_tires": "Yedek lastiğe sahip değilsin",
+        "no_brake_parts": "Fren parçalarına sahip değilsin",
+        "no_clutch": "Debriyaj parçalarına sahip değilsin",
+        "no_suspension_parts": "Süspansiyon parçalarına sahip değilsin",
+        "no_spark_plug": "Bujilere sahip değilsin"
+    }
+}

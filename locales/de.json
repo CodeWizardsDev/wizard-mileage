@@ -30,16 +30,17 @@
         "changingsparkplug": "Zündkerzen werden gewechselt..."
     },
     "info": {
-        "oil_changed": "Fahrzeugöl wurde erfolgreich gewechselt",
-        "filter_changed": "Fahrzeugölfilter wurde erfolgreich gewechselt",
-        "air_filter_changed": "Fahrzeugluftfilter wurde erfolgreich gewechselt",
-        "tire_changed": "Fahrzeugreifen wurden erfolgreich gewechselt",
-        "brakes_changed": "Fahrzeugbremsen wurden erfolgreich gewechselt",
-        "clutch_changed": "Fahrzeugkupplung wurde erfolgreich gewechselt",
+        "oil_changed": "Fahrzeug öl wurde erfolgreich gewechselt",
+        "filter_changed": "Fahrzeug öl filter wurde erfolgreich gewechselt",
+        "air_filter_changed": "Fahrzeug luft filter wurde erfolgreich gewechselt",
+        "tire_changed": "Fahrzeug reifen wurden erfolgreich gewechselt",
+        "brakes_changed": "Fahrzeug bremsen wurden erfolgreich gewechselt",
+        "clutch_changed": "Fahrzeug kupplung wurde erfolgreich gewechselt",
         "suspension_changed": "Aufhängung wurde erfolgreich gewechselt",
         "spark_plug_changed": "Zündkerzen wurden erfolgreich gewechselt"
     },
     "warning": {
+        "checking_veh": "Fahrzeug überprüfen...",
         "remaining_oil": "Öllebensdauer bei",
         "remaining_filter": "Ölfilterlebensdauer bei",
         "remaining_air_filter": "Luftfilterlebensdauer bei",
@@ -60,7 +61,11 @@
         "not_mechanic": "Du musst ein Mechaniker sein",
         "low_grade": "Du bist nicht qualifiziert genug dafür",
         "not_in_vehicle": "Du musst in einem Fahrzeug sein",
+        "in_vehicle": "Du musst dein Fahrzeug verlassen",
+        "not_found": "Fahrzeug nicht gefunden",
+        "plate_not_found": "Fahrzeugkennzeichen nicht gefunden",
         "not_owned": "Dieses Fahrzeug gehört niemandem",
+
         "no_oil": "Du hast kein Motoröl",
         "no_oil_filter": "Du hast keinen Ölfilter",
         "no_air_filter": "Du hast keinen Luftfilter",

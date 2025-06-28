@@ -1,0 +1,76 @@
+{
+    "__author": "@AI",
+
+    "ui": {
+        "mileage": "Rida:",
+        "unit_km": "Km",
+        "unit_miles": "Mylios"
+    },
+    
+    "target": {
+        "changeoil": "Keičiamas alyva...",
+        "changeoilfilter": "Keičiamas alyvos filtras...",
+        "changeairfilter": "Keičiamas oro filtras...",
+        "changetires": "Keičiamos padangos...",
+        "changebrakes": "Keičiami stabdžiai",
+        "changeclutch": "Keičiamas sankabos diskas",
+        "changesuspension": "Keičiama pakaba",
+        "changesparkplug": "Keičiamos žvakės"
+    },
+    "progress": {
+        "changingoil": "Keičiama alyva...",
+        "changingoilfilter": "Keičiamas alyvos filtras...",
+        "changingairfilter": "Keičiamas oro filtras...",
+        "changingtires": "Keičiamos padangos...",
+        "changingbrakes": "Keičiami stabdžiai...",
+        "changingclutch": "Keičiamas sankabos diskas...",
+        "changingsuspension": "Keičiama pakaba...",
+        "changingsparkplug": "Keičiamos žvakės..."
+    },
+    "info": {
+        "oil_changed": "Transporto priemonės alyva sėkmingai pakeista",
+        "filter_changed": "Transporto priemonės alyvos filtras sėkmingai pakeistas",
+        "air_filter_changed": "Transporto priemonės oro filtras sėkmingai pakeistas",
+        "tire_changed": "Transporto priemonės padangos sėkmingai pakeistos",
+        "brakes_changed": "Transporto priemonės stabdžiai sėkmingai pakeisti",
+        "clutch_changed": "Transporto priemonės sankaba sėkmingai pakeista",
+        "suspension_changed": "Transporto priemonės pakaba sėkmingai pakeista",
+        "spark_plug_changed": "Transporto priemonės žvakės sėkmingai pakeistos"
+    },
+    "warning": {
+        "checking_veh": "Tikrinama transporto priemonė...",
+        "remaining_oil": "Alyvos tarnavimo laikas liko",
+        "remaining_filter": "Alyvos filtro tarnavimo laikas liko",
+        "remaining_air_filter": "Oro filtro tarnavimo laikas liko",
+        "remaining_tire": "Padangų tarnavimo laikas liko",
+        "remaining_brakes": "Stabdžių tarnavimo laikas liko",
+        "remaining_clutch": "Sankabos tarnavimo laikas liko",
+        "remaining_suspension": "Pakabos tarnavimo laikas liko",
+        "remaining_spark_plug": "Žvakių tarnavimo laikas liko",
+        "remaining": "liko",
+        "replace_need": "Reikia pakeisti!",
+        "replace_soon": "Pakeiskite greitai!",
+        "replace_immediately": "Pakeiskite nedelsiant!",
+        "engine_critical": "Variklis kritiškai pažeistas dėl alyvos priežiūros trūkumo!",
+        "stalled": "Variklis užgeso dėl susidėvėjusios sankabos!",
+        "spark_plug_misfire": "Variklis netinkamai veikia dėl sugedusių žvakių!"
+    },
+    "error": {
+        "not_mechanic": "Turite būti mechanikas, kad tai atliktumėte",
+        "low_grade": "Neturite pakankamai įgūdžių tai atlikti",
+        "not_in_vehicle": "Turite būti transporto priemonėje",
+        "in_vehicle": "Turite išlipti iš transporto priemonės",
+        "not_found": "Transporto priemonė nerasta",
+        "plate_not_found": "Transporto priemonės numeris nerastas",
+        "not_owned": "Ši transporto priemonė nepriklauso niekam",
+
+        "no_oil": "Neturite variklio alyvos",
+        "no_oil_filter": "Neturite alyvos filtro",
+        "no_air_filter": "Neturite oro filtro",
+        "no_tires": "Neturite atsarginių padangų",
+        "no_brake_parts": "Neturite stabdžių dalių",
+        "no_clutch": "Neturite sankabos dalių",
+        "no_suspension_parts": "Neturite pakabos dalių",
+        "no_spark_plug": "Neturite žvakių"
+    }
+}
