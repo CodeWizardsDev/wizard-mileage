@@ -8,6 +8,7 @@
 
 
 -- UI and vehicle state flags
+local loaded = false                  -- Is vehicle data loaded?
 local mileageVisible = false          -- Is the mileage UI currently visible?
 local inVehicle = false               -- Is the player currently in a vehicle?
 local waitingForData = false          -- Waiting for server data to load?
@@ -17,6 +18,8 @@ local allowSmartGearDetect = true     -- Allow smart gear detection for clutch w
 local mileageUIVisible = true         -- Should the mileage UI be shown?
 local lastPos = nil                   -- Last known vehicle position (vector3)
 local currentPlate = nil              -- Current vehicle plate being tracked
+local CWFT = false                    -- Is checkWear menu openned for targetting script?
+local clipboardEntity = nil           -- The clipboard entity for checking vehicle wear
 
 -- Wear distances (in meters, set by config/unit)
 local unitMultiplier = (Config.Unit == "mile") and 1609.34 or 1000
@@ -66,7 +69,7 @@ local vehicleListCallbacks = {}
 
 ---------------- Framework initialize ----------------
 --[[
-    This section initializes the framework (ESX or QBCore) based on the Config settings.
+    This section initializes the framework (ESX or ND or QBCore) based on the Config settings.
     It sets up player data and job checks, and registers events for player loading.
     The CheckJob function returns the player's job name and grade for use in service actions.
 --]]
@@ -84,6 +87,31 @@ if Config.FrameWork == 'esx' then
     function CheckJob()
         ESX = exports["es_extended"]:getSharedObject()
         return ESX.GetPlayerData().job.name, ESX.GetPlayerData().job.grade
+    end
+elseif Config.FrameWork == 'nd' then
+    local nd_core = exports["ND_Core"]
+
+    NDCore = setmetatable({}, {
+        __index = function(self, index)
+            self[index] = function(...)
+                return nd_core[index](nil, ...)
+            end
+
+            return self[index]
+        end
+    })
+
+    RegisterNetEvent("ND:characterLoaded", function(char)
+        player = char
+    end)
+    RegisterNetEvent("ND:updateCharacter", function(char)
+        player = char
+    end)
+
+    -- Returns the player's job name and grade
+    function CheckJob()
+        local player = NDCore.getPlayer()
+        return player.job, player.jobInfo.rank
     end
 else
     QBCore = exports['qb-core']:GetCoreObject()
@@ -670,6 +698,130 @@ local function openServiceMenu()
     end
 end
 
+-- Function to open the checkwear menu for a given vehicle entity
+local function openCheckWearMenu(vehicle)
+    Notify(locale('warning.checking_veh'), 'warning')
+    
+    local ped = PlayerPedId()
+    local coords = GetEntityCoords(ped)
+    if clipboardEntity then
+        -- If it does, remove it and exit
+        DeleteObject(clipboardEntity)
+        clipboardEntity = nil
+        ClearPedTasks(ped)
+        return
+    end
+    RequestModel(Config.CheckVehicle.Object)
+    while not HasModelLoaded(Config.CheckVehicle.Object) do
+        Wait(500)
+    end
+    clipboardEntity = CreateObject(GetHashKey(Config.CheckVehicle.Object), coords.x, coords.y, coords.z, true, true, true)
+    AttachEntityToEntity(clipboardEntity, ped, GetPedBoneIndex(ped, Config.CheckVehicle.Bone), -0.1, 0.0, 0.0, 90.0, 0.0, 0.0, true, true, false, true, 1, true)
+    TaskPlayAnim(ped, Config.CheckVehicle.AnimDict, Config.CheckVehicle.Animation, 8.0, -8.0, -1, 49, 0, false, false, false)
+
+    if not DoesEntityExist(vehicle) then
+        Notify(locale('error.not_found'), 'error')
+        -- Clear the animation and remove the clipboard
+        ClearPedTasks(ped)
+        DeleteObject(clipboardEntity)
+        clipboardEntity = nil
+        return
+    end
+
+    if IsPedInAnyVehicle(ped, false) or IsPedInAnyVehicle(ped, true) or IsPedGettingIntoAVehicle(ped) then
+        Notify(locale('error.in_vehicle'), 'error')
+        -- Clear the animation and remove the clipboard
+        ClearPedTasks(ped)
+        DeleteObject(clipboardEntity)
+        clipboardEntity = nil
+        return
+    end
+
+    local plate = GetVehiclePlate(vehicle)
+    if not plate or plate == 'UNKNOWN' then
+        Notify(locale('error.plate_not_found'), 'error')
+        -- Clear the animation and remove the clipboard
+        ClearPedTasks(ped)
+        DeleteObject(clipboardEntity)
+        clipboardEntity = nil
+        return
+    end
+    
+    if not IsVehicleOwned(plate) then 
+        Notify(locale('error.not_owned'), 'error') 
+        -- Clear the animation and remove the clipboard
+        ClearPedTasks(ped)
+        DeleteObject(clipboardEntity)
+        clipboardEntity = nil
+        return 
+    end
+
+    loaded = false
+
+    TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', plate)
+
+    while not loaded do
+        Wait(250)
+    end
+
+    CWFT = true
+
+    if Config.WearTracking.SparkPlugs then
+        sparkPlugDistanceDriven = accDistance - lastSparkPlugChange
+        sparkPlugLifeRemaining = math.max(0, sparkPlugchangedist - sparkPlugDistanceDriven)
+        sparkPlugPercentage = math.floor((sparkPlugLifeRemaining / sparkPlugchangedist) * 100)
+    end
+    if Config.WearTracking.Oil then
+        oilDistanceDriven = accDistance - lastOilChange
+        oilLifeRemaining = math.max(0, oilchangedist - oilDistanceDriven)
+        oilPercentage = math.floor((oilLifeRemaining / oilchangedist) * 100)
+
+        filterDistanceDriven = accDistance - lastOilFilterChange
+        filterLifeRemaining = math.max(0, oilfilterchangedist - filterDistanceDriven)
+        filterPercentage = math.floor((filterLifeRemaining / oilfilterchangedist) * 100)
+    end
+    if Config.WearTracking.AirFilter then
+        airFilterDistanceDriven = accDistance - lastAirFilterChange
+        airFilterLifeRemaining = math.max(0, airfilterchangedist - airFilterDistanceDriven)
+        airFilterPercentage = math.floor((airFilterLifeRemaining / airfilterchangedist) * 100)
+    end
+    if Config.WearTracking.Tires then
+        tireDistanceDriven = accDistance - lastTireChange
+        tireLifeRemaining = math.max(0, tirechangedist - tireDistanceDriven)
+        tirePercentage = math.floor((tireLifeRemaining / tirechangedist) * 100)
+    end
+    if Config.WearTracking.Brakes then
+        brakePercentage = math.floor((1 - (lastbrakeWear / Config.MaxBrakeWear)) * 100)
+    end
+    if Config.WearTracking.Suspension then
+        suspensionDistanceDriven = accDistance - lastSuspensionChange
+        suspensionLifeRemaining = math.max(0, Config.SuspensionChangeDistance * 1000 - suspensionDistanceDriven)
+        suspensionPercentage = math.floor((suspensionLifeRemaining / (Config.SuspensionChangeDistance * 1000)) * 100)
+    end
+    if Config.WearTracking.Clutch then
+        clutchPercentage = math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
+    end
+    local displayedMileage = convertDistance(accDistance)
+    SendNUIMessage({
+        type = "closeCustomization"
+    })
+    SetNuiFocus(true, false)
+    SendNUIMessage({
+        type = "updateWear",
+        showUI = true,
+        mileage = displayedMileage,
+        unit = (Config.Unit == "mile" and "miles" or "km"),
+        sparkPlugPercentage = sparkPlugPercentage,
+        oilPercentage = oilPercentage,
+        filterPercentage = filterPercentage,
+        airFilterPercentage = airFilterPercentage,
+        tirePercentage = tirePercentage,
+        brakePercentage = brakePercentage,
+        suspensionPercentage = suspensionPercentage,
+        clutchPercentage = clutchPercentage
+    })
+end
+
 --[[
     Sends any cached clutch or brake wear data to the server for saving.
     This function is called when the player exits the vehicle or at certain intervals,
@@ -803,6 +955,7 @@ Citizen.CreateThread(function()
                 cachedBrakeWear = 0.0
                 clutchWearDirty = false
                 brakeWearDirty = false
+                loaded = false
                 -- Hide the mileage UI
                 SendNUIMessage({
                     type = "toggleMileage",
@@ -941,6 +1094,23 @@ Citizen.CreateThread(function()
                         end
                         openServiceMenu()
                     end
+                },
+                {
+                    name = "vehicle_check",
+                    icon = "fas fa-info",
+                    label = "Check Vehicle",
+                    canInteract = function(entity)
+                        local playerPed = PlayerPedId()
+                        if IsPedInAnyVehicle(playerPed, false) then
+                            return false
+                        end
+                        local plate = GetVehicleNumberPlateText(entity)
+                        return IsVehicleOwned(plate)
+                    end,
+                    onSelect = function(data)
+                        local targetVeh = data.entity
+                        openCheckWearMenu(targetVeh)
+                    end
                 }
             })
         end,
@@ -975,6 +1145,23 @@ Citizen.CreateThread(function()
                                 end
                             end
                             openServiceMenu()
+                        end
+                    },
+                    {
+                        type = "client",
+                        icon = "fas fa-info",
+                        label = "Check Vehicle",
+                        canInteract = function(entity)
+                            local playerPed = PlayerPedId()
+                            if IsPedInAnyVehicle(playerPed, false) then
+                                return false
+                            end
+                            local plate = GetVehicleNumberPlateText(entity)
+                            return IsVehicleOwned(plate)
+                        end,
+                        action = function(data)
+                            local targetVeh = data.entity
+                            openCheckWearMenu(targetVeh)
                         end
                     }
                 },
@@ -1568,6 +1755,7 @@ AddEventHandler('wizard_vehiclemileage:client:setData', function(mileage, oilCha
     lastSparkPlugChange = lastSparkPlugChangeVal or 0.0
     sparkPlugWear = sparkPlugWearVal or 0.0
     waitingForData = false
+    loaded = true
     local displayedMileage = convertDistance(accDistance)
     SendNUIMessage({
         type = "updateMileage",
@@ -1971,9 +2159,16 @@ end)
 --]]
 RegisterNUICallback('closeMenu', function(data, cb)
     SetNuiFocus(false, false)
+    loaded = false
+    if CWFT then
+        -- Clear the animation and remove the clipboard
+        ClearPedTasks(PlayerPedId())
+        DeleteObject(clipboardEntity)
+        clipboardEntity = nil
+        CWFT = false
+    end
     cb({})
 end)
-
 
 ---------------- Commands ----------------
 --[[
@@ -2039,6 +2234,7 @@ RegisterCommand(Config.CheckWearCommand, function()
         if Config.WearTracking.Clutch then
             clutchPercentage = math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
         end
+        local displayedMileage = convertDistance(accDistance)
         SendNUIMessage({
             type = "closeCustomization"
         })
@@ -2046,6 +2242,8 @@ RegisterCommand(Config.CheckWearCommand, function()
         SendNUIMessage({
             type = "updateWear",
             showUI = true,
+            mileage = displayedMileage,
+            unit = (Config.Unit == "mile" and "miles" or "km"),
             sparkPlugPercentage = sparkPlugPercentage,
             oilPercentage = oilPercentage,
             filterPercentage = filterPercentage,
