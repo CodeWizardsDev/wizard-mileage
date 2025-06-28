@@ -512,6 +512,18 @@ window.addEventListener('message', ({
             if (data.showUI == true) {
                 const wearDisplay = document.getElementById('wearDisplay');
                 wearDisplay.style.display = 'block';
+
+                // Update the mileage title in the wearDisplay UI
+                const wearMileageTitle = document.getElementById('wearMileageTitle');
+                if (wearMileageTitle && typeof data.mileage === 'number' && typeof data.unit === 'string') {
+                    let unitLabel = data.unit.toLowerCase();
+                    if (unitLabel === 'km') {
+                        unitLabel = 'km';
+                    } else if (unitLabel.startsWith('mile')) {
+                        unitLabel = 'miles';
+                    }
+                    wearMileageTitle.textContent = `Mileage: ${data.mileage.toFixed(2)} ${unitLabel}`;
+                }
             }
 
             const wearTypes = [{
