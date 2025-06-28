@@ -4,9 +4,9 @@
 
 
     "ui": {
-        "mileage": "Kilometerstand:",
-        "unit_km": "Km",
-        "unit_miles": "Mijlen"
+        "mileage": "مسافت",
+        "unit_km": "کیلومتر",
+        "unit_miles": "مایل"
     },
     
     "target": {
@@ -40,6 +40,7 @@
         "spark_plug_changed": "شمع موتور با موفقیت تعویض شد"
     },
     "warning": {
+        "checking_veh": "در حال بررسی...",
         "remaining_oil": "عمر مانده روغن",
         "remaining_filter": "عمر مانده فیلتر روغن",
         "remaining_air_filter": "عمر مانده فیلتر هوا",
@@ -60,7 +61,11 @@
         "not_mechanic": "شما باید مکانیک باشید",
         "low_grade": "مهارت شما کافی نیست",
         "not_in_vehicle": "شما باید در خودرو باشید",
+        "in_vehicle": "باید از وسیله نقلیه خود پیاده شوید",
+        "not_found": "وسیله نقلیه پیدا نشد",
+        "plate_not_found": "پلاک وسیله نقلیه پیدا نشد",
         "not_owned": "این خودرو متعلق به کسی نیست",
+
         "no_oil": "شما روغن موتور ندارید",
         "no_oil_filter": "شما فیلتر روغن ندارید",
         "no_air_filter": "شما فیلتر هوا ندارید",
