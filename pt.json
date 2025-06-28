@@ -1,0 +1,75 @@
+{
+    "__author":"@AI",
+
+    "ui": {
+        "mileage": "Quilometragem:",
+        "unit_km": "Km",
+        "unit_miles": "Milhas"
+    },
+    
+    "target": {
+        "changeoil": "Trocando óleo...",
+        "changeoilfilter": "Trocando filtro de óleo...",
+        "changeairfilter": "Trocando filtro de ar...",
+        "changetires": "Trocando pneus...",
+        "changebrakes": "Trocando freios",
+        "changeclutch": "Trocando embreagem",
+        "changesuspension": "Trocando suspensão",
+        "changesparkplug": "Trocando velas de ignição"
+    },
+    "progress": {
+        "changingoil": "Trocando óleo...",
+        "changingoilfilter": "Trocando filtro de óleo...",
+        "changingairfilter": "Trocando filtro de ar...",
+        "changingtires": "Trocando pneus...",
+        "changingbrakes": "Trocando freios...",
+        "changingclutch": "Trocando embreagem...",
+        "changingsuspension": "Trocando suspensão...",
+        "changingsparkplug": "Trocando velas de ignição..."
+    },
+    "info": {
+        "oil_changed": "O óleo do veículo foi trocado com sucesso",
+        "filter_changed": "O filtro de óleo do veículo foi trocado com sucesso",
+        "air_filter_changed": "O filtro de ar do veículo foi trocado com sucesso",
+        "tire_changed": "Os pneus do veículo foram trocados com sucesso",
+        "brakes_changed": "Os freios do veículo foram trocados com sucesso",
+        "clutch_changed": "A embreagem do veículo foi trocada com sucesso",
+        "suspension_changed": "A suspensão do veículo foi trocada com sucesso",
+        "spark_plug_changed": "As velas de ignição do veículo foram trocadas com sucesso"
+    },
+    "warning": {
+        "checking_veh": "Verificando veículo...",
+        "remaining_oil": "Vida útil do óleo",
+        "remaining_filter": "Vida útil do filtro de óleo",
+        "remaining_air_filter": "Vida útil do filtro de ar",
+        "remaining_tire": "Vida útil do pneu",
+        "remaining_brakes": "Vida útil do freio",
+        "remaining_clutch": "Vida útil da embreagem",
+        "remaining_suspension": "Vida útil da suspensão",
+        "remaining_spark_plug": "Vida útil da vela de ignição",
+        "remaining": "restante",
+        "replace_need": "Substituição necessária!",
+        "replace_soon": "Substitua em breve!",
+        "replace_immediately": "Substitua imediatamente!",
+        "engine_critical": "O motor está gravemente danificado devido à falta de manutenção do óleo!",
+        "stalled": "O motor parou devido à embreagem desgastada!",
+        "spark_plug_misfire": "O motor está falhando devido a velas de ignição defeituosas!"
+    },
+    "error": {
+        "not_mechanic": "Você deve ser mecânico para fazer isso",
+        "low_grade": "Você não tem habilidade suficiente para fazer isso",
+        "not_in_vehicle": "Você deve estar em um veículo",
+        "in_vehicle": "Você deve sair do seu veículo",
+        "not_found": "Veículo não encontrado",
+        "plate_not_found": "Placa do veículo não encontrada",
+        "not_owned": "Este veículo não pertence a ninguém",
+        "no_oil": "Você não tem óleo de motor",
+        "no_oil_filter": "Você não tem filtro de óleo",
+        "no_air_filter": "Você não tem filtro de ar",
+        "no_tires": "Você não tem pneus de reposição",
+        "no_brake_parts": "Você não tem peças de freio",
+        "no_clutch": "Você não tem peças de embreagem",
+        "no_suspension_parts": "Você não tem peças de suspensão",
+        "no_spark_plug": "Você não tem velas de ignição"
+    }
+}

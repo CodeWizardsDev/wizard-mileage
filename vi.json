@@ -1,0 +1,76 @@
+{
+    "__author": "@AI",
+
+    "ui": {
+        "mileage": "Số km đã đi:",
+        "unit_km": "Km",
+        "unit_miles": "Dặm"
+    },
+    
+    "target": {
+        "changeoil": "Đang thay dầu...",
+        "changeoilfilter": "Đang thay lọc dầu...",
+        "changeairfilter": "Đang thay lọc gió...",
+        "changetires": "Đang thay lốp...",
+        "changebrakes": "Thay phanh",
+        "changeclutch": "Thay ly hợp",
+        "changesuspension": "Thay hệ thống treo",
+        "changesparkplug": "Thay bugi"
+    },
+    "progress": {
+        "changingoil": "Đang thay dầu...",
+        "changingoilfilter": "Đang thay lọc dầu...",
+        "changingairfilter": "Đang thay lọc gió...",
+        "changingtires": "Đang thay lốp...",
+        "changingbrakes": "Đang thay phanh...",
+        "changingclutch": "Đang thay ly hợp...",
+        "changingsuspension": "Đang thay hệ thống treo...",
+        "changingsparkplug": "Đang thay bugi..."
+    },
+    "info": {
+        "oil_changed": "Đã thay dầu xe thành công",
+        "filter_changed": "Đã thay lọc dầu xe thành công",
+        "air_filter_changed": "Đã thay lọc gió xe thành công",
+        "tire_changed": "Đã thay lốp xe thành công",
+        "brakes_changed": "Đã thay phanh xe thành công",
+        "clutch_changed": "Đã thay ly hợp xe thành công",
+        "suspension_changed": "Đã thay hệ thống treo xe thành công",
+        "spark_plug_changed": "Đã thay bugi xe thành công"
+    },
+    "warning": {
+        "checking_veh": "Đang kiểm tra xe...",
+        "remaining_oil": "Tuổi thọ dầu còn",
+        "remaining_filter": "Tuổi thọ lọc dầu còn",
+        "remaining_air_filter": "Tuổi thọ lọc gió còn",
+        "remaining_tire": "Tuổi thọ lốp còn",
+        "remaining_brakes": "Tuổi thọ phanh còn",
+        "remaining_clutch": "Tuổi thọ ly hợp còn",
+        "remaining_suspension": "Tuổi thọ hệ thống treo còn",
+        "remaining_spark_plug": "Tuổi thọ bugi còn",
+        "remaining": "còn lại",
+        "replace_need": "Cần thay thế!",
+        "replace_soon": "Sắp phải thay!",
+        "replace_immediately": "Phải thay ngay!",
+        "engine_critical": "Động cơ bị hư hỏng nghiêm trọng do thiếu bảo dưỡng dầu!",
+        "stalled": "Động cơ chết máy do ly hợp bị mòn!",
+        "spark_plug_misfire": "Động cơ bị đánh lửa sai do bugi hỏng!"
+    },
+    "error": {
+        "not_mechanic": "Bạn phải là thợ máy để làm việc này",
+        "low_grade": "Bạn không đủ kỹ năng để làm việc này",
+        "not_in_vehicle": "Bạn phải ở trong xe",
+        "in_vehicle": "Bạn phải ra khỏi xe",
+        "not_found": "Không tìm thấy xe",
+        "plate_not_found": "Không tìm thấy biển số xe",
+        "not_owned": "Chiếc xe này không thuộc sở hữu của ai",
+
+        "no_oil": "Bạn không có dầu động cơ",
+        "no_oil_filter": "Bạn không có lọc dầu",
+        "no_air_filter": "Bạn không có lọc gió",
+        "no_tires": "Bạn không có lốp thay thế",
+        "no_brake_parts": "Bạn không có phụ tùng phanh",
+        "no_clutch": "Bạn không có phụ tùng ly hợp",
+        "no_suspension_parts": "Bạn không có phụ tùng hệ thống treo",
+        "no_spark_plug": "Bạn không có bugi"
+    }
+}

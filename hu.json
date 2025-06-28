@@ -1,0 +1,76 @@
+{
+    "__author": "@AI",
+
+    "ui": {
+        "mileage": "Futásteljesítmény:",
+        "unit_km": "Km",
+        "unit_miles": "Mérföld"
+    },
+    
+    "target": {
+        "changeoil": "Olajcsere...",
+        "changeoilfilter": "Olajszűrő csere...",
+        "changeairfilter": "Légszűrő csere...",
+        "changetires": "Gumik cseréje...",
+        "changebrakes": "Fékek cseréje",
+        "changeclutch": "Kuplung cseréje",
+        "changesuspension": "Felfüggesztés cseréje",
+        "changesparkplug": "Gyújtógyertyák cseréje"
+    },
+    "progress": {
+        "changingoil": "Olaj cseréje...",
+        "changingoilfilter": "Olajszűrő cseréje...",
+        "changingairfilter": "Légszűrő cseréje...",
+        "changingtires": "Gumik cseréje...",
+        "changingbrakes": "Fékek cseréje...",
+        "changingclutch": "Kuplung cseréje...",
+        "changingsuspension": "Felfüggesztés cseréje...",
+        "changingsparkplug": "Gyújtógyertyák cseréje..."
+    },
+    "info": {
+        "oil_changed": "A jármű olaját sikeresen kicserélték",
+        "filter_changed": "A jármű olajszűrőjét sikeresen kicserélték",
+        "air_filter_changed": "A jármű légszűrőjét sikeresen kicserélték",
+        "tire_changed": "A jármű gumiabroncsait sikeresen kicserélték",
+        "brakes_changed": "A jármű fékeit sikeresen kicserélték",
+        "clutch_changed": "A jármű kuplungját sikeresen kicserélték",
+        "suspension_changed": "A jármű felfüggesztését sikeresen kicserélték",
+        "spark_plug_changed": "A jármű gyújtógyertyáit sikeresen kicserélték"
+    },
+    "warning": {
+        "checking_veh": "Jármű ellenőrzése...",
+        "remaining_oil": "Olaj élettartama:",
+        "remaining_filter": "Olajszűrő élettartama:",
+        "remaining_air_filter": "Légszűrő élettartama:",
+        "remaining_tire": "Gumi élettartama:",
+        "remaining_brakes": "Fék élettartama:",
+        "remaining_clutch": "Kuplung élettartama:",
+        "remaining_suspension": "Felfüggesztés élettartama:",
+        "remaining_spark_plug": "Gyújtógyertya élettartama:",
+        "remaining": "maradt",
+        "replace_need": "Csere szükséges!",
+        "replace_soon": "Hamarosan cserélje ki!",
+        "replace_immediately": "Azonnal cserélje ki!",
+        "engine_critical": "A motor kritikus károsodást szenvedett az olajkarbantartás hiánya miatt!",
+        "stalled": "A motor leállt a kopott kuplung miatt!",
+        "spark_plug_misfire": "A motor hibás gyújtógyertyák miatt hibásan működik!"
+    },
+    "error": {
+        "not_mechanic": "Mechanikusnak kell lenned ehhez",
+        "low_grade": "Nincs elég képzettséged ehhez",
+        "not_in_vehicle": "Járműben kell lenned",
+        "in_vehicle": "Ki kell szállnod a járműből",
+        "not_found": "Jármű nem található",
+        "plate_not_found": "Rendszámtábla nem található",
+        "not_owned": "Ez a jármű senki tulajdona",
+
+        "no_oil": "Nincs motorolajod",
+        "no_oil_filter": "Nincs olajszűrőd",
+        "no_air_filter": "Nincs légszűrőd",
+        "no_tires": "Nincs csere gumiabroncsod",
+        "no_brake_parts": "Nincs fékalkatrészed",
+        "no_clutch": "Nincs kuplungalakatrészed",
+        "no_suspension_parts": "Nincs felfüggesztés alkatrészed",
+        "no_spark_plug": "Nincs gyújtógyertyád"
+    }
+}

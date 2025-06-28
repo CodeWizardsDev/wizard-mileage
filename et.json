@@ -1,0 +1,76 @@
+{
+    "__author": "@AI",
+
+    "ui": {
+        "mileage": "Läbisõit:",
+        "unit_km": "Km",
+        "unit_miles": "Miil"
+    },
+    
+    "target": {
+        "changeoil": "Õli vahetamine...",
+        "changeoilfilter": "Õlifiltri vahetamine...",
+        "changeairfilter": "Õhufiltri vahetamine...",
+        "changetires": "Rehvide vahetamine...",
+        "changebrakes": "Pidurite vahetus",
+        "changeclutch": "Siduri vahetus",
+        "changesuspension": "Vedrustuse vahetus",
+        "changesparkplug": "Süüteküünalde vahetus"
+    },
+    "progress": {
+        "changingoil": "Õli vahetamine...",
+        "changingoilfilter": "Õlifiltri vahetamine...",
+        "changingairfilter": "Õhufiltri vahetamine...",
+        "changingtires": "Rehvide vahetamine...",
+        "changingbrakes": "Pidurite vahetamine...",
+        "changingclutch": "Siduri vahetamine...",
+        "changingsuspension": "Vedrustuse vahetamine...",
+        "changingsparkplug": "Süüteküünalde vahetamine..."
+    },
+    "info": {
+        "oil_changed": "Sõiduki õli on edukalt vahetatud",
+        "filter_changed": "Sõiduki õlifilter on edukalt vahetatud",
+        "air_filter_changed": "Sõiduki õhufilter on edukalt vahetatud",
+        "tire_changed": "Sõiduki rehvid on edukalt vahetatud",
+        "brakes_changed": "Sõiduki pidurid on edukalt vahetatud",
+        "clutch_changed": "Sõiduki sidur on edukalt vahetatud",
+        "suspension_changed": "Sõiduki vedrustus on edukalt vahetatud",
+        "spark_plug_changed": "Sõiduki süüteküünlad on edukalt vahetatud"
+    },
+    "warning": {
+        "checking_veh": "Sõiduki kontrollimine...",
+        "remaining_oil": "Õli eluiga on",
+        "remaining_filter": "Õlifiltri eluiga on",
+        "remaining_air_filter": "Õhufiltri eluiga on",
+        "remaining_tire": "Rehvide eluiga on",
+        "remaining_brakes": "Pidurite eluiga on",
+        "remaining_clutch": "Siduri eluiga on",
+        "remaining_suspension": "Vedrustuse eluiga on",
+        "remaining_spark_plug": "Süüteküünalde eluiga on",
+        "remaining": "jäänud",
+        "replace_need": "Vajab vahetust!",
+        "replace_soon": "Vahetage varsti!",
+        "replace_immediately": "Vahetage kohe!",
+        "engine_critical": "Mootor on kriitiliselt kahjustatud õlita hoolduse puudumise tõttu!",
+        "stalled": "Mootor seiskus kulunud siduri tõttu!",
+        "spark_plug_misfire": "Mootor töötab halvasti vigaste süüteküünalde tõttu!"
+    },
+    "error": {
+        "not_mechanic": "Selle tegemiseks peate olema mehaanik",
+        "low_grade": "Teil pole selleks piisavalt oskusi",
+        "not_in_vehicle": "Peate olema sõidukis",
+        "in_vehicle": "Peate sõidukist väljuma",
+        "not_found": "Sõidukit ei leitud",
+        "plate_not_found": "Sõiduki numbrimärki ei leitud",
+        "not_owned": "See sõiduk ei kuulu kellelegi",
+
+        "no_oil": "Teil pole mootoriõli",
+        "no_oil_filter": "Teil pole õlifiltrit",
+        "no_air_filter": "Teil pole õhufiltrit",
+        "no_tires": "Teil pole varurehve",
+        "no_brake_parts": "Teil pole piduriosasid",
+        "no_clutch": "Teil pole siduriosasid",
+        "no_suspension_parts": "Teil pole vedrustuse osi",
+        "no_spark_plug": "Teil pole süüteküünlaid"
+    }
+}

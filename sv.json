@@ -1,0 +1,75 @@
+{
+    "__author":"@AI",
+
+    "ui": {
+        "mileage": "Mätarställning:",
+        "unit_km": "Km",
+        "unit_miles": "Mil"
+    },
+    
+    "target": {
+        "changeoil": "Byter olja...",
+        "changeoilfilter": "Byter oljefilter...",
+        "changeairfilter": "Byter luftfilter...",
+        "changetires": "Byter däck...",
+        "changebrakes": "Byter bromsar",
+        "changeclutch": "Byter koppling",
+        "changesuspension": "Byter fjädring",
+        "changesparkplug": "Byter tändstift"
+    },
+    "progress": {
+        "changingoil": "Byter olja...",
+        "changingoilfilter": "Byter oljefilter...",
+        "changingairfilter": "Byter luftfilter...",
+        "changingtires": "Byter däck...",
+        "changingbrakes": "Byter bromsar...",
+        "changingclutch": "Byter koppling...",
+        "changingsuspension": "Byter fjädring...",
+        "changingsparkplug": "Byter tändstift..."
+    },
+    "info": {
+        "oil_changed": "Fordonets olja har bytts ut framgångsrikt",
+        "filter_changed": "Fordonets oljefilter har bytts ut framgångsrikt",
+        "air_filter_changed": "Fordonets luftfilter har bytts ut framgångsrikt",
+        "tire_changed": "Fordonets däck har bytts ut framgångsrikt",
+        "brakes_changed": "Fordonets bromsar har bytts ut framgångsrikt",
+        "clutch_changed": "Fordonets koppling har bytts ut framgångsrikt",
+        "suspension_changed": "Fordonets fjädring har bytts ut framgångsrikt",
+        "spark_plug_changed": "Fordonets tändstift har bytts ut framgångsrikt"
+    },
+    "warning": {
+        "checking_veh": "Kontrollerar fordon...",
+        "remaining_oil": "Oljans livslängd",
+        "remaining_filter": "Oljefiltrets livslängd",
+        "remaining_air_filter": "Luftfiltrets livslängd",
+        "remaining_tire": "Däckets livslängd",
+        "remaining_brakes": "Bromsens livslängd",
+        "remaining_clutch": "Kopplingens livslängd",
+        "remaining_suspension": "Fjädringens livslängd",
+        "remaining_spark_plug": "Tändstiftets livslängd",
+        "remaining": "kvar",
+        "replace_need": "Byte krävs!",
+        "replace_soon": "Byt snart!",
+        "replace_immediately": "Byt omedelbart!",
+        "engine_critical": "Motorn är allvarligt skadad på grund av bristande oljeservice!",
+        "stalled": "Motorn stannade på grund av utsliten koppling!",
+        "spark_plug_misfire": "Motorn misständer på grund av defekta tändstift!"
+    },
+    "error": {
+        "not_mechanic": "Du måste vara mekaniker för att göra detta",
+        "low_grade": "Du har inte tillräcklig skicklighet för att göra detta",
+        "not_in_vehicle": "Du måste vara i ett fordon",
+        "in_vehicle": "Du måste gå ur ditt fordon",
+        "not_found": "Fordon hittades inte",
+        "plate_not_found": "Fordonets registreringsskylt hittades inte",
+        "not_owned": "Detta fordon ägs inte av någon",
+        "no_oil": "Du har ingen motorolja",
+        "no_oil_filter": "Du har inget oljefilter",
+        "no_air_filter": "Du har inget luftfilter",
+        "no_tires": "Du har inga reservdäck",
+        "no_brake_parts": "Du har inga bromsdelar",
+        "no_clutch": "Du har inga kopplingsdelar",
+        "no_suspension_parts": "Du har inga fjädringsdelar",
+        "no_spark_plug": "Du har inga tändstift"
+    }
+}
