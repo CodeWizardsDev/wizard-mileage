@@ -73,6 +73,6 @@
         "no_brake_parts": "ليس لديك قطع فحمات",
         "no_clutch": "ليس لديك قطع كلتش",
         "no_suspension_parts": "ليس لديك قطع نظام تعليق",
-        "no_spark_plug": "ليس لديك شمعات إشعال"
+        "no_spark_plugs": "ليس لديك شمعات إشعال"
     }
 }

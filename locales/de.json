@@ -73,6 +73,6 @@
         "no_brake_parts": "Du hast keine Bremsteile",
         "no_clutch": "Du hast keine Kupplungsteile",
         "no_suspension_parts": "Du hast keine Aufhängungsteile",
-        "no_spark_plug": "Du hast keine Zündkerzen"
+        "no_spark_plugs": "Du hast keine Zündkerzen"
     }
 }

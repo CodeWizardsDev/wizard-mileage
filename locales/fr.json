@@ -73,6 +73,6 @@
         "no_brake_parts": "Tu n’as pas de pièces de frein",
         "no_clutch": "Tu n’as pas de pièces d’embrayage",
         "no_suspension_parts": "Tu n’as pas de pièces de suspension",
-        "no_spark_plug": "Tu n’as pas de bougies d’allumage"
+        "no_spark_plugs": "Tu n’as pas de bougies d’allumage"
     }
 }

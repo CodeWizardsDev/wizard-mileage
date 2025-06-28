@@ -71,6 +71,6 @@
         "no_brake_parts": "ブレーキ部品がありません",
         "no_clutch": "クラッチ部品がありません",
         "no_suspension_parts": "サスペンション部品がありません",
-        "no_spark_plug": "スパークプラグがありません"
+        "no_spark_plugs": "スパークプラグがありません"
     }
 }

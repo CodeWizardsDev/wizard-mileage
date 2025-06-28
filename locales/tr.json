@@ -73,6 +73,6 @@
         "no_brake_parts": "Fren parçalarına sahip değilsin",
         "no_clutch": "Debriyaj parçalarına sahip değilsin",
         "no_suspension_parts": "Süspansiyon parçalarına sahip değilsin",
-        "no_spark_plug": "Bujilere sahip değilsin"
+        "no_spark_plugs": "Bujilere sahip değilsin"
     }
 }

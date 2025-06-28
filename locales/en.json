@@ -73,6 +73,6 @@
         "no_brake_parts": "You don't have brake parts",
         "no_clutch": "You don't have clutch parts",
         "no_suspension_parts": "You don't have suspension parts",
-        "no_spark_plug": "You don't have spark plugs"
+        "no_spark_plugs": "You don't have spark plugs"
     }
 }
