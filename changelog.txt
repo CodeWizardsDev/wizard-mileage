@@ -1,8 +1,6 @@
-1.2.1
-Some improvements
-Quasar inventory support fixed
-Update checker system improved
-
-1.2.2
-Some readability improvements for the code
-Some performance improvements
+1.2.3
+Some optimizations
+Added ND_Core support
+Added option to check vehicle without entering it
+Added mileage at top of the checkwear menu
+Added other langs: Czech, Greece, Spanish, Estonian, Finnish, Hungarian, Italian, Japanese, Lithuanian, Polish, Portuguese, Russian, Slovenian, Swedish, Thai, Turkish, Vietnamese, Chinese
