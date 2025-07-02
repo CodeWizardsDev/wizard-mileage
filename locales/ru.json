@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Пробег:",
-        "unit_km": "Км",
-        "unit_miles": "Мили"
+        "mileage": "Пробег",
+        "unit_km": " Км",
+        "unit_miles": " Мили",
+
+        "save": "Сохранить",
+        "edit": "Редактировать",
+        "delete": "Удалить",
+        "cancel": "Отмена",
+        "close": "Закрыть",
+
+        "mileage_meter_ui": "Интерфейс счетчика пробега",
+        "checkwear_ui": "Интерфейс проверки износа",
+        "show_mileage_meter": "Показать счетчик пробега",
+        "size": "Размер",
+        "position": "Позиция (X, Y)",
+
+        "vehicle_mileage_db": "База данных пробега автомобиля",
+        "edit_veh_data": "Редактировать данные автомобиля",
+        "actions": "Действия",
+        "plate": "Номер",
+        "last_oil_change": "Последняя замена масла",
+        "last_filter_change": "Последняя замена масляного фильтра",
+        "last_air_filter_change": "Последняя замена воздушного фильтра",
+        "last_tire_change": "Последняя замена шин",
+        "last_brake_change": "Последняя замена тормозов",
+        "brake_wear": "Износ тормозов",
+        "last_clutch_change": "Последняя замена сцепления",
+        "clutch_wear": "Износ сцепления",
+        "last_sus_change": "Последняя замена подвески",
+        "last_plugs_change": "Последняя замена свечей зажигания",
+
+        "no_vehicles_found": "Автомобили не найдены.",
+        "confirm_delete_vehicle": "Вы уверены, что хотите удалить этот автомобиль?",
+        "vehicle_deleted_success": "Автомобиль успешно удален.",
+        "failed_delete_vehicle": "Не удалось удалить автомобиль",
+        "enter_valid_plate_mileage": "Пожалуйста, введите действительный номер и пробег.",
+        "must_be_equal_or_lower": "{label} должен быть равен или меньше пробега.",
+        "vehicle_data_updated": "Данные автомобиля успешно обновлены",
+        "failed_update_vehicle_data": "Не удалось обновить данные автомобиля",
+
+        "spark_plug": "Свечи зажигания",
+        "oil": "Срок службы масла",
+        "filter": "Масляный фильтр",
+        "air_filter": "Воздушный фильтр",
+        "tire": "Шины",
+        "brake": "Тормоза",
+        "suspension": "Подвеска",
+        "clutch": "Сцепление",
+
+        "excellent": "Отлично",
+        "good": "Хорошо",
+        "warning": "Предупреждение",
+        "critical": "Критично",
+        "disabled": "ОТКЛЮЧЕНО"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "У вас нет тормозных деталей",
         "no_clutch": "У вас нет деталей сцепления",
         "no_suspension_parts": "У вас нет деталей подвески",
-        "no_spark_plugs": "У вас нет свечей зажигания"
+        "no_spark_plug": "У вас нет свечей зажигания"
     }
 }

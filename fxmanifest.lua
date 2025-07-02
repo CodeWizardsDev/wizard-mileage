@@ -4,14 +4,14 @@ games { 'gta5' }
 author 'The_Hs5'
 
 description 'Display vehicle mileage, Service vehicle'
-version '1.2.3'
+version '1.2.4'
 ui_page 'html/index.html'
 
-dependency {'oxmysql', 'ox_lib'}
+dependency {'wizard-lib', 'oxmysql', 'ox_lib'}
 
 shared_scripts {
 	'@ox_lib/init.lua',
-	'config.lua'
+	'config/config.lua'
 }
 
 client_scripts {
@@ -24,15 +24,10 @@ server_scripts {
 
 files {
     'locales/*.json',
+    'config/ui_config.json',
     'html/index.html',
     'html/style.css',
     'html/script.js'
-}
-
-ox_libs {
-	'notify',
-	'progressBar',
-	'locale',
 }
 
 lua54 'yes'

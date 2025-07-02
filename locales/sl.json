@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Prevožena razdalja:",
-        "unit_km": "Km",
-        "unit_miles": "Milje"
+        "mileage": "Prevožena razdalja",
+        "unit_km": " Km",
+        "unit_miles": " Milje",
+
+        "save": "Shrani",
+        "edit": "Uredi",
+        "delete": "Izbriši",
+        "cancel": "Prekliči",
+        "close": "Zapri",
+
+        "mileage_meter_ui": "Vmesnik števca prevoženih kilometrov",
+        "checkwear_ui": "Vmesnik za preverjanje obrabe",
+        "show_mileage_meter": "Prikaži števec prevoženih kilometrov",
+        "size": "Velikost",
+        "position": "Pozicija (X, Y)",
+
+        "vehicle_mileage_db": "Baza podatkov o prevoženih kilometrih vozila",
+        "edit_veh_data": "Uredi podatke o vozilu",
+        "actions": "Dejanja",
+        "plate": "Registrska številka",
+        "last_oil_change": "Zadnja menjava olja",
+        "last_filter_change": "Zadnja menjava oljnega filtra",
+        "last_air_filter_change": "Zadnja menjava zračnega filtra",
+        "last_tire_change": "Zadnja menjava pnevmatik",
+        "last_brake_change": "Zadnja menjava zavor",
+        "brake_wear": "Obraba zavor",
+        "last_clutch_change": "Zadnja menjava sklopke",
+        "clutch_wear": "Obraba sklopke",
+        "last_sus_change": "Zadnja menjava vzmetenja",
+        "last_plugs_change": "Zadnja menjava svečk",
+
+        "no_vehicles_found": "Vozila niso bila najdena.",
+        "confirm_delete_vehicle": "Ali ste prepričani, da želite izbrisati to vozilo?",
+        "vehicle_deleted_success": "Vozilo je bilo uspešno izbrisano.",
+        "failed_delete_vehicle": "Brisanje vozila ni uspelo",
+        "enter_valid_plate_mileage": "Vnesite veljavno registrsko številko in prevoženo razdaljo.",
+        "must_be_equal_or_lower": "{label} mora biti enak ali manjši od prevožene razdalje.",
+        "vehicle_data_updated": "Podatki o vozilu so bili uspešno posodobljeni",
+        "failed_update_vehicle_data": "Posodobitev podatkov o vozilu ni uspela",
+
+        "spark_plug": "Vžigalne svečke",
+        "oil": "Življenjska doba olja",
+        "filter": "Oljni filter",
+        "air_filter": "Zračni filter",
+        "tire": "Pnevmatike",
+        "brake": "Zavore",
+        "suspension": "Vzmetenje",
+        "clutch": "Sklopka",
+
+        "excellent": "Odlično",
+        "good": "Dobro",
+        "warning": "Opozorilo",
+        "critical": "Kritično",
+        "disabled": "ONEMOGOČENO"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Nimate zavornih delov",
         "no_clutch": "Nimate delov sklopke",
         "no_suspension_parts": "Nimate delov vzmetenja",
-        "no_spark_plugs": "Nimate svečk"
+        "no_spark_plug": "Nimate svečk"
     }
 }

@@ -4,9 +4,60 @@
 
 
     "ui": {
-        "mileage": "المسافة المقطوعة:",
-        "unit_km": "كم",
-        "unit_miles": "ميل"
+        "mileage": "المسافة",
+        "unit_km": " كم",
+        "unit_miles": " ميل",
+
+        "save": "حفظ",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "cancel": "إلغاء",
+        "close": "إغلاق",
+
+        "mileage_meter_ui": "واجهة عداد المسافة",
+        "checkwear_ui": "واجهة فحص التآكل",
+        "show_mileage_meter": "عرض عداد المسافة",
+        "size": "الحجم",
+        "position": "الموقع (X، Y)",
+
+        "vehicle_mileage_db": "قاعدة بيانات عداد المسافة للمركبة",
+        "edit_veh_data": "تعديل بيانات المركبة",
+        "actions": "إجراءات",
+        "plate": "اللوحة",
+        "last_oil_change": "آخر تغيير زيت",
+        "last_filter_change": "آخر تغيير فلتر الزيت",
+        "last_air_filter_change": "آخر تغيير فلتر الهواء",
+        "last_tire_change": "آخر تغيير إطارات",
+        "last_brake_change": "آخر تغيير فرامل",
+        "brake_wear": "تآكل الفرامل",
+        "last_clutch_change": "آخر تغيير كلتش",
+        "clutch_wear": "تآكل الكلتش",
+        "last_sus_change": "آخر تغيير نظام التعليق",
+        "last_plugs_change": "آخر تغيير شمعات الإشعال",
+
+        "no_vehicles_found": "لم يتم العثور على مركبات.",
+        "confirm_delete_vehicle": "هل أنت متأكد أنك تريد حذف هذه المركبة؟",
+        "vehicle_deleted_success": "تم حذف المركبة بنجاح.",
+        "failed_delete_vehicle": "فشل في حذف المركبة",
+        "enter_valid_plate_mileage": "يرجى إدخال لوحة ورقم عداد صالحين.",
+        "must_be_equal_or_lower": "{label} يجب أن يكون مساويًا أو أقل من العداد.",
+        "vehicle_data_updated": "تم تحديث بيانات المركبة بنجاح",
+        "failed_update_vehicle_data": "فشل في تحديث بيانات المركبة",
+
+        "spark_plug": "شمعات الإشعال",
+        "oil": "عمر الزيت",
+        "filter": "فلتر الزيت",
+        "air_filter": "فلتر الهواء",
+        "tire": "الإطارات",
+        "brake": "الفرامل",
+        "suspension": "نظام التعليق",
+        "clutch": "الكلتش",
+
+        "excellent": "ممتاز",
+        "good": "جيد",
+        "warning": "تحذير",
+        "critical": "حرج",
+        "disabled": "معطل"
     },
     
     "target": {
@@ -73,6 +124,6 @@
         "no_brake_parts": "ليس لديك قطع فحمات",
         "no_clutch": "ليس لديك قطع كلتش",
         "no_suspension_parts": "ليس لديك قطع نظام تعليق",
-        "no_spark_plugs": "ليس لديك شمعات إشعال"
+        "no_spark_plug": "ليس لديك شمعات إشعال"
     }
 }

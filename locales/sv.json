@@ -2,9 +2,60 @@
     "__author":"@AI",
 
     "ui": {
-        "mileage": "Mätarställning:",
-        "unit_km": "Km",
-        "unit_miles": "Mil"
+        "mileage": "Mätarställning",
+        "unit_km": " Km",
+        "unit_miles": " Mil",
+
+        "save": "Spara",
+        "edit": "Redigera",
+        "delete": "Ta bort",
+        "cancel": "Avbryt",
+        "close": "Stäng",
+
+        "mileage_meter_ui": "Mätarställningsgränssnitt",
+        "checkwear_ui": "Slitagekontrollgränssnitt",
+        "show_mileage_meter": "Visa mätarställning",
+        "size": "Storlek",
+        "position": "Position (X, Y)",
+
+        "vehicle_mileage_db": "Fordonets mätarställningsdatabas",
+        "edit_veh_data": "Redigera fordonsdata",
+        "actions": "Åtgärder",
+        "plate": "Registreringsskylt",
+        "last_oil_change": "Senaste oljebyte",
+        "last_filter_change": "Senaste oljefilterbyte",
+        "last_air_filter_change": "Senaste luftfilterbyte",
+        "last_tire_change": "Senaste däckbyte",
+        "last_brake_change": "Senaste bromsbyte",
+        "brake_wear": "Bromsslitage",
+        "last_clutch_change": "Senaste kopplingsbyte",
+        "clutch_wear": "Kopplingsslitage",
+        "last_sus_change": "Senaste fjädringsbyte",
+        "last_plugs_change": "Senaste tändstiftsbyte",
+
+        "no_vehicles_found": "Inga fordon hittades.",
+        "confirm_delete_vehicle": "Är du säker på att du vill ta bort detta fordon?",
+        "vehicle_deleted_success": "Fordonet har tagits bort.",
+        "failed_delete_vehicle": "Misslyckades med att ta bort fordonet",
+        "enter_valid_plate_mileage": "Ange giltig registreringsskylt och mätarställning.",
+        "must_be_equal_or_lower": "{label} måste vara lika med eller lägre än mätarställningen.",
+        "vehicle_data_updated": "Fordonsdata uppdaterades framgångsrikt",
+        "failed_update_vehicle_data": "Misslyckades med att uppdatera fordonsdata",
+
+        "spark_plug": "Tändstift",
+        "oil": "Oljans livslängd",
+        "filter": "Oljefilter",
+        "air_filter": "Luftfilter",
+        "tire": "Däck",
+        "brake": "Bromsar",
+        "suspension": "Fjädring",
+        "clutch": "Koppling",
+
+        "excellent": "Utmärkt",
+        "good": "Bra",
+        "warning": "Varning",
+        "critical": "Kritiskt",
+        "disabled": "AVAKTIVERAD"
     },
     
     "target": {
@@ -70,6 +121,6 @@
         "no_brake_parts": "Du har inga bromsdelar",
         "no_clutch": "Du har inga kopplingsdelar",
         "no_suspension_parts": "Du har inga fjädringsdelar",
-        "no_spark_plugs": "Du har inga tändstift"
+        "no_spark_plug": "Du har inga tändstift"
     }
 }

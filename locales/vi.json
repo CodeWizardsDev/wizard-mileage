@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Số km đã đi:",
-        "unit_km": "Km",
-        "unit_miles": "Dặm"
+        "mileage": "Số km đã đi",
+        "unit_km": " Km",
+        "unit_miles": " Dặm",
+
+        "save": "Lưu",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa",
+        "cancel": "Hủy",
+        "close": "Đóng",
+
+        "mileage_meter_ui": "Giao diện đồng hồ công tơ mét",
+        "checkwear_ui": "Giao diện kiểm tra hao mòn",
+        "show_mileage_meter": "Hiển thị đồng hồ công tơ mét",
+        "size": "Kích thước",
+        "position": "Vị trí (X, Y)",
+
+        "vehicle_mileage_db": "Cơ sở dữ liệu số km xe",
+        "edit_veh_data": "Chỉnh sửa dữ liệu xe",
+        "actions": "Hành động",
+        "plate": "Biển số",
+        "last_oil_change": "Lần thay dầu gần nhất",
+        "last_filter_change": "Lần thay lọc dầu gần nhất",
+        "last_air_filter_change": "Lần thay lọc gió gần nhất",
+        "last_tire_change": "Lần thay lốp gần nhất",
+        "last_brake_change": "Lần thay phanh gần nhất",
+        "brake_wear": "Mòn phanh",
+        "last_clutch_change": "Lần thay ly hợp gần nhất",
+        "clutch_wear": "Mòn ly hợp",
+        "last_sus_change": "Lần thay hệ thống treo gần nhất",
+        "last_plugs_change": "Lần thay bugi gần nhất",
+
+        "no_vehicles_found": "Không tìm thấy xe.",
+        "confirm_delete_vehicle": "Bạn có chắc muốn xóa xe này không?",
+        "vehicle_deleted_success": "Xóa xe thành công.",
+        "failed_delete_vehicle": "Xóa xe thất bại",
+        "enter_valid_plate_mileage": "Vui lòng nhập biển số và số km hợp lệ.",
+        "must_be_equal_or_lower": "{label} phải bằng hoặc nhỏ hơn số km.",
+        "vehicle_data_updated": "Cập nhật dữ liệu xe thành công",
+        "failed_update_vehicle_data": "Cập nhật dữ liệu xe thất bại",
+
+        "spark_plug": "Bugi",
+        "oil": "Tuổi thọ dầu",
+        "filter": "Lọc dầu",
+        "air_filter": "Lọc gió",
+        "tire": "Lốp xe",
+        "brake": "Phanh",
+        "suspension": "Hệ thống treo",
+        "clutch": "Ly hợp",
+
+        "excellent": "Xuất sắc",
+        "good": "Tốt",
+        "warning": "Cảnh báo",
+        "critical": "Nguy cấp",
+        "disabled": "VÔ HIỆU HÓA"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Bạn không có phụ tùng phanh",
         "no_clutch": "Bạn không có phụ tùng ly hợp",
         "no_suspension_parts": "Bạn không có phụ tùng hệ thống treo",
-        "no_spark_plugs": "Bạn không có bugi"
+        "no_spark_plug": "Bạn không có bugi"
     }
 }

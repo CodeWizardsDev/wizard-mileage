@@ -5,8 +5,59 @@
 
     "ui": {
         "mileage": "مسافت",
-        "unit_km": "کیلومتر",
-        "unit_miles": "مایل"
+        "unit_km": " کیلومتر",
+        "unit_miles": " مایل",
+
+        "save": "ذخیره",
+        "edit": "ویرایش",
+        "delete": "حذف",
+        "cancel": "لغو",
+        "close": "بستن",
+
+        "mileage_meter_ui": "رابط کیلومترشمار",
+        "checkwear_ui": "رابط بررسی فرسودگی",
+        "show_mileage_meter": "نمایش کیلومترشمار",
+        "size": "اندازه",
+        "position": "موقعیت (X، Y)",
+
+        "vehicle_mileage_db": "پایگاه داده کیلومتر خودرو",
+        "edit_veh_data": "ویرایش اطلاعات خودرو",
+        "actions": "اقدامات",
+        "plate": "پلاک",
+        "last_oil_change": "آخرین تعویض روغن",
+        "last_filter_change": "آخرین تعویض فیلتر روغن",
+        "last_air_filter_change": "آخرین تعویض فیلتر هوا",
+        "last_tire_change": "آخرین تعویض لاستیک",
+        "last_brake_change": "آخرین تعویض ترمز",
+        "brake_wear": "فرسودگی ترمز",
+        "last_clutch_change": "آخرین تعویض کلاچ",
+        "clutch_wear": "فرسودگی کلاچ",
+        "last_sus_change": "آخرین تعویض سیستم تعلیق",
+        "last_plugs_change": "آخرین تعویض شمع‌ها",
+
+        "no_vehicles_found": "هیچ خودرویی یافت نشد.",
+        "confirm_delete_vehicle": "آیا مطمئن هستید که می‌خواهید این خودرو را حذف کنید؟",
+        "vehicle_deleted_success": "خودرو با موفقیت حذف شد.",
+        "failed_delete_vehicle": "حذف خودرو ناموفق بود",
+        "enter_valid_plate_mileage": "لطفاً پلاک و کیلومتر معتبر وارد کنید.",
+        "must_be_equal_or_lower": "{label} باید برابر یا کمتر از کیلومتر باشد.",
+        "vehicle_data_updated": "اطلاعات خودرو با موفقیت به‌روزرسانی شد",
+        "failed_update_vehicle_data": "به‌روزرسانی اطلاعات خودرو ناموفق بود",
+
+        "spark_plug": "شمع‌ها",
+        "oil": "عمر روغن",
+        "filter": "فیلتر روغن",
+        "air_filter": "فیلتر هوا",
+        "tire": "لاستیک‌ها",
+        "brake": "ترمزها",
+        "suspension": "سیستم تعلیق",
+        "clutch": "کلاچ",
+
+        "excellent": "عالی",
+        "good": "خوب",
+        "warning": "هشدار",
+        "critical": "بحرانی",
+        "disabled": "غیرفعال"
     },
     
     "target": {
@@ -73,6 +124,6 @@
         "no_brake_parts": "شما قطعات ترمز ندارید",
         "no_clutch": "شما قطعات کلاچ ندارید",
         "no_suspension_parts": "شما قطعات سیستم تعلیق ندارید",
-        "no_spark_plugs": "شما شمع موتور ندارید"
+        "no_spark_plug": "شما شمع موتور ندارید"
     }
 }

@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "ระยะทาง:",
-        "unit_km": "กม.",
-        "unit_miles": "ไมล์"
+        "mileage": "ระยะทาง",
+        "unit_km": " กม.",
+        "unit_miles": " ไมล์",
+
+        "save": "บันทึก",
+        "edit": "แก้ไข",
+        "delete": "ลบ",
+        "cancel": "ยกเลิก",
+        "close": "ปิด",
+
+        "mileage_meter_ui": "Mileage Meter UI",
+        "checkwear_ui": "CheckWear UI",
+        "show_mileage_meter": "Show Mileage Meter",
+        "size": "Size",
+        "position": "Position (X, Y)",
+
+        "vehicle_mileage_db": "Vehicle Mileage Database",
+        "edit_veh_data": "Edit Vehicle Data",
+        "actions": "Actions",
+        "plate": "Plate",
+        "last_oil_change": "Last Oil Change",
+        "last_filter_change": "Last Oil Filter Change",
+        "last_air_filter_change": "Last Air Filter Change",
+        "last_tire_change": "Last Tire Change",
+        "last_brake_change": "Last Brake Change",
+        "brake_wear": "Brake Wear",
+        "last_clutch_change": "Last Clutch Change",
+        "clutch_wear": "Clutch Wear",
+        "last_sus_change": "Last Suspension Change",
+        "last_plugs_change": "Last SparkPlug Change",
+
+        "no_vehicles_found": "ไม่พบรถยนต์",
+        "confirm_delete_vehicle": "คุณแน่ใจหรือไม่ว่าต้องการลบรถคันนี้?",
+        "vehicle_deleted_success": "ลบรถเรียบร้อยแล้ว",
+        "failed_delete_vehicle": "ลบรถไม่สำเร็จ",
+        "enter_valid_plate_mileage": "กรุณาใส่ป้ายทะเบียนและระยะทางที่ถูกต้อง",
+        "must_be_equal_or_lower": "{label} ต้องเท่ากับหรือต่ำกว่าระยะทาง",
+        "vehicle_data_updated": "อัปเดตข้อมูลรถเรียบร้อยแล้ว",
+        "failed_update_vehicle_data": "อัปเดตข้อมูลรถไม่สำเร็จ",
+
+        "spark_plug": "หัวเทียน",
+        "oil": "อายุการใช้น้ำมันเครื่อง",
+        "filter": "ไส้กรองน้ำมันเครื่อง",
+        "air_filter": "ไส้กรองอากาศ",
+        "tire": "ยางรถยนต์",
+        "brake": "เบรก",
+        "suspension": "ช่วงล่าง",
+        "clutch": "คลัตช์",
+
+        "excellent": "ยอดเยี่ยม",
+        "good": "ดี",
+        "warning": "คำเตือน",
+        "critical": "วิกฤต",
+        "disabled": "ปิดใช้งาน"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "คุณไม่มีอะไหล่เบรก",
         "no_clutch": "คุณไม่มีอะไหล่คลัตช์",
         "no_suspension_parts": "คุณไม่มีอะไหล่ช่วงล่าง",
-        "no_spark_plugs": "คุณไม่มีหัวเทียน"
+        "no_spark_plug": "คุณไม่มีหัวเทียน"
     }
 }

@@ -13,12 +13,12 @@
     <!---------------- Mileage meter ---------------->
     <div id="mileageDisplay">
         <span id="mileageIcon" class="mileage-icon"><i class="fa-solid fa-oil-can"></i></span>
-        <span data-locale="mileage">Mileage: <span id="mileageValue">0.00</span> <span id="unitLabel">km</span></span>
+        <span data-locale="mileage" id ="mileage"><span id="mileageValue"></span> <span id="unitLabel"></span></span>
     </div>
 
     <!---------------- CheckWear UI ---------------->
     <div id="wearDisplay" class="wear-container">
-        <div id="wearMileageTitle" class="wear-mileage-title">Mileage: 0.00 km</div>
+        <div id="wearMileageTitle" class="wear-mileage-title"></div>
         <template id="wearBarTemplate">
             <div class="wear-bar">
                 <div class="wear-label">
@@ -44,15 +44,15 @@
     <!---------------- Customization UI ---------------->
     <div id="customizationUI">
         <div>
-            <h3>Mileage Meter UI</h3>
+            <h3 id="mmui"></h3>
             <label class="checkbox-label">
                 <input type="checkbox" id="mileageVisible" />
                 <span class="slider"></span>
-                Show Mileage Meter
+                <p id="smm"></p>
             </label>
-            <label>Size</label>
+            <label id="sz"></label>
             <input type="range" id="mileageSize" min="0.5" max="2" step="0.05" />
-            <label>Position (X, Y)</label>
+            <label id="posxy"></label>
             <div class="pos-inputs">
                 <input type="number" id="mileagePosX" step="0.01" title="Mileage Position X" placeholder="X" />
                 <input type="number" id="mileagePosY" step="0.01" title="Mileage Position Y" placeholder="Y" />
@@ -61,31 +61,31 @@
         <br>
         <hr>
         <div>
-            <h3>Check Wear UI</h3>
-            <label>Size</label>
+            <h3 id="cwui"></h3>
+            <label id="sz2"></label>
             <input type="range" id="checkwearSize" min="0.5" max="2" step="0.05" title="Checkwear Size" />
-            <label>Position (X, Y)</label>
+            <label id="posxy2"></label>
             <div class="pos-inputs">
                 <input type="number" id="checkwearPosX" step="0.01" title="Checkwear Position X" placeholder="X" />
                 <input type="number" id="checkwearPosY" step="0.01" title="Checkwear Position Y" placeholder="Y" />
             </div>
         </div>
-        <button id="saveBtn">Save Settings</button>
-        <button id="closeUIButton">Close UI</button>
+        <button id="saveBtn"></button>
+        <button id="closeUIButton"></button>
     </div>
     <script src="script.js"></script>
 
     <!---------------- Vehicle Mileage Database Menu ---------------->
     <div id="databaseMenu" class="database-menu" style="display:none;">
-        <h2>Vehicle Mileage Database</h2>
-        <button id="closeDatabaseMenuBtn" class="close-btn">Close</button>
+        <h2 id="vmdb"></h2>
+        <button id="closeDatabaseMenuBtn" class="close-btn"></button>
         <div id="vehicleListContainer" class="vehicle-list-container">
             <table id="vehicleListTable" class="vehicle-list-table">
                 <thead>
                     <tr>
-                        <th>Plate</th>
-                        <th>Mileage</th>
-                        <th>Actions</th>
+                        <th id="ptb"></th>
+                        <th id="mtb"></th>
+                        <th id="atb"></th>
                     </tr>
                 </thead>
                 <tbody id="vehicleListBody">
@@ -93,47 +93,47 @@
             </table>
         </div>
         <div id="vehicleEditContainer" class="vehicle-edit-container" style="display:none;">
-            <h3>Edit Vehicle Data</h3>
+            <h3 id="evd"></h3>
             <form id="vehicleEditForm">
-                <label for="editPlate">Plate:</label>
+                <label for="editPlate" id="pop"></label>
                 <input type="text" id="editPlate" name="plate" readonly />
-                <label for="editMileage">Mileage:</label>
+                <label for="editMileage" id="mop"></label>
                 <input type="number" id="editMileage" name="mileage" min="0" step="0.01" />
 
-                <label for="editLastOilChange">Last Oil Change:</label>
+                <label for="editLastOilChange" id="locop"></label>
                 <input type="number" id="editLastOilChange" name="last_oil_change" min="0" step="0.01" />
 
-                <label for="editLastOilFilterChange">Last Oil Filter Change:</label>
+                <label for="editLastOilFilterChange" id="lfcop"></label>
                 <input type="number" id="editLastOilFilterChange" name="last_oil_filter_change" min="0" step="0.01" />
 
-                <label for="editLastAirFilterChange">Last Air Filter Change:</label>
+                <label for="editLastAirFilterChange" id="lacop"></label>
                 <input type="number" id="editLastAirFilterChange" name="last_air_filter_change" min="0" step="0.01" />
 
-                <label for="editLastTireChange">Last Tire Change:</label>
+                <label for="editLastTireChange" id="ltcop"></label>
                 <input type="number" id="editLastTireChange" name="last_tire_change" min="0" step="0.01" />
 
-                <label for="editLastBrakesChange">Last Brakes Change:</label>
+                <label for="editLastBrakesChange" id="lbcop"></label>
                 <input type="number" id="editLastBrakesChange" name="last_brakes_change" min="0" step="0.01" />
 
-                <label for="editBrakeWear">Brake Wear:</label>
+                <label for="editBrakeWear" id="bwcop"></label>
                 <input type="number" id="editBrakeWear" name="brake_wear" min="0" step="0.01" />
 
-                <label for="editLastClutchChange">Last Clutch Change:</label>
+                <label for="editLastClutchChange" id="lccop"></label>
                 <input type="number" id="editLastClutchChange" name="last_clutch_change" min="0" step="0.01" />
 
-                <label for="editClutchWear">Clutch Wear:</label>
+                <label for="editClutchWear" id="cwcop"></label>
                 <input type="number" id="editClutchWear" name="clutch_wear" min="0" step="0.01" />
 
-                <label for="editLastSuspensionChange">Last Suspension Change:</label>
+                <label for="editLastSuspensionChange" id="lscop"></label>
                 <input type="number" id="editLastSuspensionChange" name="last_suspension_change" min="0" step="0.01" />
 
-                <label for="editLastSparkPlugChange">Last Spark Plug Change:</label>
+                <label for="editLastSparkPlugChange" id="lpcop"></label>
                 <input type="number" id="editLastSparkPlugChange" name="last_spark_plug_change" min="0" step="0.01" />
 
                 <div class="form-buttons">
-                    <button type="submit" id="saveVehicleBtn">Save</button>
-                    <button type="button" id="deleteVehicleBtn">Delete</button>
-                    <button type="button" id="cancelEditBtn">Cancel</button>
+                    <button type="submit" id="saveVehicleBtn"></button>
+                    <button type="button" id="deleteVehicleBtn"></button>
+                    <button type="button" id="cancelEditBtn"></button>
                 </div>
             </form>
         </div>

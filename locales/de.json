@@ -4,9 +4,60 @@
 
 
     "ui": {
-        "mileage": "Kilometerstand:",
-        "unit_km": "Km",
-        "unit_miles": "Mijlen"
+        "mileage": "Kilometerstand",
+        "unit_km": " Km",
+        "unit_miles": " Mijlen",
+
+        "save": "Speichern",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "cancel": "Abbrechen",
+        "close": "Schließen",
+
+        "mileage_meter_ui": "Kilometerzähler-Benutzeroberfläche",
+        "checkwear_ui": "Verschleißprüfung-Benutzeroberfläche",
+        "show_mileage_meter": "Kilometerzähler anzeigen",
+        "size": "Größe",
+        "position": "Position (X, Y)",
+
+        "vehicle_mileage_db": "Fahrzeug-Kilometerstand-Datenbank",
+        "edit_veh_data": "Fahrzeugdaten bearbeiten",
+        "actions": "Aktionen",
+        "plate": "Kennzeichen",
+        "last_oil_change": "Letzter Ölwechsel",
+        "last_filter_change": "Letzter Ölfilterwechsel",
+        "last_air_filter_change": "Letzter Luftfilterwechsel",
+        "last_tire_change": "Letzter Reifenwechsel",
+        "last_brake_change": "Letzter Bremsenwechsel",
+        "brake_wear": "Bremsenverschleiß",
+        "last_clutch_change": "Letzter Kupplungswechsel",
+        "clutch_wear": "Kupplungsverschleiß",
+        "last_sus_change": "Letzter Federungswechsel",
+        "last_plugs_change": "Letzter Zündkerzenwechsel",
+
+        "no_vehicles_found": "Keine Fahrzeuge gefunden.",
+        "confirm_delete_vehicle": "Sind Sie sicher, dass Sie dieses Fahrzeug löschen möchten?",
+        "vehicle_deleted_success": "Fahrzeug erfolgreich gelöscht.",
+        "failed_delete_vehicle": "Fahrzeug konnte nicht gelöscht werden",
+        "enter_valid_plate_mileage": "Bitte geben Sie gültiges Kennzeichen und Kilometerstand ein.",
+        "must_be_equal_or_lower": "{label} muss gleich oder niedriger als der Kilometerstand sein.",
+        "vehicle_data_updated": "Fahrzeugdaten erfolgreich aktualisiert",
+        "failed_update_vehicle_data": "Fehler beim Aktualisieren der Fahrzeugdaten",
+
+        "spark_plug": "Zündkerzen",
+        "oil": "Ölstand",
+        "filter": "Ölfilter",
+        "air_filter": "Luftfilter",
+        "tire": "Reifen",
+        "brake": "Bremsen",
+        "suspension": "Aufhängung",
+        "clutch": "Kupplung",
+
+        "excellent": "Ausgezeichnet",
+        "good": "Gut",
+        "warning": "Warnung",
+        "critical": "Kritisch",
+        "disabled": "DEAKTIVIERT"
     },
     
     "target": {
@@ -73,6 +124,6 @@
         "no_brake_parts": "Du hast keine Bremsteile",
         "no_clutch": "Du hast keine Kupplungsteile",
         "no_suspension_parts": "Du hast keine Aufhängungsteile",
-        "no_spark_plugs": "Du hast keine Zündkerzen"
+        "no_spark_plug": "Du hast keine Zündkerzen"
     }
 }

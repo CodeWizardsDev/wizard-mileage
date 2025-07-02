@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Chilometraggio:",
-        "unit_km": "Km",
-        "unit_miles": "Miglia"
+        "mileage": "Chilometraggio",
+        "unit_km": " Km",
+        "unit_miles": " Miglia",
+
+        "save": "Salva",
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "cancel": "Annulla",
+        "close": "Chiudi",
+
+        "mileage_meter_ui": "Interfaccia contachilometri",
+        "checkwear_ui": "Interfaccia usura",
+        "show_mileage_meter": "Mostra contachilometri",
+        "size": "Dimensione",
+        "position": "Posizione (X, Y)",
+
+        "vehicle_mileage_db": "Database chilometraggio veicolo",
+        "edit_veh_data": "Modifica dati veicolo",
+        "actions": "Azioni",
+        "plate": "Targa",
+        "last_oil_change": "Ultimo cambio olio",
+        "last_filter_change": "Ultimo cambio filtro olio",
+        "last_air_filter_change": "Ultimo cambio filtro aria",
+        "last_tire_change": "Ultimo cambio pneumatici",
+        "last_brake_change": "Ultimo cambio freni",
+        "brake_wear": "Usura freni",
+        "last_clutch_change": "Ultimo cambio frizione",
+        "clutch_wear": "Usura frizione",
+        "last_sus_change": "Ultimo cambio sospensioni",
+        "last_plugs_change": "Ultimo cambio candele",
+
+        "no_vehicles_found": "Nessun veicolo trovato.",
+        "confirm_delete_vehicle": "Sei sicuro di voler eliminare questo veicolo?",
+        "vehicle_deleted_success": "Veicolo eliminato con successo.",
+        "failed_delete_vehicle": "Impossibile eliminare il veicolo",
+        "enter_valid_plate_mileage": "Inserisci targa e chilometraggio validi.",
+        "must_be_equal_or_lower": "{label} deve essere uguale o inferiore al chilometraggio.",
+        "vehicle_data_updated": "Dati veicolo aggiornati con successo",
+        "failed_update_vehicle_data": "Impossibile aggiornare i dati del veicolo",
+
+        "spark_plug": "Candele",
+        "oil": "Durata olio",
+        "filter": "Filtro olio",
+        "air_filter": "Filtro aria",
+        "tire": "Pneumatici",
+        "brake": "Freni",
+        "suspension": "Sospensioni",
+        "clutch": "Frizione",
+
+        "excellent": "Eccellente",
+        "good": "Buono",
+        "warning": "Avviso",
+        "critical": "Critico",
+        "disabled": "DISABILITATO"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Non hai parti dei freni",
         "no_clutch": "Non hai parti della frizione",
         "no_suspension_parts": "Non hai parti delle sospensioni",
-        "no_spark_plugs": "Non hai candele"
+        "no_spark_plug": "Non hai candele"
     }
 }

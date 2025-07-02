@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Rida:",
-        "unit_km": "Km",
-        "unit_miles": "Mylios"
+        "mileage": "Rida",
+        "unit_km": " Km",
+        "unit_miles": " Mylios",
+
+        "save": "Išsaugoti",
+        "edit": "Redaguoti",
+        "delete": "Ištrinti",
+        "cancel": "Atšaukti",
+        "close": "Uždaryti",
+
+        "mileage_meter_ui": "Ridos matuoklio sąsaja",
+        "checkwear_ui": "Dėvėjimosi patikros sąsaja",
+        "show_mileage_meter": "Rodyti ridos matuoklį",
+        "size": "Dydis",
+        "position": "Pozicija (X, Y)",
+
+        "vehicle_mileage_db": "Transporto priemonės ridos duomenų bazė",
+        "edit_veh_data": "Redaguoti transporto priemonės duomenis",
+        "actions": "Veiksmai",
+        "plate": "Valstybinis numeris",
+        "last_oil_change": "Paskutinis alyvos keitimas",
+        "last_filter_change": "Paskutinis alyvos filtro keitimas",
+        "last_air_filter_change": "Paskutinis oro filtro keitimas",
+        "last_tire_change": "Paskutinis padangų keitimas",
+        "last_brake_change": "Paskutinis stabdžių keitimas",
+        "brake_wear": "Stabdžių nusidėvėjimas",
+        "last_clutch_change": "Paskutinis sankabos keitimas",
+        "clutch_wear": "Sankabos nusidėvėjimas",
+        "last_sus_change": "Paskutinis pakabos keitimas",
+        "last_plugs_change": "Paskutinis uždegimo žvakių keitimas",
+
+        "no_vehicles_found": "Transporto priemonių nerasta.",
+        "confirm_delete_vehicle": "Ar tikrai norite ištrinti šią transporto priemonę?",
+        "vehicle_deleted_success": "Transporto priemonė sėkmingai ištrinta.",
+        "failed_delete_vehicle": "Nepavyko ištrinti transporto priemonės",
+        "enter_valid_plate_mileage": "Įveskite galiojančią valstybinį numerį ir ridą.",
+        "must_be_equal_or_lower": "{label} turi būti lygus arba mažesnis už ridą.",
+        "vehicle_data_updated": "Transporto priemonės duomenys sėkmingai atnaujinti",
+        "failed_update_vehicle_data": "Nepavyko atnaujinti transporto priemonės duomenų",
+
+        "spark_plug": "Uždegimo žvakės",
+        "oil": "Naftos tarnavimo laikas",
+        "filter": "Naftos filtras",
+        "air_filter": "Oro filtras",
+        "tire": "Padangos",
+        "brake": "Stabdžiai",
+        "suspension": "Pakaba",
+        "clutch": "Sankaba",
+
+        "excellent": "Puikus",
+        "good": "Geras",
+        "warning": "Įspėjimas",
+        "critical": "Kritinis",
+        "disabled": "IŠJUNGTA"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Neturite stabdžių dalių",
         "no_clutch": "Neturite sankabos dalių",
         "no_suspension_parts": "Neturite pakabos dalių",
-        "no_spark_plugs": "Neturite žvakių"
+        "no_spark_plug": "Neturite žvakių"
     }
 }

@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Mittarilukema:",
-        "unit_km": "Km",
-        "unit_miles": "Mailia"
+        "mileage": "Mittarilukema",
+        "unit_km": " Km",
+        "unit_miles": " Mailia",
+
+        "save": "Tallenna",
+        "edit": "Muokkaa",
+        "delete": "Poista",
+        "cancel": "Peruuta",
+        "close": "Sulje",
+
+        "mileage_meter_ui": "Mittarilukeman käyttöliittymä",
+        "checkwear_ui": "Kuluman tarkistus käyttöliittymä",
+        "show_mileage_meter": "Näytä mittarilukema",
+        "size": "Koko",
+        "position": "Sijainti (X, Y)",
+
+        "vehicle_mileage_db": "Ajoneuvon mittarilukematietokanta",
+        "edit_veh_data": "Muokkaa ajoneuvon tietoja",
+        "actions": "Toiminnot",
+        "plate": "Rekisterikilpi",
+        "last_oil_change": "Viimeisin öljynvaihto",
+        "last_filter_change": "Viimeisin öljynsuodattimen vaihto",
+        "last_air_filter_change": "Viimeisin ilmansuodattimen vaihto",
+        "last_tire_change": "Viimeisin renkaiden vaihto",
+        "last_brake_change": "Viimeisin jarrujen vaihto",
+        "brake_wear": "Jarrujen kuluminen",
+        "last_clutch_change": "Viimeisin kytkimen vaihto",
+        "clutch_wear": "Kytkimen kuluminen",
+        "last_sus_change": "Viimeisin jousituksen vaihto",
+        "last_plugs_change": "Viimeisin sytytystulppien vaihto",
+
+        "no_vehicles_found": "Ajoneuvoja ei löytynyt.",
+        "confirm_delete_vehicle": "Haluatko varmasti poistaa tämän ajoneuvon?",
+        "vehicle_deleted_success": "Ajoneuvo poistettu onnistuneesti.",
+        "failed_delete_vehicle": "Ajoneuvon poistaminen epäonnistui",
+        "enter_valid_plate_mileage": "Syötä kelvollinen rekisterikilpi ja mittarilukema.",
+        "must_be_equal_or_lower": "{label} on oltava yhtä suuri tai pienempi kuin mittarilukema.",
+        "vehicle_data_updated": "Ajoneuvon tiedot päivitetty onnistuneesti",
+        "failed_update_vehicle_data": "Ajoneuvon tietojen päivitys epäonnistui",
+
+        "spark_plug": "Sytytystulpat",
+        "oil": "Öljyn kestoikä",
+        "filter": "Öljynsuodatin",
+        "air_filter": "Ilmansuodatin",
+        "tire": "Renkaat",
+        "brake": "Jarrut",
+        "suspension": "Jousitus",
+        "clutch": "Kytkin",
+
+        "excellent": "Erinomainen",
+        "good": "Hyvä",
+        "warning": "Varoitus",
+        "critical": "Kriittinen",
+        "disabled": "POIS KÄYTÖSTÄ"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Sinulla ei ole jarruosia",
         "no_clutch": "Sinulla ei ole kytkinosia",
         "no_suspension_parts": "Sinulla ei ole jousitusosia",
-        "no_spark_plugs": "Sinulla ei ole sytytystulppia"
+        "no_spark_plug": "Sinulla ei ole sytytystulppia"
     }
 }

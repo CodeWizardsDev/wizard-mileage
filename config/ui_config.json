@@ -1,0 +1,17 @@
+{
+    "lang": "en",
+    
+    "cssVariables": {
+        "glass-bg": "linear-gradient(135deg, #1a1a2ed7 0%, #16213ed7 100%)",
+        "glass-border": "rgba(255, 255, 255, 0.15)",
+        "text-primary": "#ffffff",
+        "text-secondary": "rgba(255, 255, 255, 0.7)",
+        "accent-blue": "#4dabf7",
+        "accent-green": "#69db7c",
+        "accent-orange": "#ffa94d",
+        "accent-red": "#ff2f2f",
+        "accent-purple": "#9775fa",
+        "accent-yellow": "#faed75",
+        "transition": "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+    }
+}

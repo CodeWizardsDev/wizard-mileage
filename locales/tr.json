@@ -4,9 +4,60 @@
 
 
     "ui": {
-        "mileage": "Kilometre:",
-        "unit_km": "Km",
-        "unit_miles": "Mil"
+        "mileage": "Kilometre",
+        "unit_km": " Km",
+        "unit_miles": " Mil",
+
+        "save": "Kaydet",
+        "edit": "Düzenle",
+        "delete": "Sil",
+        "cancel": "İptal",
+        "close": "Kapat",
+
+        "mileage_meter_ui": "Kilometre Sayacı Arayüzü",
+        "checkwear_ui": "Aşınma Kontrolü Arayüzü",
+        "show_mileage_meter": "Kilometre Sayacını Göster",
+        "size": "Boyut",
+        "position": "Pozisyon (X, Y)",
+
+        "vehicle_mileage_db": "Araç Kilometre Veritabanı",
+        "edit_veh_data": "Araç Verilerini Düzenle",
+        "actions": "Eylemler",
+        "plate": "Plaka",
+        "last_oil_change": "Son Yağ Değişimi",
+        "last_filter_change": "Son Yağ Filtresi Değişimi",
+        "last_air_filter_change": "Son Hava Filtresi Değişimi",
+        "last_tire_change": "Son Lastik Değişimi",
+        "last_brake_change": "Son Fren Değişimi",
+        "brake_wear": "Fren Aşınması",
+        "last_clutch_change": "Son Debriyaj Değişimi",
+        "clutch_wear": "Debriyaj Aşınması",
+        "last_sus_change": "Son Süspansiyon Değişimi",
+        "last_plugs_change": "Son Buji Değişimi",
+
+        "no_vehicles_found": "Araç bulunamadı.",
+        "confirm_delete_vehicle": "Bu aracı silmek istediğinizden emin misiniz?",
+        "vehicle_deleted_success": "Araç başarıyla silindi.",
+        "failed_delete_vehicle": "Araç silme başarısız oldu",
+        "enter_valid_plate_mileage": "Lütfen geçerli plaka ve kilometre girin.",
+        "must_be_equal_or_lower": "{label} Kilometreden eşit veya düşük olmalıdır.",
+        "vehicle_data_updated": "Araç verileri başarıyla güncellendi",
+        "failed_update_vehicle_data": "Araç verileri güncellenemedi",
+
+        "spark_plug": "Bujiler",
+        "oil": "Yağ Ömrü",
+        "filter": "Yağ Filtresi",
+        "air_filter": "Hava Filtresi",
+        "tire": "Lastikler",
+        "brake": "Frenler",
+        "suspension": "Süspansiyon",
+        "clutch": "Debriyaj",
+
+        "excellent": "Mükemmel",
+        "good": "İyi",
+        "warning": "Uyarı",
+        "critical": "Kritik",
+        "disabled": "DEVRE DIŞI"
     },
     
     "target": {
@@ -73,6 +124,6 @@
         "no_brake_parts": "Fren parçalarına sahip değilsin",
         "no_clutch": "Debriyaj parçalarına sahip değilsin",
         "no_suspension_parts": "Süspansiyon parçalarına sahip değilsin",
-        "no_spark_plugs": "Bujilere sahip değilsin"
+        "no_spark_plug": "Bujilere sahip değilsin"
     }
 }

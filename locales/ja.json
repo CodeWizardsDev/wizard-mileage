@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "走行距離：",
-        "unit_km": "キロメートル",
-        "unit_miles": "マイル"
+        "mileage": "走行距離",
+        "unit_km": " キロメートル",
+        "unit_miles": " マイル",
+
+        "save": "保存",
+        "edit": "編集",
+        "delete": "削除",
+        "cancel": "キャンセル",
+        "close": "閉じる",
+
+        "mileage_meter_ui": "走行距離メーターUI",
+        "checkwear_ui": "摩耗チェックUI",
+        "show_mileage_meter": "走行距離メーターを表示",
+        "size": "サイズ",
+        "position": "位置 (X, Y)",
+
+        "vehicle_mileage_db": "車両走行距離データベース",
+        "edit_veh_data": "車両データを編集",
+        "actions": "操作",
+        "plate": "ナンバー",
+        "last_oil_change": "最終オイル交換",
+        "last_filter_change": "最終オイルフィルター交換",
+        "last_air_filter_change": "最終エアフィルター交換",
+        "last_tire_change": "最終タイヤ交換",
+        "last_brake_change": "最終ブレーキ交換",
+        "brake_wear": "ブレーキ摩耗",
+        "last_clutch_change": "最終クラッチ交換",
+        "clutch_wear": "クラッチ摩耗",
+        "last_sus_change": "最終サスペンション交換",
+        "last_plugs_change": "最終スパークプラグ交換",
+
+        "no_vehicles_found": "車両が見つかりません。",
+        "confirm_delete_vehicle": "この車両を削除してもよろしいですか？",
+        "vehicle_deleted_success": "車両が正常に削除されました。",
+        "failed_delete_vehicle": "車両の削除に失敗しました",
+        "enter_valid_plate_mileage": "有効なナンバープレートと走行距離を入力してください。",
+        "must_be_equal_or_lower": "{label}は走行距離と同じかそれ以下でなければなりません。",
+        "vehicle_data_updated": "車両データが正常に更新されました",
+        "failed_update_vehicle_data": "車両データの更新に失敗しました",
+
+        "spark_plug": "スパークプラグ",
+        "oil": "オイル寿命",
+        "filter": "オイルフィルター",
+        "air_filter": "エアフィルター",
+        "tire": "タイヤ",
+        "brake": "ブレーキ",
+        "suspension": "サスペンション",
+        "clutch": "クラッチ",
+
+        "excellent": "優秀",
+        "good": "良い",
+        "warning": "警告",
+        "critical": "重大",
+        "disabled": "無効"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "ブレーキ部品がありません",
         "no_clutch": "クラッチ部品がありません",
         "no_suspension_parts": "サスペンション部品がありません",
-        "no_spark_plugs": "スパークプラグがありません"
+        "no_spark_plug": "スパークプラグがありません"
     }
 }

@@ -4,11 +4,63 @@
 
 
     "ui": {
-        "mileage": "Mileage:",
-        "unit_km": "Km",
-        "unit_miles": "Miles"
+        "mileage": "Mileage",
+        "unit_km": " KM",
+        "unit_miles": " Miles",
+
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "close": "Close",
+
+        "mileage_meter_ui": "Mileage Meter UI",
+        "checkwear_ui": "CheckWear UI",
+        "show_mileage_meter": "Show Mileage Meter",
+        "size": "Size",
+        "position": "Position (X, Y)",
+
+        "vehicle_mileage_db": "Vehicle Mileage Database",
+        "edit_veh_data": "Edit Vehicle Data",
+        "actions": "Actions",
+        "plate": "Plate",
+        "last_oil_change": "Last Oil Change",
+        "last_filter_change": "Last Oil Filter Change",
+        "last_air_filter_change": "Last Air Filter Change",
+        "last_tire_change": "Last Tire Change",
+        "last_brake_change": "Last Brake Change",
+        "brake_wear": "Brake Wear",
+        "last_clutch_change": "Last Clutch Change",
+        "clutch_wear": "Clutch Wear",
+        "last_sus_change": "Last Suspension Change",
+        "last_plugs_change": "Last SparkPlug Change",
+
+        "no_vehicles_found": "No vehicles found.",
+        "confirm_delete_vehicle": "Are you sure you want to delete this vehicle?",
+        "vehicle_deleted_success": "Vehicle deleted successfully.",
+        "failed_delete_vehicle": "Failed to delete vehicle",
+        "enter_valid_plate_mileage": "Please enter valid plate and mileage.",
+        "must_be_equal_or_lower": "{label} must be equal or lower than Mileage.",
+        "vehicle_data_updated": "Vehicle data updated successfully",
+        "failed_update_vehicle_data": "Failed to update vehicle data",
+
+        "spark_plug": "Spark Plugs",
+        "oil": "Oil Life",
+        "filter": "Oil Filter",
+        "air_filter": "Air Filter",
+        "tire": "Tires",
+        "brake": "Brakes",
+        "suspension": "Suspension",
+        "clutch": "Clutch",
+
+        "excellent": "Excellent",
+        "good": "Good",
+        "warning": "Warning",
+        "critical": "Critical",
+        "disabled": "DISABLED"
     },
-    
+
+
     "target": {
         "changeoil": "Changing Oil...",
         "changeoilfilter": "Changing Oil Filter...",
@@ -29,6 +81,8 @@
         "changingsuspension": "Changing Suspension...",
         "changingsparkplug": "Changing Spark Plugs..."
     },
+
+
     "info": {
         "oil_changed": "Vehicle Oil has been successfully changed",
         "filter_changed": "Vehicle Oil Filter has been successfully changed",
@@ -73,6 +127,6 @@
         "no_brake_parts": "You don't have brake parts",
         "no_clutch": "You don't have clutch parts",
         "no_suspension_parts": "You don't have suspension parts",
-        "no_spark_plugs": "You don't have spark plugs"
+        "no_spark_plug": "You don't have spark plugs"
     }
 }

@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Najeto kilometrů:",
-        "unit_km": "Km",
-        "unit_miles": "Mil"
+        "mileage": "Najeto kilometrů",
+        "unit_km": " Km",
+        "unit_miles": " Mil",
+
+        "save": "Uložit",
+        "edit": "Upravit",
+        "delete": "Smazat",
+        "cancel": "Zrušit",
+        "close": "Zavřít",
+
+        "mileage_meter_ui": "Rozhraní počítadla kilometrů",
+        "checkwear_ui": "Rozhraní kontroly opotřebení",
+        "show_mileage_meter": "Zobrazit počítadlo kilometrů",
+        "size": "Velikost",
+        "position": "Pozice (X, Y)",
+
+        "vehicle_mileage_db": "Databáze najetých kilometrů vozidla",
+        "edit_veh_data": "Upravit údaje o vozidle",
+        "actions": "Akce",
+        "plate": "SPZ",
+        "last_oil_change": "Poslední výměna oleje",
+        "last_filter_change": "Poslední výměna olejového filtru",
+        "last_air_filter_change": "Poslední výměna vzduchového filtru",
+        "last_tire_change": "Poslední výměna pneumatik",
+        "last_brake_change": "Poslední výměna brzd",
+        "brake_wear": "Opotřebení brzd",
+        "last_clutch_change": "Poslední výměna spojky",
+        "clutch_wear": "Opotřebení spojky",
+        "last_sus_change": "Poslední výměna podvozku",
+        "last_plugs_change": "Poslední výměna zapalovacích svíček",
+
+        "no_vehicles_found": "Nebyly nalezeny žádné vozy.",
+        "confirm_delete_vehicle": "Opravdu chcete smazat toto vozidlo?",
+        "vehicle_deleted_success": "Vozidlo bylo úspěšně smazáno.",
+        "failed_delete_vehicle": "Nepodařilo se smazat vozidlo",
+        "enter_valid_plate_mileage": "Zadejte platnou SPZ a stav tachometru.",
+        "must_be_equal_or_lower": "{label} musí být rovno nebo nižší než stav tachometru.",
+        "vehicle_data_updated": "Data vozidla byla úspěšně aktualizována",
+        "failed_update_vehicle_data": "Nepodařilo se aktualizovat data vozidla",
+
+        "spark_plug": "Zapalovací svíčky",
+        "oil": "Životnost oleje",
+        "filter": "Olejový filtr",
+        "air_filter": "Vzduchový filtr",
+        "tire": "Pneumatiky",
+        "brake": "Brzdy",
+        "suspension": "Podvozek",
+        "clutch": "Spojka",
+
+        "excellent": "Výborný",
+        "good": "Dobrý",
+        "warning": "Varování",
+        "critical": "Kritický",
+        "disabled": "VYPNUTO"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Nemáte brzdové díly",
         "no_clutch": "Nemáte spojkové díly",
         "no_suspension_parts": "Nemáte díly zavěšení",
-        "no_spark_plugs": "Nemáte zapalovací svíčky"
+        "no_spark_plug": "Nemáte zapalovací svíčky"
     }
 }

@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Läbisõit:",
-        "unit_km": "Km",
-        "unit_miles": "Miil"
+        "mileage": "Läbisõit",
+        "unit_km": " Km",
+        "unit_miles": " Miil",
+
+        "save": "Salvesta",
+        "edit": "Muuda",
+        "delete": "Kustuta",
+        "cancel": "Tühista",
+        "close": "Sulge",
+
+        "mileage_meter_ui": "Läbisõidu mõõdiku liides",
+        "checkwear_ui": "Kulumise kontrolli liides",
+        "show_mileage_meter": "Näita läbisõidu mõõdikut",
+        "size": "Suurus",
+        "position": "Asukoht (X, Y)",
+
+        "vehicle_mileage_db": "Sõiduki läbisõidu andmebaas",
+        "edit_veh_data": "Muuda sõiduki andmeid",
+        "actions": "Tegevused",
+        "plate": "Numbrimärk",
+        "last_oil_change": "Viimane õlivahetus",
+        "last_filter_change": "Viimane õlifiltri vahetus",
+        "last_air_filter_change": "Viimane õhufiltri vahetus",
+        "last_tire_change": "Viimane rehvide vahetus",
+        "last_brake_change": "Viimane pidurite vahetus",
+        "brake_wear": "Pidurite kulumine",
+        "last_clutch_change": "Viimane siduri vahetus",
+        "clutch_wear": "Siduri kulumine",
+        "last_sus_change": "Viimane vedrustuse vahetus",
+        "last_plugs_change": "Viimane süüteküünalde vahetus",
+
+        "no_vehicles_found": "Sõidukeid ei leitud.",
+        "confirm_delete_vehicle": "Kas olete kindel, et soovite selle sõiduki kustutada?",
+        "vehicle_deleted_success": "Sõiduk kustutati edukalt.",
+        "failed_delete_vehicle": "Sõiduki kustutamine ebaõnnestus",
+        "enter_valid_plate_mileage": "Palun sisestage kehtiv number ja läbisõit.",
+        "must_be_equal_or_lower": "{label} peab olema võrdne või väiksem kui läbisõit.",
+        "vehicle_data_updated": "Sõiduki andmed uuendati edukalt",
+        "failed_update_vehicle_data": "Sõiduki andmete uuendamine ebaõnnestus",
+
+        "spark_plug": "Süüteküünlad",
+        "oil": "Õli eluiga",
+        "filter": "Õlifilter",
+        "air_filter": "Õhufilter",
+        "tire": "Rehvid",
+        "brake": "Pidurid",
+        "suspension": "Vedrustus",
+        "clutch": "Sidur",
+
+        "excellent": "Suurepärane",
+        "good": "Hea",
+        "warning": "Hoiatus",
+        "critical": "Kriitiline",
+        "disabled": "KEELATUD"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Teil pole piduriosasid",
         "no_clutch": "Teil pole siduriosasid",
         "no_suspension_parts": "Teil pole vedrustuse osi",
-        "no_spark_plugs": "Teil pole süüteküünlaid"
+        "no_spark_plug": "Teil pole süüteküünlaid"
     }
 }

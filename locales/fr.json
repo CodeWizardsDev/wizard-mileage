@@ -4,9 +4,60 @@
 
 
     "ui": {
-        "mileage": "Mileage:",
-        "unit_km": "Km",
-        "unit_miles": "Miles"
+        "mileage": "Mileage",
+        "unit_km": " Km",
+        "unit_miles": " Miles",
+
+        "save": "Enregistrer",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "cancel": "Annuler",
+        "close": "Fermer",
+
+        "mileage_meter_ui": "Interface du compteur kilométrique",
+        "checkwear_ui": "Interface d'usure",
+        "show_mileage_meter": "Afficher le compteur kilométrique",
+        "size": "Taille",
+        "position": "Position (X, Y)",
+
+        "vehicle_mileage_db": "Base de données kilométrage véhicule",
+        "edit_veh_data": "Modifier les données du véhicule",
+        "actions": "Actions",
+        "plate": "Plaque",
+        "last_oil_change": "Dernier changement d'huile",
+        "last_filter_change": "Dernier changement de filtre à huile",
+        "last_air_filter_change": "Dernier changement de filtre à air",
+        "last_tire_change": "Dernier changement de pneus",
+        "last_brake_change": "Dernier changement de freins",
+        "brake_wear": "Usure des freins",
+        "last_clutch_change": "Dernier changement d'embrayage",
+        "clutch_wear": "Usure de l'embrayage",
+        "last_sus_change": "Dernier changement de suspension",
+        "last_plugs_change": "Dernier changement de bougies",
+
+        "no_vehicles_found": "Aucun véhicule trouvé.",
+        "confirm_delete_vehicle": "Êtes-vous sûr de vouloir supprimer ce véhicule ?",
+        "vehicle_deleted_success": "Véhicule supprimé avec succès.",
+        "failed_delete_vehicle": "Échec de la suppression du véhicule",
+        "enter_valid_plate_mileage": "Veuillez entrer une plaque et un kilométrage valides.",
+        "must_be_equal_or_lower": "{label} doit être égal ou inférieur au kilométrage.",
+        "vehicle_data_updated": "Données du véhicule mises à jour avec succès",
+        "failed_update_vehicle_data": "Échec de la mise à jour des données du véhicule",
+
+        "spark_plug": "Bougies d'allumage",
+        "oil": "Durée de vie de l'huile",
+        "filter": "Filtre à huile",
+        "air_filter": "Filtre à air",
+        "tire": "Pneus",
+        "brake": "Freins",
+        "suspension": "Suspension",
+        "clutch": "Embrayage",
+
+        "excellent": "Excellent",
+        "good": "Bon",
+        "warning": "Avertissement",
+        "critical": "Critique",
+        "disabled": "DÉSACTIVÉ"
     },
     
     "target": {
@@ -73,6 +124,6 @@
         "no_brake_parts": "Tu n’as pas de pièces de frein",
         "no_clutch": "Tu n’as pas de pièces d’embrayage",
         "no_suspension_parts": "Tu n’as pas de pièces de suspension",
-        "no_spark_plugs": "Tu n’as pas de bougies d’allumage"
+        "no_spark_plug": "Tu n’as pas de bougies d’allumage"
     }
 }

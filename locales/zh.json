@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "里程：",
-        "unit_km": "公里",
-        "unit_miles": "英里"
+        "mileage": "里程",
+        "unit_km": " 公里",
+        "unit_miles": " 英里",
+
+        "save": "保存",
+        "edit": "编辑",
+        "delete": "删除",
+        "cancel": "取消",
+        "close": "关闭",
+
+        "mileage_meter_ui": "里程表界面",
+        "checkwear_ui": "磨损检查界面",
+        "show_mileage_meter": "显示里程表",
+        "size": "大小",
+        "position": "位置 (X, Y)",
+
+        "vehicle_mileage_db": "车辆里程数据库",
+        "edit_veh_data": "编辑车辆数据",
+        "actions": "操作",
+        "plate": "车牌",
+        "last_oil_change": "上次换油",
+        "last_filter_change": "上次更换机油滤清器",
+        "last_air_filter_change": "上次更换空气滤清器",
+        "last_tire_change": "上次更换轮胎",
+        "last_brake_change": "上次更换刹车",
+        "brake_wear": "刹车磨损",
+        "last_clutch_change": "上次更换离合器",
+        "clutch_wear": "离合器磨损",
+        "last_sus_change": "上次更换悬挂",
+        "last_plugs_change": "上次更换火花塞",
+
+        "no_vehicles_found": "未找到车辆。",
+        "confirm_delete_vehicle": "您确定要删除此车辆吗？",
+        "vehicle_deleted_success": "车辆删除成功。",
+        "failed_delete_vehicle": "删除车辆失败",
+        "enter_valid_plate_mileage": "请输入有效的车牌和里程。",
+        "must_be_equal_or_lower": "{label} 必须等于或小于里程。",
+        "vehicle_data_updated": "车辆数据更新成功",
+        "failed_update_vehicle_data": "车辆数据更新失败",
+
+        "spark_plug": "火花塞",
+        "oil": "机油寿命",
+        "filter": "机油滤清器",
+        "air_filter": "空气滤清器",
+        "tire": "轮胎",
+        "brake": "刹车",
+        "suspension": "悬挂",
+        "clutch": "离合器",
+
+        "excellent": "优秀",
+        "good": "良好",
+        "warning": "警告",
+        "critical": "严重",
+        "disabled": "禁用"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "您没有刹车零件",
         "no_clutch": "您没有离合器零件",
         "no_suspension_parts": "您没有悬挂零件",
-        "no_spark_plugs": "您没有火花塞"
+        "no_spark_plug": "您没有火花塞"
     }
 }

@@ -1,6 +1,8 @@
-1.2.3
-Some optimizations
-Added ND_Core support
-Added option to check vehicle without entering it
-Added mileage at top of the checkwear menu
-Added other langs: Czech, Greece, Spanish, Estonian, Finnish, Hungarian, Italian, Japanese, Lithuanian, Polish, Portuguese, Russian, Slovenian, Swedish, Thai, Turkish, Vietnamese, Chinese
+1.2.4
+UPDATE RECOMMENDED
+Huge Performance optimization!
+Less code lines, lower cpu & memory usage, faster execution.
+More configurable warning system
+More configurable UI
+Added all UI options to language files!
+Made code easier to understand

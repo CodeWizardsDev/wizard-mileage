@@ -2,9 +2,60 @@
     "__author": "@AI",
 
     "ui": {
-        "mileage": "Futásteljesítmény:",
-        "unit_km": "Km",
-        "unit_miles": "Mérföld"
+        "mileage": "Futásteljesítmény",
+        "unit_km": " Km",
+        "unit_miles": " Mérföld",
+
+        "save": "Mentés",
+        "edit": "Szerkesztés",
+        "delete": "Törlés",
+        "cancel": "Mégse",
+        "close": "Bezárás",
+
+        "mileage_meter_ui": "Futásteljesítmény-mérő felület",
+        "checkwear_ui": "Kopásellenőrző felület",
+        "show_mileage_meter": "Futásteljesítmény-mérő megjelenítése",
+        "size": "Méret",
+        "position": "Pozíció (X, Y)",
+
+        "vehicle_mileage_db": "Jármű futásteljesítmény-adatbázis",
+        "edit_veh_data": "Járműadatok szerkesztése",
+        "actions": "Műveletek",
+        "plate": "Rendszám",
+        "last_oil_change": "Utolsó olajcsere",
+        "last_filter_change": "Utolsó olajszűrő csere",
+        "last_air_filter_change": "Utolsó levegőszűrő csere",
+        "last_tire_change": "Utolsó gumicsere",
+        "last_brake_change": "Utolsó fékcsere",
+        "brake_wear": "Fékek kopása",
+        "last_clutch_change": "Utolsó kuplungcsere",
+        "clutch_wear": "Kuplung kopása",
+        "last_sus_change": "Utolsó felfüggesztés csere",
+        "last_plugs_change": "Utolsó gyújtógyertya csere",
+
+        "no_vehicles_found": "Nem található jármű.",
+        "confirm_delete_vehicle": "Biztosan törölni szeretné ezt a járművet?",
+        "vehicle_deleted_success": "A jármű sikeresen törölve lett.",
+        "failed_delete_vehicle": "A jármű törlése sikertelen volt",
+        "enter_valid_plate_mileage": "Kérjük, adjon meg érvényes rendszámot és kilométerállást.",
+        "must_be_equal_or_lower": "{label} egyenlő vagy kisebb kell legyen, mint a kilométeróra állása.",
+        "vehicle_data_updated": "A jármű adatai sikeresen frissítve lettek",
+        "failed_update_vehicle_data": "A jármű adatai nem frissültek",
+
+        "spark_plug": "Gyújtógyertyák",
+        "oil": "Olaj élettartama",
+        "filter": "Olajszűrő",
+        "air_filter": "Levegőszűrő",
+        "tire": "Gumik",
+        "brake": "Fékek",
+        "suspension": "Felfüggesztés",
+        "clutch": "Kuplung",
+
+        "excellent": "Kiváló",
+        "good": "Jó",
+        "warning": "Figyelmeztetés",
+        "critical": "Kritikus",
+        "disabled": "KIKAPCSOLVA"
     },
     
     "target": {
@@ -71,6 +122,6 @@
         "no_brake_parts": "Nincs fékalkatrészed",
         "no_clutch": "Nincs kuplungalakatrészed",
         "no_suspension_parts": "Nincs felfüggesztés alkatrészed",
-        "no_spark_plugs": "Nincs gyújtógyertyád"
+        "no_spark_plug": "Nincs gyújtógyertyád"
     }
 }

@@ -2,9 +2,60 @@
     "__author":"@AI",
 
     "ui": {
-        "mileage": "Przebieg:",
-        "unit_km": "Km",
-        "unit_miles": "Mile"
+        "mileage": "Przebieg",
+        "unit_km": " Km",
+        "unit_miles": " Mile",
+
+        "save": "Zapisz",
+        "edit": "Edytuj",
+        "delete": "Usuń",
+        "cancel": "Anuluj",
+        "close": "Zamknij",
+
+        "mileage_meter_ui": "Interfejs licznika przebiegu",
+        "checkwear_ui": "Interfejs kontroli zużycia",
+        "show_mileage_meter": "Pokaż licznik przebiegu",
+        "size": "Rozmiar",
+        "position": "Pozycja (X, Y)",
+
+        "vehicle_mileage_db": "Baza danych przebiegu pojazdu",
+        "edit_veh_data": "Edytuj dane pojazdu",
+        "actions": "Akcje",
+        "plate": "Tablica rejestracyjna",
+        "last_oil_change": "Ostatnia wymiana oleju",
+        "last_filter_change": "Ostatnia wymiana filtra oleju",
+        "last_air_filter_change": "Ostatnia wymiana filtra powietrza",
+        "last_tire_change": "Ostatnia wymiana opon",
+        "last_brake_change": "Ostatnia wymiana hamulców",
+        "brake_wear": "Zużycie hamulców",
+        "last_clutch_change": "Ostatnia wymiana sprzęgła",
+        "clutch_wear": "Zużycie sprzęgła",
+        "last_sus_change": "Ostatnia wymiana zawieszenia",
+        "last_plugs_change": "Ostatnia wymiana świec zapłonowych",
+
+        "no_vehicles_found": "Nie znaleziono pojazdów.",
+        "confirm_delete_vehicle": "Czy na pewno chcesz usunąć ten pojazd?",
+        "vehicle_deleted_success": "Pojazd został pomyślnie usunięty.",
+        "failed_delete_vehicle": "Nie udało się usunąć pojazdu",
+        "enter_valid_plate_mileage": "Wprowadź prawidłowy numer rejestracyjny i przebieg.",
+        "must_be_equal_or_lower": "{label} musi być równe lub mniejsze niż przebieg.",
+        "vehicle_data_updated": "Dane pojazdu zostały pomyślnie zaktualizowane",
+        "failed_update_vehicle_data": "Nie udało się zaktualizować danych pojazdu",
+
+        "spark_plug": "Świece zapłonowe",
+        "oil": "Żywotność oleju",
+        "filter": "Filtr oleju",
+        "air_filter": "Filtr powietrza",
+        "tire": "Opony",
+        "brake": "Hamulce",
+        "suspension": "Zawieszenie",
+        "clutch": "Sprzęgło",
+
+        "excellent": "Doskonały",
+        "good": "Dobry",
+        "warning": "Ostrzeżenie",
+        "critical": "Krytyczny",
+        "disabled": "WYŁĄCZONY"
     },
     
     "target": {
@@ -70,6 +121,6 @@
         "no_brake_parts": "Nie masz części hamulcowych",
         "no_clutch": "Nie masz części sprzęgła",
         "no_suspension_parts": "Nie masz części zawieszenia",
-        "no_spark_plugs": "Nie masz świec zapłonowych"
+        "no_spark_plug": "Nie masz świec zapłonowych"
     }
 }

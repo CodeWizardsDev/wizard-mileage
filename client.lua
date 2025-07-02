@@ -4,13 +4,15 @@
     They are used throughout the script to keep track of the player's vehicle status,
     UI visibility, wear levels, and cached data for server sync.
     Customers can reference these variables to understand what is being tracked.
---]]
+]]--
 
+-- Importing the required lib
+require("@wizard-lib/client/functions")
 
 -- UI and vehicle state flags
 local loaded = false                  -- Is vehicle data loaded?
 local mileageVisible = false          -- Is the mileage UI currently visible?
-local inVehicle = false               -- Is the player currently in a vehicle?
+local isInVehicle = false               -- Is the player currently in a vehicle?
 local waitingForData = false          -- Waiting for server data to load?
 local clutchWearDirty = false         -- Is clutch wear data dirty (needs sync)?
 local brakeWearDirty = false          -- Is brake wear data dirty (needs sync)?
@@ -20,16 +22,16 @@ local lastPos = nil                   -- Last known vehicle position (vector3)
 local currentPlate = nil              -- Current vehicle plate being tracked
 local CWFT = false                    -- Is checkWear menu openned for targetting script?
 local clipboardEntity = nil           -- The clipboard entity for checking vehicle wear
+local vehOwned = false                -- Is the vehicle owned by anyone?
+local playerPed = PlayerPedId()       -- Get the player's ped id (will update during the script events)
 
 -- Wear distances (in meters, set by config/unit)
-local unitMultiplier = (Config.Unit == "mile") and 1609.34 or 1000
+local unitMultiplier = (Cfg.Unit == "imperial") and 1609.34 or 1000
 local sparkPlugchangedist   = Config.SparkPlugChangeDistance * unitMultiplier
 local oilchangedist         = Config.OilChangeDistance * unitMultiplier
 local oilfilterchangedist   = Config.OilFilterDistance * unitMultiplier
 local airfilterchangedist   = Config.AirFilterDistance * unitMultiplier
 local tirechangedist        = Config.TireWearDistance * unitMultiplier
-
-local isOutdated = nil                -- Script version outdated flag
 
 -- Wear and mileage tracking values
 local accDistance = 0.0               -- Accumulated distance driven (meters)
@@ -45,6 +47,7 @@ local lastSuspensionChange = 0.0      -- Last suspension change mileage
 local suspensionWear = 0.0            -- Current suspension wear value
 local lastSparkPlugChange = 0.0       -- Last spark plug change mileage
 local sparkPlugWear = 0.0             -- Current spark plug wear value
+local lastSavedMil = 0.0              -- Lastest saved mileage
 
 -- Cached values for syncing with the server
 local cachedClutchWear = 0.0
@@ -61,73 +64,14 @@ local checkwearUISize = 1.0
 -- Engine warning notification timer
 local lastEngineCriticalNotify = 0
 
--- Callback tables for admin and vehicle list requests
-local adminCallbacks = {}
+-- Callback tables for vehicle list requests
 local vehicleListCallbacks = {}
 
-
-
----------------- Framework initialize ----------------
---[[
-    This section initializes the framework (ESX or ND or QBCore) based on the Config settings.
-    It sets up player data and job checks, and registers events for player loading.
-    The CheckJob function returns the player's job name and grade for use in service actions.
---]]
-if Config.FrameWork == 'esx' then
-    ESX = exports["es_extended"]:getSharedObject()
-
-    RegisterNetEvent('esx:playerLoaded')
-    AddEventHandler('esx:playerLoaded', function(xPlayer)
-        ESX.PlayerData = xPlayer
-        ESX.PlayerLoaded = true
-        TriggerServerEvent("wizard_vehiclemileage:server:getupdate")
-    end)
-
-    -- Returns the player's job name and grade
-    function CheckJob()
-        ESX = exports["es_extended"]:getSharedObject()
-        return ESX.GetPlayerData().job.name, ESX.GetPlayerData().job.grade
-    end
-elseif Config.FrameWork == 'nd' then
-    local nd_core = exports["ND_Core"]
-
-    NDCore = setmetatable({}, {
-        __index = function(self, index)
-            self[index] = function(...)
-                return nd_core[index](nil, ...)
-            end
-
-            return self[index]
-        end
-    })
-
-    RegisterNetEvent("ND:characterLoaded", function(char)
-        player = char
-    end)
-    RegisterNetEvent("ND:updateCharacter", function(char)
-        player = char
-    end)
-
-    -- Returns the player's job name and grade
-    function CheckJob()
-        local player = NDCore.getPlayer()
-        return player.job, player.jobInfo.rank
-    end
-else
-    QBCore = exports['qb-core']:GetCoreObject()
-
-    RegisterNetEvent("QBCore:Client:OnPlayerLoaded")
-    AddEventHandler("QBCore:Client:OnPlayerLoaded", function()
-        TriggerServerEvent("wizard_vehiclemileage:server:getupdate")
-    end)
-
-    -- Returns the player's job name and grade
-    function CheckJob()
-        local Player = QBCore.Functions.GetPlayerData()
-        return Player.job.name, Player.job.grade.level
-    end
-end
-
+-- Default wait time invertals for threads
+local wTM = 3000
+local wTU = 5000
+local wTB = 2000
+local wTC = 2000
 
 
 ---------------- Bought vehicles detection ----------------
@@ -135,7 +79,7 @@ end
     This section checks if a vehicle is owned by the player.
     If Config.BoughtVehiclesOnly is true, it will ask the server for ownership status.
     Otherwise, it will always return true (all vehicles are considered owned).
---]]
+]]--
 if Config.BoughtVehiclesOnly then
     local ownershipCache = {} -- Cache to store ownership results for plates
 
@@ -170,249 +114,22 @@ if Config.BoughtVehiclesOnly then
 else
     -- If not checking ownership, always return true (all vehicles are considered owned)
     function IsVehicleOwned()
-        local p = promise.new()
-        p:resolve(true)
-        return Citizen.Await(p)
+        return true
     end
 end
-
 
 ---------------- Functions ----------------
---[[
-    Checks for script updates and notifies the player in chat.
-    Waits until the isOutdated flag is set, then displays a message
-    if the script is outdated or up to date.
-    Params:
-        isOutdated (bool): Whether the script is outdated (set by server)
-        currentVersion (string): Current script version
-        latestVersion (string): Latest available version
---]]
-local function updateCheck(isOutdated, currentVersion, latestVersion)
-    while isOutdated == nil do Wait(100) end -- Wait until the check is complete
-    if isOutdated then
-        -- Notify player that their script is outdated
-        TriggerEvent('chat:addMessage', {
-            color = {255, 0, 255},
-            args = {
-                'Wizard Mileage',
-                ("^5Your script version ^2(%s) ^5is outdated. Latest version is ^2%s"):format(currentVersion, latestVersion)
-            }
-        })
-    else
-        -- Notify player that their script is up to date
-        TriggerEvent('chat:addMessage', {
-            color = {255, 0, 255},
-            args = {'Wizard Mileage', "^5Script is up to date"}
-        })
-    end
-end
-
---[[
-    Notify function for sending messages to the player using the configured notification system.
-    This function supports multiple notification resources (wizard-notify, okokNotify, qbx_core, qb, esx_notify, ox_lib).
-    It will automatically use the one selected in your Config.Notify setting.
-    Params:
-        message (string): The message to display to the player.
-        type (string): The type of notification (e.g., "success", "error", "info", "warning").
---]]
-local function Notify(message, type)
-    if not message or not type then return end -- Don't send empty notifications
-
-    -- Table of supported notification systems and their respective function calls
-    local notifyConfig = {
-        wizard = function() exports['wizard-notify']:Send('Wizard Mileage', message, 5000, type) end,
-        okok = function() exports['okokNotify']:Alert('Wizard Mileage', message, 5000, type, false) end,
-        qbx = function() exports.qbx_core:Notify(message, type, 5000) end,
-        qb = function() TriggerEvent('QBCore:Notify', source, message, type) end,
-        esx = function() exports['esx_notify']:Notify(message, type, 5000, 'Wizard Mileage') end,
-        ox = function() lib.notify{title = 'Wizard Mileage', description = message, type = type} end
-    }
-
-    -- Select and call the correct notification function based on config
-    local notifyFunc = notifyConfig[Config.Notify]
-    if notifyFunc then notifyFunc() end
-end
-
---[[
-    Triggers an admin callback to check if the current player is an admin.
-    This is used for admin-only features, such as opening the database management UI.
-    The callback is stored in a table with a unique ID, so when the server responds,
-    the correct callback can be executed.
-    @param cb (function): The function to call with the admin status (true/false).
---]]
-local function TriggerAdminCallback(cb)
-    local cbId = math.random(100000, 999999) -- Generate a unique callback ID
-    adminCallbacks[cbId] = cb                -- Store the callback for later use
-    TriggerServerEvent('wizard_vehiclemileage:server:isAdmin', cbId) -- Ask the server to check admin status
-end
-
 --[[
     Triggers a vehicle list callback to retrieve all vehicles from the server.
     This is used for admin/database features that need to display or manage all vehicles.
     The callback is stored in a table with a unique ID, so when the server responds,
     the correct callback can be executed.
     @param cb (function): The function to call with the vehicle list (table).
---]]
+]]--
 local function TriggerVehicleListCallback(cb)
     local cbId = math.random(100000, 999999) -- Generate a unique callback ID
     vehicleListCallbacks[cbId] = cb          -- Store the callback for later use
     TriggerServerEvent('wizard_vehiclemileage:server:getAllVehicles', cbId) -- Ask the server for the vehicle list
-end
-
---[[
-    Shows a progress bar to the player using the configured progress bar system.
-    Supports both 'qb' and 'ox' progress bar libraries, depending on your Config.ProgressBar setting.
-    Params:
-        duration (number): How long the progress bar should last (in ms).
-        label (string): The text label to show on the progress bar.
-        config (table): Additional settings (e.g., Cancelable, FreezePlayer, FreezeCar).
-    Returns:
-        true if the progress bar was started (qb), or the result of lib.progressBar (ox).
---]]
-local function DisplayProgressBar(duration, label, config)
-    if Config.ProgressBar == 'qb' then
-        -- QBCore progress bar
-        QBCore.Functions.Progressbar(
-            "vehicle_maintenance",           -- Unique key for this progress bar
-            label,                          -- Text to display
-            duration,                       -- Duration in ms
-            false,                          -- Not a repeating bar
-            config.Cancelable,              -- Can the player cancel?
-            {
-                disableMovement = config.FreezePlayer,
-                disableCarMovement = config.FreezeCar,
-                disableMouse = false,
-                disableCombat = true,
-            },
-            {}, {}, {},                     -- Animation and prop tables (unused here)
-            function() end,                 -- On success (empty)
-            function() end                  -- On cancel (empty)
-        )
-        return true
-    elseif Config.ProgressBar == 'ox' then
-        -- ox_lib progress bar
-        return lib.progressBar({
-            duration = duration,
-            label = label,
-            useWhileDead = false,
-            canCancel = config.Cancelable,
-            disable = {
-                car = config.FreezeCar,
-                move = config.FreezePlayer
-            }
-        })
-    end
-end
-
---[[
-    Checks if the player has a specific inventory item, depending on the configured inventory system.
-    Supports: ox_inventory, codem-inventory, qs-inventory, qb-core, es_extended.
-    Returns true if the item is found, false otherwise.
-    @param item (string): The item name to check for.
-    @return (boolean): True if the player has the item, false otherwise.
---]]
-local function checkInventoryItem(item)
-    if not Config.InventoryItems then return true end -- If inventory checks are disabled, always return true
-    local hasItem = false
-
-    if Config.InventoryScript == 'ox' then
-        -- ox_inventory: returns count of the item
-        hasItem = exports.ox_inventory:Search('count', item) > 0
-
-    elseif Config.InventoryScript == 'codem' then
-        -- codem-inventory: returns true if player has at least 1 of the item
-        hasItem = exports['codem-inventory']:HasItem(item, 1)
-
-    elseif Config.InventoryScript == 'quasar' then
-        -- qs-inventory: loop through player inventory and check for item
-        local PlayerInv = exports['qs-inventory']:getUserInventory()
-        for _, itemData in pairs(PlayerInv) do
-            if itemData.name == item and itemData.amount > 0 then
-                hasItem = true
-                break
-            end
-        end
-
-    elseif Config.InventoryScript == 'qb' then
-        -- qb-core: loop through player items and check for item
-        local QBCore = exports['qb-core']:GetCoreObject()
-        local Player = QBCore.Functions.GetPlayerData()
-        for _, v in pairs(Player.items) do
-            if v.name == item then
-                hasItem = true
-                break
-            end
-        end
-
-    elseif Config.InventoryScript == 'esx' then
-        -- es_extended: loop through player inventory and check for item with count > 0
-        local ESX = exports['es_extended']:getSharedObject()
-        local inventory = ESX.GetPlayerData().inventory
-        for _, v in pairs(inventory) do
-            if v.name == item and v.count > 0 then
-                hasItem = true
-                break
-            end
-        end
-    end
-
-    return hasItem
-end
-
---[[
-    Calculates the distance between two 3D vectors (positions).
-    Used to determine how far a vehicle has traveled between updates.
-    @param vec1 (vector3): The first position.
-    @param vec2 (vector3): The second position.
-    @return (number): The distance between the two positions.
---]]
-local function getDistance(vec1, vec2)
-    if not vec1 or not vec2 then return 0 end -- Return 0 if either position is missing
-    local dx, dy, dz = vec1.x - vec2.x, vec1.y - vec2.y, vec1.z - vec2.z
-    return math.sqrt(dx * dx + dy * dy + dz * dz)
-end
-
---[[
-    Finds the closest vehicle to the player within a given distance.
-    Useful for service actions and part changes.
-    @param maxDistance (number): The maximum distance to search for vehicles (default: 5.0).
-    @return (vehicle, number): The closest vehicle entity and its distance from the player.
---]]
-local function GetClosestVehicle(maxDistance)
-    local playerPed = PlayerPedId()
-    local playerCoords = GetEntityCoords(playerPed)
-    local vehicles = GetGamePool("CVehicle")
-    local closestDistance = maxDistance or 5.0
-    local closestVehicle = 0
-    for _, veh in ipairs(vehicles) do
-        local distance = #(playerCoords - GetEntityCoords(veh))
-        if distance < closestDistance then
-            closestDistance = distance
-            closestVehicle = veh
-        end
-    end
-    return closestVehicle, closestDistance
-end
-
---[[
-    Gets the license plate text of a vehicle entity.
-    Returns "UNKNOWN" if the entity does not exist.
-    @param vehicle (entity): The vehicle entity to check.
-    @return (string): The vehicle's license plate text, or "UNKNOWN" if not found.
---]]
-local function GetVehiclePlate(vehicle)
-    return DoesEntityExist(vehicle) and GetVehicleNumberPlateText(vehicle) or "UNKNOWN"
-end
-
---[[
-    Converts a distance in meters to either miles or kilometers, depending on config.
-    Used for displaying mileage in the preferred unit for your server.
-    @param meters (number): The distance in meters.
-    @return (number): The converted distance (miles or kilometers).
---]]
-local function convertDistance(meters)
-    -- If Config.Unit is "mile", convert meters to miles. Otherwise, convert to kilometers.
-    return Config.Unit == "mile" and meters * 0.000621371 or meters / 1000
 end
 
 --[[
@@ -421,10 +138,9 @@ end
     - Sends the updated wear value to the server for saving.
     - If the spark plugs are fully worn, there is a chance for a misfire (engine RPM drops).
     @param vehicle (entity): The vehicle entity to update.
---]]
+]]--
 local function updateSparkPlugWear(vehicle)
     if not Config.WearTracking.SparkPlugs then return end -- Skip if spark plug wear tracking is disabled
-    if not DoesEntityExist(vehicle) then return end       -- Skip if vehicle doesn't exist
 
     -- Calculate how far the vehicle has driven since last spark plug change
     local distanceSinceSparkPlugChange = accDistance - lastSparkPlugChange
@@ -434,18 +150,13 @@ local function updateSparkPlugWear(vehicle)
 
     sparkPlugWear = wearRatio
 
-    -- Sync wear value with the server
-    TriggerServerEvent('wizard_vehiclemileage:server:updateSparkPlugWear', currentPlate, sparkPlugWear)
-
     -- If spark plugs are fully worn, chance for a misfire
     if sparkPlugWear >= 1.0 then
-        local ped = PlayerPedId()
-        local veh = GetVehiclePedIsIn(ped, false)
         if DoesEntityExist(veh) then
             if math.random() < Config.MissfireChance then
-                Notify(locale('warning.spark_plug_misfire'), 'warning')
+                Notify('Wizard Mileage', locale('warning.spark_plug_misfire'), 'warning')
                 SetVehicleCurrentRpm(veh, 0.0)
-                Citizen.Wait(100)
+                Wait(100)
                 SetVehicleCurrentRpm(veh, 0.0)
             end
         end
@@ -457,10 +168,9 @@ end
     - If oil or filter is overdue, applies engine damage and drains oil faster.
     - Notifies the player if engine health is critical.
     @param vehicle (entity): The vehicle entity to update.
---]]
+]]--
 local function updateEngineDamage(vehicle)
     if not Config.WearTracking.Oil then return end
-    if not DoesEntityExist(vehicle) then return end
 
     -- Calculate wear ratios for oil and oil filter
     local oilDistanceDriven = accDistance - lastOilChange
@@ -491,7 +201,7 @@ local function updateEngineDamage(vehicle)
         if engineHealth < 200.0 then
             local currentTime = GetGameTimer()
             if (currentTime - lastEngineCriticalNotify) >= invertal then
-                Notify(locale('warning.engine_critical'), 'error')
+                Notify('Wizard Mileage', locale('warning.engine_critical'), 'error')
                 lastEngineCriticalNotify = currentTime
             end
         end
@@ -503,10 +213,9 @@ end
     - Reduces acceleration as the air filter wears out.
     - Saves and restores original drive force as needed.
     @param vehicle (entity): The vehicle entity to update.
---]]
+]]--
 local function updateAirFilterPerformance(vehicle)
     if not Config.WearTracking.AirFilter then return end
-    if not DoesEntityExist(vehicle) then return end
 
     -- Calculate air filter wear ratio (0 = new, 1 = fully worn)
     local airFilterDistanceDriven = accDistance - lastAirFilterChange
@@ -528,10 +237,9 @@ end
     Updates the tire wear for the given vehicle.
     - Reduces tire grip as tires wear out.
     @param vehicle (entity): The vehicle entity to update.
---]]
+]]--
 local function updateTireWear(vehicle)
     if not Config.WearTracking.Tires then return end
-    if not DoesEntityExist(vehicle) then return end
 
     -- Calculate tire wear ratio (0 = new, 1 = fully worn)
     local distanceSinceTireChange = accDistance - lastTireChange
@@ -550,10 +258,9 @@ end
     - Adjusts the brake force based on the current brake wear value.
     - The more worn the brakes, the less effective they become.
     @param vehicle (entity): The vehicle entity to update.
---]]
+]]--
 local function updateBrakeWear(vehicle)
     if not Config.WearTracking.Brakes then return end -- Skip if brake wear tracking is disabled
-    if not DoesEntityExist(vehicle) then return end   -- Skip if vehicle doesn't exist
 
     -- Get the current brake force (for reference, not used in calculation)
     local currentBrakeForce = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fBrakeForce")
@@ -572,10 +279,9 @@ end
     - Saves and restores original suspension force and raise values as needed.
     - Applies new suspension values to the vehicle based on wear.
     @param vehicle (entity): The vehicle entity to update.
---]]
+]]--
 local function updateSuspensionWear(vehicle)
     if not Config.WearTracking.Suspension then return end -- Skip if suspension wear tracking is disabled
-    if not DoesEntityExist(vehicle) then return end       -- Skip if vehicle doesn't exist
 
     -- Calculate how far the vehicle has driven since last suspension change
     local distanceSinceSuspensionChange = accDistance - lastSuspensionChange
@@ -589,20 +295,17 @@ local function updateSuspensionWear(vehicle)
 
     suspensionWear = wearRatio
 
-    -- Sync wear value with the server
-    TriggerServerEvent('wizard_vehiclemileage:server:updateSuspensionWear', currentPlate, suspensionWear)
-
     -- Get or save original suspension force and raise values
     local originalForce = originalSuspensionForce or GetVehicleHandlingFloat(vehicle, "CHandlingData", "fSuspensionForce")
     local originalRaise = originalSuspensionRaise or GetVehicleHandlingFloat(vehicle, "CHandlingData", "fSuspensionRaise")
 
     if not originalSuspensionForce or originalSuspensionForce == 0 then
         originalSuspensionForce = originalForce
-        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionForce', currentPlate, originalForce)
+        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionForce', plate, originalForce)
     end
     if not originalSuspensionRaise then
         originalSuspensionRaise = originalRaise
-        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', currentPlate, originalRaise)
+        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', plate, originalRaise)
     end
 
     -- Calculate new suspension values based on wear
@@ -620,21 +323,19 @@ end
     - If the clutch is very worn (efficiency <= 20%), simulates clutch failure and possible engine stall.
     - Notifies the player if the vehicle stalls due to clutch wear.
     @param vehicle (entity): The vehicle entity to update.
---]]
+]]--
 local function updateClutchWear(vehicle)
-    if not DoesEntityExist(vehicle) then return end
-
     -- Calculate clutch efficiency (1.0 = new, decreases as wear increases)
     local efficiency = 1.0 - (math.min(lastClutchWear, Config.MaxClutchWear) / Config.MaxClutchWear * Config.ClutchEfficiencyLoss)
 
     -- If clutch is very worn, simulate clutch failure and possible stall
     if efficiency <= 0.2 then
         -- Simulate clutch slipping/failure
-        Citizen.InvokeNative(GetHashKey('SET_VEHICLE_CLUTCH') & 0xFFFFFFFF, vehicle, -1.0)
+        InvokeNative(GetHashKey('SET_VEHICLE_CLUTCH') & 0xFFFFFFFF, vehicle, -1.0)
         -- Random chance to stall the engine
         if math.random() < Config.StallChance then
             SetVehicleEngineOn(vehicle, false, true, true)
-            Notify(locale('warning.stalled'), 'warning')
+            Notify('Wizard Mileage', locale('warning.stalled'), 'warning')
         end
     else
         -- You can add logic here for normal clutch operation if needed
@@ -643,11 +344,70 @@ local function updateClutchWear(vehicle)
 end
 
 --[[
+    Calculates the remaining life percentage for each tracked vehicle component.
+    Updates global variables for spark plugs, oil, filter, air filter, tires, brakes, suspension, and clutch based on current mileage and wear.
+    Also updates the displayed mileage value for the UI.
+]]--
+local function GetData()
+    if Config.WearTracking.SparkPlugs then
+        sparkPlugDistanceDriven = accDistance - lastSparkPlugChange
+        sparkPlugLifeRemaining = math.max(0, sparkPlugchangedist - sparkPlugDistanceDriven)
+        sparkPlugPercentage = math.floor((sparkPlugLifeRemaining / sparkPlugchangedist) * 100)
+    end
+    if Config.WearTracking.Oil then
+        oilDistanceDriven = accDistance - lastOilChange
+        oilLifeRemaining = math.max(0, oilchangedist - oilDistanceDriven)
+        oilPercentage = math.floor((oilLifeRemaining / oilchangedist) * 100)
+
+        filterDistanceDriven = accDistance - lastOilFilterChange
+        filterLifeRemaining = math.max(0, oilfilterchangedist - filterDistanceDriven)
+        filterPercentage = math.floor((filterLifeRemaining / oilfilterchangedist) * 100)
+    end
+    if Config.WearTracking.AirFilter then
+        airFilterDistanceDriven = accDistance - lastAirFilterChange
+        airFilterLifeRemaining = math.max(0, airfilterchangedist - airFilterDistanceDriven)
+        airFilterPercentage = math.floor((airFilterLifeRemaining / airfilterchangedist) * 100)
+    end
+    if Config.WearTracking.Tires then
+        tireDistanceDriven = accDistance - lastTireChange
+        tireLifeRemaining = math.max(0, tirechangedist - tireDistanceDriven)
+        tirePercentage = math.floor((tireLifeRemaining / tirechangedist) * 100)
+    end
+    if Config.WearTracking.Brakes then
+        brakePercentage = math.floor((1 - (lastbrakeWear / Config.MaxBrakeWear)) * 100)
+    end
+    if Config.WearTracking.Suspension then
+        suspensionDistanceDriven = accDistance - lastSuspensionChange
+        suspensionLifeRemaining = math.max(0, Config.SuspensionChangeDistance * 1000 - suspensionDistanceDriven)
+        suspensionPercentage = math.floor((suspensionLifeRemaining / (Config.SuspensionChangeDistance * 1000)) * 100)
+    end
+    if Config.WearTracking.Clutch then
+        clutchPercentage = math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
+    end
+    displayedMileage = convertDistance(accDistance)
+end
+
+--[[
+    Cleans up the clipboard entity and animation for the player.
+    Deletes the clipboard object if it exists and clears the player's current tasks/animations.
+    @param ped (entity): The player ped to clear tasks for.
+]]--
+local function CleanupClipboardEntity(ped)
+    if clipboardEntity then
+        DeleteObject(clipboardEntity)
+        clipboardEntity = nil
+    end
+    if ped then
+        ClearPedTasks(ped)
+    end
+end
+
+--[[
     Opens the service menu for the player, using the configured menu system.
     - If Config.Menu is "ox", shows the ox_lib context menu.
     - If Config.Menu is "qb", opens the qb-menu with all available service options.
     Each menu option triggers a client event to perform the selected maintenance action.
---]]
+]]--
 local function openServiceMenu()
     if Config.Menu == "ox" then
         -- Show ox_lib context menu
@@ -698,61 +458,52 @@ local function openServiceMenu()
     end
 end
 
--- Function to open the checkwear menu for a given vehicle entity
+--[[
+    Opens the vehicle wear check menu for a given vehicle.
+    Plays clipboard animation, checks for valid vehicle and ownership, and retrieves wear data from the server.
+    Displays error notifications if any checks fail, and cleans up the clipboard entity/animation as needed.
+    On success, sends wear data to the NUI for display.
+    @param vehicle (entity): The vehicle entity to check wear for.
+]]--
 local function openCheckWearMenu(vehicle)
-    Notify(locale('warning.checking_veh'), 'warning')
+    Notify('Wizard Mileage', locale('warning.checking_veh'), 'warning')
     
-    local ped = PlayerPedId()
-    local coords = GetEntityCoords(ped)
+    local coords = GetEntityCoords(playerPed)
     if clipboardEntity then
-        -- If it does, remove it and exit
-        DeleteObject(clipboardEntity)
-        clipboardEntity = nil
-        ClearPedTasks(ped)
+        CleanupClipboardEntity(playerPed)
         return
     end
-    RequestModel(Config.CheckVehicle.Object)
-    while not HasModelLoaded(Config.CheckVehicle.Object) do
-        Wait(500)
-    end
-    clipboardEntity = CreateObject(GetHashKey(Config.CheckVehicle.Object), coords.x, coords.y, coords.z, true, true, true)
-    AttachEntityToEntity(clipboardEntity, ped, GetPedBoneIndex(ped, Config.CheckVehicle.Bone), -0.1, 0.0, 0.0, 90.0, 0.0, 0.0, true, true, false, true, 1, true)
-    TaskPlayAnim(ped, Config.CheckVehicle.AnimDict, Config.CheckVehicle.Animation, 8.0, -8.0, -1, 49, 0, false, false, false)
+    local clipboardHash = RequestProp(Config.CheckVehicle.Object)
+    clipboardEntity = CreateObject(clipboardHash, coords.x, coords.y, coords.z, true, true, true)
+    AttachEntityToEntity(clipboardEntity, playerPed, GetPedBoneIndex(playerPed, Config.CheckVehicle.Bone), -0.1, 0.0, 0.0, 90.0, 0.0, 0.0, true, true, false, true, 1, true)
+    TaskPlayAnim(playerPed, Config.CheckVehicle.AnimDict, Config.CheckVehicle.Animation, 8.0, -8.0, -1, 49, 0, false, false, false)
 
     if not DoesEntityExist(vehicle) then
-        Notify(locale('error.not_found'), 'error')
+        Notify('Wizard Mileage', locale('error.not_found'), 'error')
         -- Clear the animation and remove the clipboard
-        ClearPedTasks(ped)
-        DeleteObject(clipboardEntity)
-        clipboardEntity = nil
+        CleanupClipboardEntity(playerPed)
         return
     end
 
-    if IsPedInAnyVehicle(ped, false) or IsPedInAnyVehicle(ped, true) or IsPedGettingIntoAVehicle(ped) then
-        Notify(locale('error.in_vehicle'), 'error')
+    if isInVehicle then
+        Notify('Wizard Mileage', locale('error.in_vehicle'), 'error')
         -- Clear the animation and remove the clipboard
-        ClearPedTasks(ped)
-        DeleteObject(clipboardEntity)
-        clipboardEntity = nil
+        CleanupClipboardEntity(playerPed)
         return
     end
 
     local plate = GetVehiclePlate(vehicle)
     if not plate or plate == 'UNKNOWN' then
-        Notify(locale('error.plate_not_found'), 'error')
+        Notify('Wizard Mileage', locale('error.plate_not_found'), 'error')
         -- Clear the animation and remove the clipboard
-        ClearPedTasks(ped)
-        DeleteObject(clipboardEntity)
-        clipboardEntity = nil
+        CleanupClipboardEntity(playerPed)
         return
     end
     
     if not IsVehicleOwned(plate) then 
-        Notify(locale('error.not_owned'), 'error') 
+        Notify('Wizard Mileage', locale('error.not_owned'), 'error') 
         -- Clear the animation and remove the clipboard
-        ClearPedTasks(ped)
-        DeleteObject(clipboardEntity)
-        clipboardEntity = nil
+        CleanupClipboardEntity(playerPed)
         return 
     end
 
@@ -761,56 +512,22 @@ local function openCheckWearMenu(vehicle)
     TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', plate)
 
     while not loaded do
-        Wait(250)
+        Wait(500)
     end
 
     CWFT = true
 
-    if Config.WearTracking.SparkPlugs then
-        sparkPlugDistanceDriven = accDistance - lastSparkPlugChange
-        sparkPlugLifeRemaining = math.max(0, sparkPlugchangedist - sparkPlugDistanceDriven)
-        sparkPlugPercentage = math.floor((sparkPlugLifeRemaining / sparkPlugchangedist) * 100)
-    end
-    if Config.WearTracking.Oil then
-        oilDistanceDriven = accDistance - lastOilChange
-        oilLifeRemaining = math.max(0, oilchangedist - oilDistanceDriven)
-        oilPercentage = math.floor((oilLifeRemaining / oilchangedist) * 100)
+    GetData()
 
-        filterDistanceDriven = accDistance - lastOilFilterChange
-        filterLifeRemaining = math.max(0, oilfilterchangedist - filterDistanceDriven)
-        filterPercentage = math.floor((filterLifeRemaining / oilfilterchangedist) * 100)
-    end
-    if Config.WearTracking.AirFilter then
-        airFilterDistanceDriven = accDistance - lastAirFilterChange
-        airFilterLifeRemaining = math.max(0, airfilterchangedist - airFilterDistanceDriven)
-        airFilterPercentage = math.floor((airFilterLifeRemaining / airfilterchangedist) * 100)
-    end
-    if Config.WearTracking.Tires then
-        tireDistanceDriven = accDistance - lastTireChange
-        tireLifeRemaining = math.max(0, tirechangedist - tireDistanceDriven)
-        tirePercentage = math.floor((tireLifeRemaining / tirechangedist) * 100)
-    end
-    if Config.WearTracking.Brakes then
-        brakePercentage = math.floor((1 - (lastbrakeWear / Config.MaxBrakeWear)) * 100)
-    end
-    if Config.WearTracking.Suspension then
-        suspensionDistanceDriven = accDistance - lastSuspensionChange
-        suspensionLifeRemaining = math.max(0, Config.SuspensionChangeDistance * 1000 - suspensionDistanceDriven)
-        suspensionPercentage = math.floor((suspensionLifeRemaining / (Config.SuspensionChangeDistance * 1000)) * 100)
-    end
-    if Config.WearTracking.Clutch then
-        clutchPercentage = math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
-    end
-    local displayedMileage = convertDistance(accDistance)
     SendNUIMessage({
         type = "closeCustomization"
     })
     SetNuiFocus(true, false)
-    SendNUIMessage({
+    local wearDataCache = {
         type = "updateWear",
         showUI = true,
         mileage = displayedMileage,
-        unit = (Config.Unit == "mile" and "miles" or "km"),
+        unit = (Cfg.Unit == "imperial" and "miles" or "km"),
         sparkPlugPercentage = sparkPlugPercentage,
         oilPercentage = oilPercentage,
         filterPercentage = filterPercentage,
@@ -819,328 +536,229 @@ local function openCheckWearMenu(vehicle)
         brakePercentage = brakePercentage,
         suspensionPercentage = suspensionPercentage,
         clutchPercentage = clutchPercentage
-    })
+    }
+    SendNUIMessage(wearDataCache)
 end
 
 --[[
-    Sends any cached clutch or brake wear data to the server for saving.
-    This function is called when the player exits the vehicle or at certain intervals,
-    ensuring that wear data is not lost and is always up to date on the server.
-    It only sends data if the player is in a vehicle and a plate is set,
-    and only for parts that have been marked as "dirty" (changed since last sync).
---]]
-local function sendCachedWearData()
-    if inVehicle and currentPlate then
-        -- If clutch wear has changed, send it to the server and reset the dirty flag
+    Performs a maintenance action on the nearest vehicle.
+    Checks job and inventory requirements, plays animation, shows a progress bar, and removes the required item.
+    Handles advanced actions (like opening the hood) if specified.
+    Returns true and the vehicle entity on success, or false and nil on failure.
+
+    @param item (string): The required inventory item for maintenance.
+    @param errorMSG (string): The error message key for missing item.
+    @param configData (table): Animation and progress bar configuration.
+    @param progressMSG (string): The progress bar message key.
+    @param isAdv (boolean): Whether to perform advanced actions (e.g., open hood).
+]]--
+local function DoMaintenance(item, errorMSG, configData, progressMSG, isAdv)
+    if Config.JobRequired then
+        local Job, Grade = CheckJob()
+        if Job ~= Config.MechanicJob then
+            Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
+            return
+        end
+        if Grade < Config.MinimumJobGrade then
+            Notify('Wizard Mileage', locale("error.low_grade"), "error")
+            return
+        end
+    end
+
+    if Config.InventoryItems and not checkInventoryItem(item) then
+        Notify('Wizard Mileage', locale("error." .. errorMSG), "error")
+        return
+    end
+
+    local closestVehicle = GetClosestVehicle(5.0)
+    if closestVehicle == 0 then
+        Notify('Wizard Mileage', locale("error.no_vehicle_nearby"), "error")
+        return
+    end
+
+    local vehicleClass = GetVehicleClass(closestVehicle)
+    if Config.DisabledVehicleClasses[vehicleClass] then
+        return
+    end
+
+    if isAdv then
+        if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
+            SetVehicleDoorOpen(closestVehicle, 4, false, true)
+            Wait(500)
+        end
+        local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
+        TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
+        Wait(1000)
+    end
+
+    PlayAnimation(playerPed, configData.AnimationDict, configData.Animation, -1 , 1)
+
+    if DisplayProgressBar(configData.Duration, locale("progress." .. progressMSG), configData) then
+        TriggerServerEvent('wizard-lib:server:removeItem', item, 1)
+        if isAdv then SetVehicleDoorShut(closestVehicle, 4, false) end
+        ClearPedTasks(playerPed)
+        return true, closestVehicle
+    else
+        if isAdv then SetVehicleDoorShut(closestVehicle, 4, false) end
+        return false, nil
+    end
+end
+
+--[[
+    Loads vehicle and mileage data when the player enters a vehicle.
+    Sets state flags, caches the starting position, resets accumulated distance,
+    shows the mileage UI if enabled, and requests the latest mileage data from the server.
+    @side-effect: Updates global state variables and UI.
+]]--
+local function LoadData()
+    isInVehicle = true
+    lastPos = GetEntityCoords(veh)
+    waitingForData = true
+    accDistance = 0.0
+    if mileageUIVisible then
+        SendNUIMessage({ type = "toggleMileage", visible = true })
+        mileageVisible = true
+    end
+    TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', currentPlate)
+end
+
+--[[
+    Clears and saves all vehicle and wear data when the player exits a vehicle or disconnects.
+    Hides the mileage UI, sends any unsaved wear and mileage data to the server,
+    resets all tracking variables, and clears cached state.
+    @side-effect: Triggers server events to persist data and resets local state.
+]]--
+local function ClearData(ClearType)
+    if mileageVisible then
+        SendNUIMessage({ type = "toggleMileage", visible = false })
+        mileageVisible = false
+    end
+
+    if ClearType == "normal" then
+        isInVehicle = false
+        inAnyVeh = false
+        lastPos = nil
+        accDistance = 0.0
+        currentPlate = nil
+        waitingForData = false
+        lastOilChange = 0.0
+        lastOilFilterChange = 0.0
+        lastAirFilterChange = 0.0
+        lastTireChange = 0.0
+        lastbrakeChange = 0.0
+        lastbrakeWear = 0.0
+        lastClutchChange = 0.0
+        lastClutchWear = 0.0
+        lastSuspensionChange = 0.0
+        suspensionWear = 0.0
+        lastSparkPlugChange = 0.0
+        sparkPlugWear = 0.0
+        cachedClutchWear = 0.0
+        cachedBrakeWear = 0.0
+        clutchWearDirty = false
+        brakeWearDirty = false
+        loaded = false
+        vehOwned = false
+    end
+
+    if currentPlate then
+        local savedPlate = currentPlate
+        local savedMil = accDistance
+        local savedPlugWear = sparkPlugWear
+        local savedSusWear = suspensionWear
         if clutchWearDirty then
             TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', currentPlate, cachedClutchWear)
-            clutchWearDirty = false
+        clutchWearDirty = false
         end
-        -- If brake wear has changed, send it to the server and reset the dirty flag
         if brakeWearDirty then
             TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWear', currentPlate, cachedBrakeWear)
             brakeWearDirty = false
         end
+        TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', currentPlate, savedMil)
+        TriggerServerEvent('wizard_vehiclemileage:server:updateSparkPlugWear', currentPlate, savedPlugWear)
+        TriggerServerEvent('wizard_vehiclemileage:server:updateSuspensionWear', currentPlate, savedSusWear)
     end
 end
 
-
-
 ---------------- Threads ----------------
 --[[
-    Main thread for mileage and wear tracking.
+    Main thread for mileage and wear tracking and Targeting script handler.
     This thread constantly checks if the player is in a vehicle, updates mileage, wear, and UI,
     and handles entering/exiting vehicles and syncing data with the server.
---]]
-Citizen.CreateThread(function()
-    -- Send initial configuration to the NUI (UI)
-    SendNUIMessage({
-        type = "Configuration",
-        maxMil = Config.MaxMileageDisplay,
-        language = Config.Language
-    })
-    local waitTime = 2000 -- Default wait time between checks (ms)
-    while true do
-        Citizen.Wait(waitTime)
-        local ped = PlayerPedId()
-        local isInVehicle = IsPedInAnyVehicle(ped, false)
-        if isInVehicle then
-            local veh = GetVehiclePedIsIn(ped, false)
-            local vehicleClass = GetVehicleClass(veh)
-            -- Hide UI if vehicle class is disabled
-            if Config.DisabledVehicleClasses[vehicleClass] then
-                SendNUIMessage({
-                    type = "toggleMileage",
-                    visible = false
-                })
-            else
-                -- Handle entering a vehicle
-                if not inVehicle then
-                    inVehicle = true
-                    lastPos = GetEntityCoords(veh)
-                    currentPlate = GetVehiclePlate(veh)
-                    if IsVehicleOwned(currentPlate) then
-                        waitingForData = true
-                        accDistance = 0.0
-                        TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', currentPlate)
-                        if mileageUIVisible then
-                            SendNUIMessage({
-                                type = "toggleMileage",
-                                visible = true
-                            })
-                            mileageVisible = true
-                        end
-                    else
-                        SendNUIMessage({
-                            type = "toggleMileage",
-                            visible = false
-                        })
-                    end
-                    waitTime = 1500 -- Reduce wait time for faster updates while in vehicle
-                else
-                    -- Handle mileage and wear updates while in vehicle
-                    if not waitingForData then
-                        local currentPos = GetEntityCoords(veh)
-                        local delta = getDistance(lastPos, currentPos)
-                        accDistance = accDistance + delta
-                        lastPos = currentPos
-                        local displayedMileage = convertDistance(accDistance)
-                
-                        -- Update UI with new mileage
-                        SendNUIMessage({
-                            type = "updateMileage",
-                            mileage = displayedMileage,
-                            unit = (Config.Unit == "mile" and "miles" or "km")
-                        })
-                
-                        -- Update all wear systems
-                        updateSparkPlugWear(veh)
-                        updateEngineDamage(veh)
-                        updateAirFilterPerformance(veh)
-                        updateSuspensionWear(veh)
-                        updateTireWear(veh)
-                    end
-                end
-            end
-        else
-            -- Handle exiting a vehicle
-            if inVehicle then
-                if currentPlate and IsVehicleOwned(currentPlate) then
-                    local savedPlate = currentPlate
-                    local savedDistance = accDistance
-                    
-                    sendCachedWearData() -- Sync any dirty wear data
-                    TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', savedPlate, savedDistance)
-                    Wait(100)
-                end
-                -- Reset all state variables
-                inVehicle = false
-                lastPos = nil
-                accDistance = 0.0
-                currentPlate = nil
-                waitingForData = false
-                lastOilChange = 0.0
-                lastOilFilterChange = 0.0
-                lastAirFilterChange = 0.0
-                lastTireChange = 0.0
-                lastbrakeChange = 0.0
-                lastbrakeWear = 0.0
-                lastClutchChange = 0.0
-                lastClutchWear = 0.0
-                lastSuspensionChange = 0.0
-                suspensionWear = 0.0
-                lastSparkPlugChange = 0.0
-                sparkPlugWear = 0.0
-                cachedClutchWear = 0.0
-                cachedBrakeWear = 0.0
-                clutchWearDirty = false
-                brakeWearDirty = false
-                loaded = false
-                -- Hide the mileage UI
-                SendNUIMessage({
-                    type = "toggleMileage",
-                    visible = false
-                })
-                waitTime = 2000 -- Restore default wait time
-            end
-        end
-    end
-end)
-
---[[
-    Clutch wear tracking thread.
-    This thread monitors gear changes while the player is in a vehicle and updates clutch wear accordingly.
-    - Only runs if clutch wear tracking is enabled in the config.
-    - Increases clutch wear each time the player shifts gears (with a cooldown to prevent rapid wear).
-    - Larger gear jumps (e.g., 1st to 3rd) cause more wear.
-    - If wear exceeds the maximum, it is capped.
-    - Marks clutch wear as "dirty" so it will be synced to the server.
-    - Calls updateClutchWear to apply any clutch effects (like stalling).
---]]
-Citizen.CreateThread(function()
-    if not Config.WearTracking.Clutch then return end
-    local prevGear = 0
-    local lastShiftTime = 0
-    local shiftCooldown = 500 -- Minimum ms between gear shifts to count as wear
-    while true do
-        Citizen.Wait(1000)
-        if inVehicle and currentPlate and allowSmartGearDetect then
-            local ped = PlayerPedId()
-            local veh = GetVehiclePedIsIn(ped, false)
-            if DoesEntityExist(veh) then
-                if IsVehicleOwned(currentPlate) then
-                    local currentGear = GetVehicleCurrentGear(veh)
-                    local currentTime = GetGameTimer()
-                    -- Only count gear changes after cooldown
-                    if (currentGear ~= prevGear) and ((currentTime - lastShiftTime) > shiftCooldown) then
-                        local gearDiff = math.abs(currentGear - prevGear)
-                        local wearIncrement = Config.ClutchWearRate * gearDiff
-                        -- Extra wear for skipping more than one gear
-                        if gearDiff > 1 then
-                            wearIncrement = wearIncrement * 1.5
-                        end
-                        lastClutchWear = lastClutchWear + wearIncrement
-                        if lastClutchWear > Config.MaxClutchWear then
-                            lastClutchWear = Config.MaxClutchWear
-                        end
-                        cachedClutchWear = lastClutchWear
-                        clutchWearDirty = true
-                        updateClutchWear(veh)
-                        lastShiftTime = currentTime
-                        prevGear = currentGear
-                    end
-                end
-            end
-        end
-    end
-end)
-
---[[
-    Brake wear tracking thread.
-    This thread monitors the player's braking while in a vehicle and increases brake wear accordingly.
-    - Only runs if brake wear tracking is enabled in the config.
-    - Increases brake wear each time the player presses the brake (default key: S or brake control).
-    - Only increases wear if the vehicle is moving and in gear.
-    - Caps the wear at the configured maximum.
-    - Marks brake wear as "dirty" so it will be synced to the server.
-    - Calls updateBrakeWear to apply any brake effects (like reduced braking power).
---]]
-Citizen.CreateThread(function()
-    if not Config.WearTracking.Brakes then return end
-    while true do
-        Citizen.Wait(1000)
-        if inVehicle and currentPlate then
-            if IsVehicleOwned(currentPlate) then
-                local ped = PlayerPedId()
-                local veh = GetVehiclePedIsIn(ped, false)
-                if DoesEntityExist(veh) and IsControlPressed(0, 72) then -- 72 is the brake control
-                    local speed = GetEntitySpeed(veh)
-                    local gear = GetVehicleCurrentGear(veh)
-                    if speed > 0 and gear > 0 then
-                        lastbrakeWear = lastbrakeWear + Config.BrakeWearRate
-                        if lastbrakeWear > Config.MaxBrakeWear then lastbrakeWear = Config.MaxBrakeWear end
-                        cachedBrakeWear = lastbrakeWear
-                        brakeWearDirty = true
-                        updateBrakeWear(veh)
-                    end
-                end
-            end
-        end
-    end
-end)
-
---[[
-    Targeting script handler.
-    This thread sets up vehicle interaction targets for supported targeting systems (ox_target, qb-target).
+    
+    also this thread sets up vehicle interaction targets for supported targeting systems (ox_target, qb-target).
     - Adds a "Service Vehicle" option to all vehicles for mechanics (or anyone, if job not required).
     - Checks if the player is not in a vehicle and owns the vehicle before allowing interaction.
     - Handles job and grade checks if required.
     - Opens the service menu when the target is selected.
     - Also registers the ox_lib context menu if using ox as the menu system.
---]]
-Citizen.CreateThread(function()
-    if not Config.UseTarget then
-        return
+]]--
+lib.onCache('vehicle', function(value, oldValue)
+    if not value then 
+        ClearData("normal")
+    else 
+        veh = value
+        inAnyVeh = true
+        local vehicleClass = GetVehicleClass(veh)
+        if Config.DisabledVehicleClasses[vehicleClass] then
+            return
+        end
+        currentPlate = GetVehiclePlate(veh)
+        if IsVehicleOwned(currentPlate) then
+            vehOwned = true
+            if GetPedInVehicleSeat(veh, -1) ~= playerPed then
+                return
+            end
+            LoadData()
+        else
+            vehOwned = false
+        end
     end
-    local targetConfig = {
-        ox = function()
-            exports.ox_target:addGlobalVehicle({
-                {
-                    name = "vehicle_service",
-                    icon = "fas fa-wrench",
-                    label = "Service Vehicle",
-                    canInteract = function(entity)
-                        local playerPed = PlayerPedId()
-                        if IsPedInAnyVehicle(playerPed, false) then
-                            return false
-                        end
-                        local plate = GetVehicleNumberPlateText(entity)
-                        return IsVehicleOwned(plate)
-                    end,
-                    onSelect = function()
-                        if Config.JobRequired then
-                            local Job, Grade = CheckJob()
-                            if Job == Config.MechanicJob then
-                                if Grade >= Config.MinimumJobGrade then
-                                    Wait(100)
-                                else
-                                    Notify(locale("error.low_grade"), "error")
-                                    return
-                                end
-                            else
-                                Notify(locale("error.not_mechanic"), "error")
-                                return
-                            end
-                        end
-                        openServiceMenu()
-                    end
-                },
-                {
-                    name = "vehicle_check",
-                    icon = "fas fa-info",
-                    label = "Check Vehicle",
-                    canInteract = function(entity)
-                        local playerPed = PlayerPedId()
-                        if IsPedInAnyVehicle(playerPed, false) then
-                            return false
-                        end
-                        local plate = GetVehicleNumberPlateText(entity)
-                        return IsVehicleOwned(plate)
-                    end,
-                    onSelect = function(data)
-                        local targetVeh = data.entity
-                        openCheckWearMenu(targetVeh)
-                    end
-                }
-            })
-        end,
-        qb = function()
-            exports["qb-target"]:AddGlobalVehicle({
-                options = {
+end)
+lib.onCache('seat', function(value, oldValue)
+    if oldValue == -1 then
+        ClearData("limited")
+    end
+    if value == -1 and vehOwned then
+        LoadData()
+    end
+end)
+lib.onCache('ped', function(value, oldValue)
+    playerPed = value
+end)
+CreateThread(function()
+    local lastMileage = -1    
+    if Config.Targeting then
+        local targetConfig = {
+            ox = function()
+                exports.ox_target:addGlobalVehicle({
                     {
-                        type = "client",
+                        name = "vehicle_service",
                         icon = "fas fa-wrench",
                         label = "Service Vehicle",
                         canInteract = function(entity)
-                            local playerPed = PlayerPedId()
-                            if IsPedInAnyVehicle(playerPed, false) then
+                            if inAnyVeh then
                                 return false
                             end
                             local plate = GetVehicleNumberPlateText(entity)
-                            return IsVehicleOwned(plate)
+                            if IsVehicleOwned(plate) then
+                                local vehicleClass = GetVehicleClass(entity)
+                                if Config.DisabledVehicleClasses[vehicleClass] then
+                                    return false
+                                else
+                                    return true
+                                end
+                            end
                         end,
-                        action = function()
+                        onSelect = function(data)
                             if Config.JobRequired then
                                 local Job, Grade = CheckJob()
-                                if Job == Config.MechanicJob then
-                                    if Grade >= Config.MinimumJobGrade then
-                                        Wait(100)
-                                    else
-                                        Notify(locale("error.low_grade"), "error")
-                                        return
-                                    end
-                                else
-                                    Notify(locale("error.not_mechanic"), "error")
+                                if Job ~= Config.MechanicJob then
+                                    Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
+                                    return
+                                end
+                                if Grade < Config.MinimumJobGrade then
+                                    Notify('Wizard Mileage', locale("error.low_grade"), "error")
                                     return
                                 end
                             end
@@ -1148,32 +766,100 @@ Citizen.CreateThread(function()
                         end
                     },
                     {
-                        type = "client",
+                        name = "vehicle_check",
                         icon = "fas fa-info",
                         label = "Check Vehicle",
                         canInteract = function(entity)
-                            local playerPed = PlayerPedId()
-                            if IsPedInAnyVehicle(playerPed, false) then
+                            if inAnyVeh then
                                 return false
                             end
                             local plate = GetVehicleNumberPlateText(entity)
-                            return IsVehicleOwned(plate)
+                            if IsVehicleOwned(plate) then
+                                local vehicleClass = GetVehicleClass(entity)
+                                if Config.DisabledVehicleClasses[vehicleClass] then
+                                    return false
+                                else
+                                    return true
+                                end
+                            end
                         end,
-                        action = function(data)
+                        onSelect = function(data)
                             local targetVeh = data.entity
                             openCheckWearMenu(targetVeh)
                         end
                     }
-                },
-                distance = 2.5
-            })
+                })
+            end,
+            qb = function()
+                exports["qb-target"]:AddGlobalVehicle({
+                    options = {
+                        {
+                            type = "client",
+                            icon = "fas fa-wrench",
+                            label = "Service Vehicle",
+                            canInteract = function(entity)
+                                if inAnyVeh then
+                                    return false
+                                end
+                                local plate = GetVehicleNumberPlateText(entity)
+                                if IsVehicleOwned(plate) then
+                                    local vehicleClass = GetVehicleClass(entity)
+                                    if Config.DisabledVehicleClasses[vehicleClass] then
+                                        return false
+                                    else
+                                        return true
+                                    end
+                                end
+                            end,
+                            action = function()
+                                if Config.JobRequired then
+                                    local Job, Grade = CheckJob()
+                                    if Job ~= Config.MechanicJob then
+                                        Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
+                                        return
+                                    end
+                                    if Grade < Config.MinimumJobGrade then
+                                        Notify('Wizard Mileage', locale("error.low_grade"), "error")
+                                        return
+                                    end
+                                end
+                                openServiceMenu()
+                            end
+                        },
+                        {
+                            type = "client",
+                            icon = "fas fa-info",
+                            label = "Check Vehicle",
+                            canInteract = function(entity)
+                                if inAnyVeh then
+                                    return false
+                                end
+                                local plate = GetVehicleNumberPlateText(entity)
+                                if IsVehicleOwned(plate) then
+                                    local vehicleClass = GetVehicleClass(entity)
+                                    if Config.DisabledVehicleClasses[vehicleClass] then
+                                        return false
+                                    else
+                                        return true
+                                    end
+                                end
+                            end,
+                            action = function(data)
+                                local targetVeh = data.entity
+                                openCheckWearMenu(targetVeh)
+                            end
+                        }
+                    },
+                    distance = 2.5
+                })
+            end
+        }
+        local targetFunc = targetConfig[Config.Targeting]
+        if targetFunc then
+            targetFunc()
         end
-    }
-    local targetFunc = targetConfig[Config.Targeting]
-    if targetFunc then
-        targetFunc()
     end
-    -- Register ox_lib context menu if using ox as the menu system
+    
     if Config.Menu == "ox" then
         lib.registerContext({
             id = "vehicle_service_menu",
@@ -1246,498 +932,295 @@ Citizen.CreateThread(function()
             }
         })
     end
+
+    while true do
+        if isInVehicle then
+            wTM = 1000
+            if not waitingForData then
+                local currentPos = GetEntityCoords(veh)
+                local delta = getDistance(lastPos, currentPos)
+                accDistance = accDistance + delta
+                lastPos = currentPos
+                local displayedMileage = convertDistance(accDistance)
+                if displayedMileage ~= lastMileage then
+                    SendNUIMessage({ type = "updateMileage", mileage = displayedMileage, unit = (Cfg.Unit == "imperial" and "miles" or "km") })
+                    lastMileage = displayedMileage
+                end
+            end
+        else
+            wTM = 3000
+        end
+        Wait(wTM)
+    end
+end)
+CreateThread(function()
+    while true do
+        if isInVehicle then
+            wTU = 3000
+            if not waitingForData then
+                updateSparkPlugWear(veh)
+                updateEngineDamage(veh)
+                updateAirFilterPerformance(veh)
+                updateSuspensionWear(veh)
+                updateTireWear(veh)
+            end
+        else
+            wTU = 5000
+        end
+        Wait(wTU)
+    end
+end)
+
+--[[
+    Clutch wear tracking thread.
+    This thread monitors gear changes while the player is in a vehicle and updates clutch wear accordingly.
+    - Only runs if clutch wear tracking is enabled in the config.
+    - Increases clutch wear each time the player shifts gears (with a cooldown to prevent rapid wear).
+    - Larger gear jumps (e.g., 1st to 3rd) cause more wear.
+    - If wear exceeds the maximum, it is capped.
+    - Marks clutch wear as "dirty" so it will be synced to the server.
+    - Calls updateClutchWear to apply any clutch effects (like stalling).
+]]--
+CreateThread(function()
+    if not Config.WearTracking.Clutch then return end
+    local prevGear = 0
+    local lastShiftTime = 0
+    local shiftCooldown = 500 -- Minimum ms between gear shifts to count as wear
+    while true do
+        if isInVehicle then
+            if currentPlate and allowSmartGearDetect then
+                wTC = 1500
+                local currentGear = GetVehicleCurrentGear(veh)
+                local currentTime = GetGameTimer()
+                -- Only count gear changes after cooldown
+                if (currentGear ~= prevGear) and ((currentTime - lastShiftTime) > shiftCooldown) then
+                    local gearDiff = math.abs(currentGear - prevGear)
+                    local wearIncrement = Config.ClutchWearRate * gearDiff
+                    -- Extra wear for skipping more than one gear
+                    if gearDiff > 1 then
+                        wearIncrement = wearIncrement * 1.3
+                    end
+                    lastClutchWear = lastClutchWear + wearIncrement
+                    if lastClutchWear > Config.MaxClutchWear then
+                        lastClutchWear = Config.MaxClutchWear
+                    end
+                    cachedClutchWear = lastClutchWear
+                    clutchWearDirty = true
+                    updateClutchWear(veh)
+                    lastShiftTime = currentTime
+                    prevGear = currentGear
+                end
+            end
+        else
+            wTC = 2000
+        end
+        Wait(wTC)
+    end
+end)
+
+--[[
+    Brake wear tracking thread.
+    This thread monitors the player's braking while in a vehicle and increases brake wear accordingly.
+    - Only runs if brake wear tracking is enabled in the config.
+    - Increases brake wear each time the player presses the brake (default key: S or brake control).
+    - Only increases wear if the vehicle is moving and in gear.
+    - Caps the wear at the configured maximum.
+    - Marks brake wear as "dirty" so it will be synced to the server.
+    - Calls updateBrakeWear to apply any brake effects (like reduced braking power).
+]]--
+CreateThread(function()
+    while true do
+        if isInVehicle then
+            if currentPlate then
+                wTB = 750
+                if Config.WearTracking.Brakes then 
+                    if IsControlPressed(0, 72) then -- 72 is the brake control
+                        local speed = GetEntitySpeed(veh)
+                        local gear = GetVehicleCurrentGear(veh)
+                        if speed > 0 and gear > 0 then
+                            lastbrakeWear = lastbrakeWear + Config.BrakeWearRate
+                            if lastbrakeWear > Config.MaxBrakeWear then lastbrakeWear = Config.MaxBrakeWear end
+                            cachedBrakeWear = lastbrakeWear
+                            brakeWearDirty = true
+                            updateBrakeWear(veh)
+                        end
+                    end
+                end
+            end
+        else
+            wTB = 2000
+        end
+        Wait(wTB)
+    end
 end)
 
 --[[
     UI wear update thread.
     This thread runs every 5 seconds and calculates the remaining life percentage for each tracked vehicle part.
-    - For each enabled wear system (spark plugs, oil, filter, air filter, tires, brakes, suspension, clutch),
-      it calculates the percentage of life remaining based on distance driven or wear value.
+    - For each enabled wear system (spark plugs, oil, filter, air filter, tires, brakes, clutch),
+    - it calculates the percentage of life remaining based on distance driven or wear value.
     - The calculated percentages are sent to the NUI (UI) for display.
     - This keeps the UI up to date with the latest wear status for all parts.
---]]
-Citizen.CreateThread(function()
+]]--
+CreateThread(function()
+    local lastWear = {}
     while true do
         Wait(5000)
-        if Config.WearTracking.SparkPlugs then
-            sparkPlugDistanceDriven = accDistance - lastSparkPlugChange
-            sparkPlugLifeRemaining = math.max(0, sparkPlugchangedist - sparkPlugDistanceDriven)
-            sparkPlugPercentage = math.floor((sparkPlugLifeRemaining / sparkPlugchangedist) * 100)
+        if isInVehicle and not waitingForData then
+            local wearData = {}
+
+            GetData()
+
+            -- Only send NUI message if data changed
+            local changed = false
+            for k, v in pairs(wearData) do
+                if lastWear[k] ~= v then
+                    changed = true
+                    break
+                end
+            end
+            if changed then
+                SendNUIMessage({ type = "updateWear", showUI = false, sparkPlugPercentage = wearData.sparkPlugPercentage, oilPercentage = wearData.oilPercentage, filterPercentage = wearData.filterPercentage, airFilterPercentage = wearData.airFilterPercentage, tirePercentage = wearData.tirePercentage, brakePercentage = wearData.brakePercentage, suspensionPercentage = wearData.suspensionPercentage, clutchPercentage = wearData.clutchPercentage })
+                lastWear = wearData
+            end
         end
-        if Config.WearTracking.Oil then
-            oilDistanceDriven = accDistance - lastOilChange
-            oilLifeRemaining = math.max(0, oilchangedist - oilDistanceDriven)
-            oilPercentage = math.floor((oilLifeRemaining / oilchangedist) * 100)
-        
-            filterDistanceDriven = accDistance - lastOilFilterChange
-            filterLifeRemaining = math.max(0, oilfilterchangedist - filterDistanceDriven)
-            filterPercentage = math.floor((filterLifeRemaining / oilfilterchangedist) * 100)
-        end
-        if Config.WearTracking.AirFilter then
-            airFilterDistanceDriven = accDistance - lastAirFilterChange
-            airFilterLifeRemaining = math.max(0, airfilterchangedist - airFilterDistanceDriven)
-            airFilterPercentage = math.floor((airFilterLifeRemaining / airfilterchangedist) * 100)
-        end
-        if Config.WearTracking.Tires then
-            tireDistanceDriven = accDistance - lastTireChange
-            tireLifeRemaining = math.max(0, tirechangedist - tireDistanceDriven)
-            tirePercentage = math.floor((tireLifeRemaining / tirechangedist) * 100)
-        end
-        if Config.WearTracking.Brakes then
-            brakePercentage = math.floor((1 - (lastbrakeWear / Config.MaxBrakeWear)) * 100)
-        end
-        if Config.WearTracking.Suspension then
-            suspensionDistanceDriven = accDistance - lastSuspensionChange
-            suspensionLifeRemaining = math.max(0, Config.SuspensionChangeDistance * 1000 - suspensionDistanceDriven)
-            suspensionPercentage = math.floor((suspensionLifeRemaining / (Config.SuspensionChangeDistance * 1000)) * 100)
-        end
-        if Config.WearTracking.Clutch then
-            clutchPercentage = math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
-        end
-        SendNUIMessage({
-            type = "updateWear",
-            showUI = false,
-            sparkPlugPercentage = sparkPlugPercentage,
-            oilPercentage = oilPercentage,
-            filterPercentage = filterPercentage,
-            airFilterPercentage = airFilterPercentage,
-            tirePercentage = tirePercentage,
-            brakePercentage = brakePercentage,
-            suspensionPercentage = suspensionPercentage,
-            clutchPercentage = clutchPercentage
-        })
     end
 end)
-
 
 
 ---------------- Net Events ----------------
 --[[
-    Admin checking callback.
-    This event is triggered by the server to return the result of an admin check.
-    It looks up the callback function by its unique ID and calls it with the admin status (true/false).
-    After calling, it removes the callback from the table to prevent memory leaks.
-    @param cbId (number): The unique callback ID.
-    @param isAdmin (boolean): Whether the player is an admin.
---]]
-RegisterNetEvent('wizard_vehiclemileage:client:isAdminCallback')
-AddEventHandler('wizard_vehiclemileage:client:isAdminCallback', function(cbId, isAdmin)
-    if adminCallbacks[cbId] then
-        adminCallbacks[cbId](isAdmin)
-        adminCallbacks[cbId] = nil
-    end
-end)
-
---[[
     Handles the spark plug change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changesparkplug')
 AddEventHandler('wizard_vehiclemileage:client:changesparkplug', function()
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
-    end
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.SparkPlug) then
-        Notify(locale("error.no_spark_plug"), "error")
-        return
-    end
-    local playerPed = PlayerPedId()
-    local closestVehicle = GetClosestVehicle(5.0)
-    if closestVehicle == 0 then
-        Notify(locale("error.no_vehicle_nearby"), "error")
-        return
-    end
-    local animDict = Config.ChangeSparkPlug.AnimationDict
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Wait(10)
-    end
-    TaskPlayAnim(playerPed, animDict, Config.ChangeSparkPlug.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if DisplayProgressBar(Config.ChangeSparkPlug.Duration, locale("progress.changingsparkplug"), Config.ChangeSparkPlug) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.SparkPlug, 1)
+    local Stats, closestVehicle = DoMaintenance(Config.Items.SparkPlug, "no_spark_plug", Config.ChangeSparkPlug, "changingsparkplug")
+    if Stats then
         local plate = GetVehicleNumberPlateText(closestVehicle)
-        Notify(locale("info.spark_plug_changed"), "success")
+        Notify('Wizard Mileage', locale("info.spark_plug_changed"), "success")
         TriggerServerEvent("wizard_vehiclemileage:server:updateSparkPlugChange", plate)
         TriggerServerEvent("wizard_vehiclemileage:server:updateSparkPlugWear", plate, 0)
         sparkPlugWear = 0
         updateSparkPlugWear(closestVehicle)
     end
-    ClearPedTasks(playerPed)
 end)
 
 --[[
     Handles the oil change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changeoil')
 AddEventHandler('wizard_vehiclemileage:client:changeoil', function()
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
-    end
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.EngineOil) then
-        Notify(locale("error.no_oil"), "error")
-        return
-    end
-    local playerPed = PlayerPedId()
-    local closestVehicle = GetClosestVehicle(5.0)
-    if closestVehicle == 0 then
-        Notify(locale("error.no_vehicle_nearby"), "error")
-        return
-    end
-    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
-        SetVehicleDoorOpen(closestVehicle, 4, false, true)
-        Wait(500)
-    end
-    local animDict = Config.ChangeOilFilter.AnimationDict
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Wait(10)
-    end
-    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
-    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
-    Wait(1000)
-    TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if DisplayProgressBar(Config.ChangeOil.Duration, locale("progress.changingoil"), Config.ChangeOil) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.EngineOil, 1)
+    local Stats, closestVehicle = DoMaintenance(Config.Items.EngineOil, "no_oil", Config.ChangeOil, "changingoil", true)
+    if Stats then
         local plate = GetVehicleNumberPlateText(closestVehicle)
-        Notify(locale("info.oil_changed"), "success")
+        Notify('Wizard Mileage', locale("info.oil_changed"), "success")
         TriggerServerEvent("wizard_vehiclemileage:server:updateOilChange", plate)
-        SetVehicleDoorShut(closestVehicle, 4, false)
-    else
-        SetVehicleDoorShut(closestVehicle, 4, false)
     end
-    ClearPedTasks(playerPed)
 end)
 
 --[[
     Handles the oil filter change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changeoilfilter')
 AddEventHandler('wizard_vehiclemileage:client:changeoilfilter', function()
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.OilFilter) then
-        Notify(locale("error.no_oil_filter"), "error")
-        return
-    end
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
-    end
-    local playerPed = PlayerPedId()
-    local closestVehicle = GetClosestVehicle(5.0)
-    if closestVehicle == 0 then
-        Notify(locale("error.no_vehicle_nearby"), "error")
-        return
-    end
-    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
-        SetVehicleDoorOpen(closestVehicle, 4, false, true)
-        Wait(500)
-    end
-    local animDict = Config.ChangeOil.AnimationDict
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Wait(10)
-    end
-    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
-    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
-    Wait(1000)
-    TaskPlayAnim(playerPed, animDict, Config.ChangeOilFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if DisplayProgressBar(Config.ChangeOilFilter.Duration, locale("progress.changingoilfilter"), Config.ChangeOilFilter) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.OilFilter, 1)
+    local Stats, closestVehicle = DoMaintenance(Config.Items.OilFilter, "no_oil_filter", Config.ChangeOilFilter, "changingoilfilter", true)
+    if Stats then
         local plate = GetVehicleNumberPlateText(closestVehicle)
-        Notify(locale("info.filter_changed"), "success")
+        Notify('Wizard Mileage', locale("info.filter_changed"), "success")
         TriggerServerEvent("wizard_vehiclemileage:server:updateOilFilter", plate)
-        SetVehicleDoorShut(closestVehicle, 4, false)
-    else
-        SetVehicleDoorShut(closestVehicle, 4, false)
     end
-    ClearPedTasks(playerPed)
 end)
 
 --[[
     Handles the air filter change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changeairfilter')
 AddEventHandler('wizard_vehiclemileage:client:changeairfilter', function()
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
-    end
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.AirFilter) then
-        Notify(locale("error.no_air_filter"), "error")
-        return
-    end
-    local playerPed = PlayerPedId()
-    local closestVehicle = GetClosestVehicle(5.0)
-    if closestVehicle == 0 then
-            Notify(locale("error.no_vehicle_nearby"), "error")
-            return
-    end
-    if not IsVehicleDoorFullyOpen(closestVehicle, 4) then
-        SetVehicleDoorOpen(closestVehicle, 4, false, true)
-        Wait(500)
-    end
-    local animDict = Config.ChangeAirFilter.AnimationDict
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Wait(10)
-    end
-    local offset = GetOffsetFromEntityInWorldCoords(closestVehicle, 0.0, 2.0, 0.0)
-    TaskGoStraightToCoord(playerPed, offset.x, offset.y, offset.z, 1.0, -1, -1, 0.0)
-    Wait(1000)
-    TaskPlayAnim(playerPed, animDict, Config.ChangeAirFilter.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if DisplayProgressBar(Config.ChangeAirFilter.Duration, locale("progress.changingairfilter"), Config.ChangeAirFilter) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.AirFilter, 1)
+    local Stats, closestVehicle = DoMaintenance(Config.Items.AirFilter, "no_air_filter", Config.ChangeAirFilter, "changingairfilter", true)
+    if Stats then
         local plate = GetVehicleNumberPlateText(closestVehicle)
-        Notify(locale("info.air_filter_changed"), "success")
+        Notify('Wizard Mileage', locale("info.air_filter_changed"), "success")
         TriggerServerEvent("wizard_vehiclemileage:server:updateAirFilter", plate)
-        SetVehicleDoorShut(closestVehicle, 4, false)
-    else
-        SetVehicleDoorShut(closestVehicle, 4, false)
     end
-    ClearPedTasks(playerPed)
 end)
 
 --[[
     Handles the tire change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changetires')
 AddEventHandler('wizard_vehiclemileage:client:changetires', function()
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
-    end
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.Tires) then
-        Notify(locale("error.no_tires"), "error")
-        return
-    end
-    local playerPed = PlayerPedId()
-    local closestVehicle = GetClosestVehicle(5.0)
-    if closestVehicle == 0 then
-        Notify(locale("error.no_vehicle_nearby"), "error")
-        return
-    end
-    local animDict = Config.ChangeTires.AnimationDict
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Wait(10)
-    end
-    TaskPlayAnim(playerPed, animDict, Config.ChangeTires.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if DisplayProgressBar(Config.ChangeTires.Duration, locale("progress.changingtires"), Config.ChangeTires) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.Tires, 1)
+    local Stats, closestVehicle = DoMaintenance(Config.Items.Tires, "no_tires", Config.ChangeTires, "changingtires")
+    if Stats then
         local plate = GetVehicleNumberPlateText(closestVehicle)
         lastTireChange = accDistance
         for i = 0, 5 do
             SetVehicleTyreFixed(closestVehicle, i)
         end
-        Notify(locale("info.tire_changed"), "success")
+        Notify('Wizard Mileage', locale("info.tire_changed"), "success")
         TriggerServerEvent("wizard_vehiclemileage:server:updateTireChange", plate)
         SetVehicleHandlingFloat(closestVehicle, "CHandlingData", "fTractionCurveMax", Config.BaseTireGrip)
     end
-    ClearPedTasks(playerPed)
 end)
 
 --[[
     Handles the brake change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changebrakes')
 AddEventHandler('wizard_vehiclemileage:client:changebrakes', function()
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
-    end
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.BrakeParts) then
-        Notify(locale("error.no_brake_parts"), "error")
-        return
-    end
-    local playerPed = PlayerPedId()
-    local closestVehicle = GetClosestVehicle(5.0)
-    if closestVehicle == 0 then
-        Notify(locale("error.no_vehicle_nearby"), "error")
-        return
-    end
-    local animDict = Config.ChangeBrakes.AnimationDict
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Wait(10)
-    end
-    TaskPlayAnim(playerPed, animDict, Config.ChangeBrakes.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if DisplayProgressBar(Config.ChangeBrakes.Duration, locale("progress.changingbrakes"), Config.ChangeBrakes) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.BrakeParts, 1)
+    local Stats, closestVehicle = DoMaintenance(Config.Items.BrakeParts, "no_brake_parts", Config.ChangeBrakes, "changingbrakes")
+    if Stats then
         local plate = GetVehicleNumberPlateText(closestVehicle)
-        Notify(locale("info.brakes_changed"), "success")
+        Notify('Wizard Mileage', locale("info.brakes_changed"), "success")
         TriggerServerEvent("wizard_vehiclemileage:server:updateBrakeChange", plate)
         lastbrakeWear = 0.0
         updateBrakeWear(closestVehicle)
     end
-    ClearPedTasks(playerPed)
 end)
 
 --[[
     Handles the suspension change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changesuspension')
 AddEventHandler('wizard_vehiclemileage:client:changesuspension', function()
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
-    end
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.SusParts) then
-        Notify(locale("error.no_suspension_parts"), "error")
-        return
-    end
-    local playerPed = PlayerPedId()
-    local closestVehicle = GetClosestVehicle(5.0)
-    if closestVehicle == 0 then
-        Notify(locale("error.no_vehicle_nearby"), "error")
-        return
-    end
-    local animDict = Config.ChangeSuspension.AnimationDict
-    RequestAnimDict(animDict)
-    while not HasAnimDictLoaded(animDict) do
-        Wait(10)
-    end
-    TaskPlayAnim(playerPed, animDict, Config.ChangeSuspension.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-    if DisplayProgressBar(Config.ChangeSuspension.Duration, locale("progress.changingsuspension"), Config.ChangeSuspension) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.SusParts, 1)
+    local Stats, closestVehicle = DoMaintenance(Config.Items.SusParts, "no_suspension_parts", Config.ChangeSuspension, "changingsuspension")
+    if Stats then
         local plate = GetVehicleNumberPlateText(closestVehicle)
-        Notify(locale("info.suspension_changed"), "success")
+        Notify('Wizard Mileage', locale("info.suspension_changed"), "success")
         TriggerServerEvent("wizard_vehiclemileage:server:updateSuspensionChange", plate)
         TriggerServerEvent("wizard_vehiclemileage:server:updateSuspensionWear", plate, 0)
         suspensionWear = 0
         updateSuspensionWear(closestVehicle)
     end
-    ClearPedTasks(playerPed)
 end)
 
 --[[
     Handles the clutch change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:changeclutch')
 AddEventHandler('wizard_vehiclemileage:client:changeclutch', function()
-    if Config.JobRequired then
-        local Job, Grade = CheckJob()
-        if Job == Config.MechanicJob then
-            if Grade >= Config.MinimumJobGrade then
-                Wait(100)
-            else
-                Notify(locale("error.low_grade"), "error")
-                return
-            end
-        else
-            Notify(locale("error.not_mechanic"), "error")
-            return
-        end
+    local Stats, closestVehicle = DoMaintenance(Config.Items.Clutch, "no_clutch", Config.ChangeClutch, "changingclutch")
+    if Stats then
+        local plate = GetVehicleNumberPlateText(closestVehicle)
+        Notify('Wizard Mileage', locale("info.clutch_changed"), "success")
+        TriggerServerEvent("wizard_vehiclemileage:server:updateClutchChange", plate)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateClutchWear", plate, 0)
+        lastClutchWear = 0
+        updateClutchWear(closestVehicle)
     end
-    if Config.InventoryItems and not checkInventoryItem(Config.Items.Clutch) then
-        Notify(locale("error.no_clutch"), "error")
-        return
-    end
-    local playerPed = PlayerPedId()
-        local closestVehicle = GetClosestVehicle(5.0)
-        if closestVehicle == 0 then
-            Notify(locale("error.no_vehicle_nearby"), "error")
-            return
-        end
-        local animDict = Config.ChangeClutch.AnimationDict
-        RequestAnimDict(animDict)
-        while not HasAnimDictLoaded(animDict) do
-            Wait(10)
-        end
-        TaskPlayAnim(playerPed, animDict, Config.ChangeClutch.Animation, 8.0, -8.0, -1, 1, 0, false, false, false)
-        if DisplayProgressBar(Config.ChangeClutch.Duration, locale("progress.changingclutch"), Config.ChangeClutch) then
-            TriggerServerEvent('wizard_vehiclemileage:server:removeItem', Config.Items.Clutch, 1)
-            local plate = GetVehicleNumberPlateText(closestVehicle)
-            Notify(locale("info.clutch_changed"), "success")
-            TriggerServerEvent("wizard_vehiclemileage:server:updateClutchChange", plate)
-            TriggerServerEvent("wizard_vehiclemileage:server:updateClutchWear", plate, 0)
-            lastClutchWear = 0
-            updateClutchWear(closestVehicle)
-        end
-        ClearPedTasks(playerPed)
 end)
 
 --[[
     Receives and sets vehicle mileage and wear data from the server.
     Updates local variables and UI.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:setData')
 AddEventHandler('wizard_vehiclemileage:client:setData', function(mileage, oilChange, filterChange, AirfilterChange, tireChange, brakeChange, brakeWear, clutchChange, clutchWear, origDriveForce, lastSuspensionChangeVal, suspensionWearVal, lastSparkPlugChangeVal, sparkPlugWearVal)
     accDistance = mileage or 0.0
@@ -1760,13 +1243,13 @@ AddEventHandler('wizard_vehiclemileage:client:setData', function(mileage, oilCha
     SendNUIMessage({
         type = "updateMileage",
         mileage = displayedMileage,
-        unit = (Config.Unit == "mile" and "miles" or "km")
+        unit = (Cfg.Unit == "imperial" and "miles" or "km")
     })
 end)
 
 --[[
     Receives notification that vehicle data has been updated and refreshes the vehicle list in the UI.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:vehicleDataUpdated')
 AddEventHandler('wizard_vehiclemileage:client:vehicleDataUpdated', function()
     TriggerVehicleListCallback(function(vehicles)
@@ -1779,7 +1262,7 @@ end)
 
 --[[
     Receives the full vehicle list from the server for admin/database UI.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:getAllVehiclesCallback')
 AddEventHandler('wizard_vehiclemileage:client:getAllVehiclesCallback', function(cbId, vehicles)
     if vehicleListCallbacks[cbId] then
@@ -1790,7 +1273,7 @@ end)
 
 --[[
     Receives and applies player UI customization settings from the server.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:setPlayerSettings')
 AddEventHandler('wizard_vehiclemileage:client:setPlayerSettings', function(settings)
     if not settings then return end
@@ -1817,7 +1300,7 @@ end)
 
 --[[
     Receives and sets the original drive force value for the current vehicle.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:setOriginalDriveForce')
 AddEventHandler('wizard_vehiclemileage:client:setOriginalDriveForce', function(driveForce)
     originalDriveForce = driveForce
@@ -1825,7 +1308,7 @@ end)
 
 --[[
     Receives and sets the original suspension raise value for the current vehicle.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:setOriginalSusRaise')
 AddEventHandler('wizard_vehiclemileage:client:setOriginalSusRaise', function(susRaise)
     originalSuspensionRaise = susRaise
@@ -1833,7 +1316,7 @@ end)
 
 --[[
     Receives and sets the original suspension force value for the current vehicle.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:setOriginalSusForce')
 AddEventHandler('wizard_vehiclemileage:client:setOriginalSusForce', function(susForce)
     originalSuspensionForce = susForce
@@ -1841,10 +1324,10 @@ end)
 
 --[[
     Updates clutch wear for wizard_manualtransmission integration.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:updateClutchWT')
 AddEventHandler('wizard_vehiclemileage:client:updateClutchWT', function()
-    if not IsVehicleOwned(currentPlate) then return end
+    if not vehOwned then return end
     
     lastClutchWear = lastClutchWear + Config.ClutchWearRate
     if lastClutchWear > Config.MaxClutchWear then
@@ -1856,7 +1339,7 @@ end)
 
 --[[
     Enables or disables smart gear detection for clutch wear tracking.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:smartGearDetect')
 AddEventHandler('wizard_vehiclemileage:client:smartGearDetect', function(data)
     allowSmartGearDetect = data
@@ -1864,19 +1347,26 @@ end)
 
 --[[
     Receives script version check results and triggers update notification.
---]]
+]]--
 RegisterNetEvent('wizard_vehiclemileage:client:setOutdated')
 AddEventHandler('wizard_vehiclemileage:client:setOutdated', function(data, currentVersion, latestVersion)
-    updateCheck(data, currentVersion, latestVersion)
+    updateCheck("Wizard Mileage", {255, 0, 255}, data, currentVersion, latestVersion)
 end)
 
 AddEventHandler('onClientResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
         TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+        TriggerServerEvent('wizard_vehiclemileage:server:getupdate')
+    end
+end)
+AddEventHandler('onClientResourceStop', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        ClearData("normal")
     end
 end)
 AddEventHandler('playerSpawned', function()
     TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+    playerPed = PlayerPedId()
 end)
 
 ---------------- Autosave system ----------------
@@ -1886,14 +1376,17 @@ end)
     - The interval is set by Config.AutosaveInterval (in seconds).
     - Only saves if the player is in a vehicle, the plate is set, the vehicle is owned, and not waiting for data.
     - Helps prevent mileage loss if the player crashes or disconnects unexpectedly.
---]]
+]]--
 if Config.Autosave then
     local autosaveinvl = Config.AutosaveInterval * 1000
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
-            Citizen.Wait(autosaveinvl)
-            if inVehicle and currentPlate and IsVehicleOwned(currentPlate) and not waitingForData then
-                TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', currentPlate, accDistance)
+            Wait(autosaveinvl)
+            if isInVehicle and not waitingForData then
+                if accDistance - lastSavedMil > Config.MinDiffToSave then
+                    lastSavedMil = accDistance
+                    TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', currentPlate, accDistance)
+                end
             end
         end
     end)
@@ -1908,85 +1401,49 @@ end
     - When a threshold is reached, a notification is sent to the player with the severity and suggested action.
     - The check interval is set by Config.WarningsInterval (in seconds).
     - Only runs if the player is in a vehicle and not waiting for data.
---]]
+]]--
 if Config.ChangeWarnings then
     local components = {
+        sparkPlug = {
+            lastChange = function() return lastSparkPlugChange end,
+            changedist = sparkPlugchangedist,
+            computeDistance = function() return accDistance - lastSparkPlugChange end,
+            thresholds = Config.Thresholds.SparkPlugs,
+            localeKey = "warning.remaining_spark_plug"
+        },
         oil = {
             lastChange = function() return lastOilChange end,
             changedist = oilchangedist,
             computeDistance = function() return accDistance - lastOilChange end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 2, severity = 'warning', action = 'replace_soon' },
-                { value = 3, severity = 'warning', action = 'replace_need' },
-                { value = 5, severity = 'warning' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' },
-                { value = 50, severity = 'info' }
-            },
+            thresholds = Config.Thresholds.Oil,
             localeKey = "warning.remaining_oil"
         },
         filter = {
             lastChange = function() return lastOilFilterChange end,
             changedist = oilfilterchangedist,
             computeDistance = function() return accDistance - lastOilFilterChange end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 5, severity = 'warning', action = 'replace_soon' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' }
-            },
+            thresholds = Config.Thresholds.OilFilter,
             localeKey = "warning.remaining_filter"
         },
         airFilter = {
             lastChange = function() return lastAirFilterChange end,
             changedist = airfilterchangedist,
             computeDistance = function() return accDistance - lastAirFilterChange end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 5, severity = 'warning', action = 'replace_soon' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' }
-            },
+            thresholds = Config.Thresholds.AirFilter,
             localeKey = "warning.remaining_air_filter"
         },
         tire = {
             lastChange = function() return lastTireChange end,
             changedist = tirechangedist,
             computeDistance = function() return accDistance - lastTireChange end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 2, severity = 'warning', action = 'replace_soon' },
-                { value = 3, severity = 'warning', action = 'replace_need' },
-                { value = 5, severity = 'warning', action = 'replace_need' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' },
-                { value = 50, severity = 'info' }
-            },
+            thresholds = Config.Thresholds.Tires,
             localeKey = "warning.remaining_tire"
-        },
-        sparkPlug = {
-            lastChange = function() return lastSparkPlugChange end,
-            changedist = sparkPlugchangedist,
-            computeDistance = function() return accDistance - lastSparkPlugChange end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 5, severity = 'warning', action = 'replace_soon' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' }
-            },
-            localeKey = "warning.remaining_spark_plug"
         },
         suspension = {
             lastChange = function() return lastSuspensionChange end,
             changedist = Config.SuspensionChangeDistance * 1000,
             computeDistance = function() return accDistance - lastSuspensionChange end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 5, severity = 'warning', action = 'replace_soon' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' }
-            },
+            thresholds = Config.Thresholds.Suspension,
             localeKey = "warning.remaining_suspension"
         }
     }
@@ -1995,24 +1452,14 @@ if Config.ChangeWarnings then
             value = function()
                 return math.floor((1 - (lastbrakeWear / Config.MaxBrakeWear)) * 100)
             end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 5, severity = 'warning', action = 'replace_soon' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' }
-            },
+            thresholds = Config.Thresholds.Brakes,
             localeKey = "warning.remaining_brakes"
         },
         clutch = {
             value = function()
                 return math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
             end,
-            thresholds = {
-                { value = 1, severity = 'error', action = 'replace_immediately' },
-                { value = 5, severity = 'warning', action = 'replace_soon' },
-                { value = 10, severity = 'warning' },
-                { value = 25, severity = 'info' }
-            },
+            thresholds = Config.Thresholds.Clutch,
             localeKey = "warning.remaining_clutch"
         }
     }
@@ -2021,13 +1468,13 @@ if Config.ChangeWarnings then
         for _, threshold in ipairs(componentData.thresholds) do
             if percentage <= threshold.value then
                 local extraMessage = threshold.action and (" " .. locale("warning." .. threshold.action)) or ""
-                Notify(baseMessage .. " " .. threshold.value .. "%!" .. extraMessage, threshold.severity)
+                Notify('Wizard Mileage', baseMessage .. " " .. threshold.value .. "%!" .. extraMessage, threshold.severity)
                 break
             end
         end
     end
     local function checkWearLevels()
-        if not inVehicle or not currentPlate then 
+        if not isInVehicle then 
             return 
         end
         for key, data in pairs(components) do
@@ -2042,10 +1489,10 @@ if Config.ChangeWarnings then
         end
     end
     local checkInterval = Config.WarningsInterval * 1000
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
-            Citizen.Wait(checkInterval)
-            if inVehicle and not waitingForData then
+            Wait(checkInterval)
+            if isInVehicle and not waitingForData then
                 checkWearLevels()
             end
         end
@@ -2061,10 +1508,10 @@ end
     - Expects `data.message` (string) and `data.type` (string, e.g., "success", "error", "info", "warning").
     - Calls the Notify function to show the message to the player.
     - Responds to the UI with success or error.
---]]
+]]--
 RegisterNUICallback('notify', function(data, cb)
     if data and data.message and data.type then
-        Notify(data.message, data.type)
+        Notify('Wizard Mileage', data.message, data.type)
         cb({success = true})
     else
         cb({success = false, error = 'Invalid data'})
@@ -2077,39 +1524,29 @@ end)
     - Calls TriggerVehicleListCallback, which fetches the vehicle list from the server.
     - Sends the vehicle list back to the UI using SendNUIMessage.
     - No data is expected from the UI for this callback.
---]]
+]]--
 RegisterNUICallback('requestVehicleList', function(data, cb)
     TriggerVehicleListCallback(function(vehicles)
-        SendNUIMessage({
-            type = 'vehicleList',
-            vehicles = vehicles
-        })
+        if vehicles then
+            SendNUIMessage({ vehicles = vehicles })
+            cb({success = true})
+        else
+            cb({success = false, error = 'No vehicles found'})
+        end
     end)
-end) 
+end)
 
 --[[
     Update vehicle data callback.
     This NUI callback is triggered by the UI when an admin or user updates a vehicle's maintenance data.
     - Expects `data.vehicle` (table) with all relevant maintenance fields.
-    - Ensures all required fields are set (defaults to 0 if missing).
     - Triggers a server event to update the vehicle data in the database.
     - Responds to the UI with success or error.
---]]
+]]--
 RegisterNUICallback('updateVehicleData', function(data, cb)
     if data and data.vehicle then
-        local vehicle = data.vehicle
-        vehicle.last_oil_change = vehicle.last_oil_change or 0
-        vehicle.last_oil_filter_change = vehicle.last_oil_filter_change or 0
-        vehicle.last_air_filter_change = vehicle.last_air_filter_change or 0
-        vehicle.last_tire_change = vehicle.last_tire_change or 0
-        vehicle.last_brakes_change = vehicle.last_brakes_change or 0
-        vehicle.brake_wear = vehicle.brake_wear or 0
-        vehicle.last_clutch_change = vehicle.last_clutch_change or 0
-        vehicle.clutch_wear = vehicle.clutch_wear or 0
-        vehicle.last_suspension_change = vehicle.last_suspension_change or 0
-        vehicle.last_spark_plug_change = vehicle.last_spark_plug_change or 0
-
-        TriggerServerEvent('wizard_vehiclemileage:server:updateVehicleData', vehicle)
+        local vehicleData = data.vehicle
+        TriggerServerEvent('wizard_vehiclemileage:server:updateVehicleData', vehicleData)
         cb({success = true})
     else
         cb({success = false, error = 'Invalid data'})
@@ -2122,7 +1559,7 @@ end)
     - Expects `data.plate` (string): the license plate of the vehicle to delete.
     - Triggers a server event to remove the vehicle data from the database.
     - Responds to the UI with success or error.
---]]
+]]--
 RegisterNUICallback('deleteVehicle', function(data, cb)
     if data and data.plate then
         TriggerServerEvent('wizard_vehiclemileage:server:deleteVehicle', data.plate)
@@ -2140,14 +1577,12 @@ end)
     - Triggers a server event to save the settings in the database.
     - Sends a message to the UI to close the customization menu.
     - Responds to the UI with an empty callback.
---]]
+]]--
 RegisterNUICallback('savePlayerSettings', function(data, cb)
     SetNuiFocus(false, false)
     TriggerServerEvent('wizard_vehiclemileage:server:savePlayerSettings', data)
-    SendNUIMessage({
-        type = "closeCustomization"
-    })
-    cb({})
+    SendNUIMessage({ type = "closeCustomization" })
+    cb({success = true})
 end)
 
 --[[
@@ -2156,18 +1591,18 @@ end)
     - Removes NUI focus from the player.
     - Sends a message to the UI to close the menu.
     - Responds to the UI with an empty callback.
---]]
+]]--
 RegisterNUICallback('closeMenu', function(data, cb)
     SetNuiFocus(false, false)
     loaded = false
     if CWFT then
         -- Clear the animation and remove the clipboard
-        ClearPedTasks(PlayerPedId())
+        ClearPedTasks(playerPed)
         DeleteObject(clipboardEntity)
         clipboardEntity = nil
         CWFT = false
     end
-    cb({})
+    cb({success = true})
 end)
 
 ---------------- Commands ----------------
@@ -2176,65 +1611,31 @@ end)
     Checks if the player is in a vehicle and has a valid plate.
     If the vehicle is owned, it opens the customization UI.
     If not in a vehicle or not owned, it shows an error notification.
---]]
+]]--
 RegisterCommand(Config.CustomizeCommand, function()
-    if inVehicle and currentPlate then
-        if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned'), 'error') return end
+    if isInVehicle then
+        if not vehOwned then Notify('Wizard Mileage', locale('error.not_owned'), 'error') return end
         TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
         SetNuiFocus(true, true)
         SendNUIMessage({
             type = "openCustomization"
         })
     else
-        Notify(locale('error.not_in_vehicle'), 'error')
+        Notify('Wizard Mileage', locale('error.not_in_vehicle'), 'error')
     end
 end)
+
 
 --[[
     Command to check vehicle wear and tear.
     Checks if the player is in a vehicle and has a valid plate.
     If the vehicle is owned, it calculates wear percentages and opens the wear UI.
     If not in a vehicle or not owned, it shows an error notification.
---]]
+]]--
 RegisterCommand(Config.CheckWearCommand, function()
-    if inVehicle and currentPlate then
-        if not IsVehicleOwned(currentPlate) then Notify(locale('error.not_owned'), 'error') return end
-        if Config.WearTracking.SparkPlugs then
-            sparkPlugDistanceDriven = accDistance - lastSparkPlugChange
-            sparkPlugLifeRemaining = math.max(0, sparkPlugchangedist - sparkPlugDistanceDriven)
-            sparkPlugPercentage = math.floor((sparkPlugLifeRemaining / sparkPlugchangedist) * 100)
-        end
-        if Config.WearTracking.Oil then
-            oilDistanceDriven = accDistance - lastOilChange
-            oilLifeRemaining = math.max(0, oilchangedist - oilDistanceDriven)
-            oilPercentage = math.floor((oilLifeRemaining / oilchangedist) * 100)
-        
-            filterDistanceDriven = accDistance - lastOilFilterChange
-            filterLifeRemaining = math.max(0, oilfilterchangedist - filterDistanceDriven)
-            filterPercentage = math.floor((filterLifeRemaining / oilfilterchangedist) * 100)
-        end
-        if Config.WearTracking.AirFilter then
-            airFilterDistanceDriven = accDistance - lastAirFilterChange
-            airFilterLifeRemaining = math.max(0, airfilterchangedist - airFilterDistanceDriven)
-            airFilterPercentage = math.floor((airFilterLifeRemaining / airfilterchangedist) * 100)
-        end
-        if Config.WearTracking.Tires then
-            tireDistanceDriven = accDistance - lastTireChange
-            tireLifeRemaining = math.max(0, tirechangedist - tireDistanceDriven)
-            tirePercentage = math.floor((tireLifeRemaining / tirechangedist) * 100)
-        end
-        if Config.WearTracking.Brakes then
-            brakePercentage = math.floor((1 - (lastbrakeWear / Config.MaxBrakeWear)) * 100)
-        end
-        if Config.WearTracking.Suspension then
-            suspensionDistanceDriven = accDistance - lastSuspensionChange
-            suspensionLifeRemaining = math.max(0, Config.SuspensionChangeDistance * 1000 - suspensionDistanceDriven)
-            suspensionPercentage = math.floor((suspensionLifeRemaining / (Config.SuspensionChangeDistance * 1000)) * 100)
-        end
-        if Config.WearTracking.Clutch then
-            clutchPercentage = math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
-        end
-        local displayedMileage = convertDistance(accDistance)
+    if isInVehicle then
+        if not vehOwned then Notify('Wizard Mileage', locale('error.not_owned'), 'error') return end
+        GetData()
         SendNUIMessage({
             type = "closeCustomization"
         })
@@ -2243,7 +1644,7 @@ RegisterCommand(Config.CheckWearCommand, function()
             type = "updateWear",
             showUI = true,
             mileage = displayedMileage,
-            unit = (Config.Unit == "mile" and "miles" or "km"),
+            unit = (Cfg.Unit == "imperial" and "miles" or "km"),
             sparkPlugPercentage = sparkPlugPercentage,
             oilPercentage = oilPercentage,
             filterPercentage = filterPercentage,
@@ -2254,18 +1655,18 @@ RegisterCommand(Config.CheckWearCommand, function()
             clutchPercentage = clutchPercentage
         })
     else
-        Notify(locale('error.not_in_vehicle'), 'error')
+        Notify('Wizard Mileage', locale('error.not_in_vehicle'), 'error')
     end
 end, false)
 
 --[[
     Command to open the database menu for admins.
-    Checks if the player is an admin using the TriggerAdminCallback.
+    Checks if the player has permission using the TriggerPermCallback.
     If admin, opens the database UI and requests the vehicle list from the server.
     If not admin, shows an error notification.
---]]
+]]--
 RegisterCommand(Config.DatabaseCommand, function()
-    TriggerAdminCallback(function(isAdmin)
+    TriggerPermCallback(Config.AdminPermission, function(isAdmin)
         if isAdmin then
             SetNuiFocus(true, true)
             SendNUIMessage({
@@ -2279,7 +1680,7 @@ RegisterCommand(Config.DatabaseCommand, function()
                 })
             end)
         else
-            Notify('You do not have permission to open this menu.', 'error')
+            Notify('Wizard Mileage', 'You do not have permission to open this menu.', 'error')
         end
     end)
 end)
@@ -2290,7 +1691,7 @@ end)
 --[[
     Exports for other scripts to interact with vehicle mileage and maintenance data.
     Provides functions to get/set mileage, parts change history, and wear levels.
---]]
+]]--
 exports('GetVehicleMileage', function()
     return accDistance
 end)
@@ -2299,7 +1700,7 @@ end)
     Set vehicle mileage.
     Can be used to set the mileage directly, e.g., for testing or resetting.
     If no mileage is provided, it uses the current accumulated distance.
---]]
+]]--
 exports('SetVehicleMileage', function(mileage)
     accDistance = mileage or accDistance
 end)
@@ -2315,7 +1716,7 @@ end)
     - brakeChange: Last brake change mileage
     - suspensionChange: Last suspension change mileage
     - clutchChange: Last clutch change mileage
---]]
+]]--
 exports('GetVehicleLastPartsChange', function()
     return {
         sparkPlugChange = lastSparkPlugChange,
@@ -2333,7 +1734,7 @@ end)
     Set vehicle last parts change data.
     Can be used to set the last change mileage for each part, e.g., for testing or resetting.
     If no mileage is provided for a part, it retains the current value.
---]]
+]]--
 exports('SetVehicleLastPartsChange', function(partsChange)
     lastOilChange = partsChange.oilChange or lastOilChange
     lastOilFilterChange = partsChange.oilFilterChange or lastOilFilterChange
@@ -2366,7 +1767,7 @@ end)
     Set vehicle parts wear data.
     Can be used to set the wear levels for each part, e.g., for testing or resetting.
     If no wear level is provided for a part, it retains the current value.
---]]
+]]--
 exports('SetVehiclePartsWear', function(partsWear)
     lastbrakeWear = partsWear.brakeWear or lastbrakeWear
     lastClutchWear = partsWear.clutchWear or lastClutchWear
@@ -2528,4 +1929,4 @@ RegisterCommand('setPartsWear', function(source, args)
     exports['wizard-mileage']:SetVehiclePartsWear(partsWear)
     print("Parts wear data updated for " .. partName .. " to wear value " .. wearValue)
 end)
-]]
+]]--

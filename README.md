@@ -38,12 +38,12 @@
 
 - FrameWork: `QBox` or `QBCore` or `ESX` or `ND_Core`
 - SQL: [`oxmysql`](https://github.com/overextended/oxmysql)
-- NEEDED: [`ox_lib`](https://github.com/overextended/ox_lib)
+- NEEDED: [`ox_lib`](https://github.com/overextended/ox_lib) & [`wizard_lib`](https://github.com/CodeWizardsDev/wizard-lib)
 - Target: [`ox_target`](https://github.com/overextended/ox_target) or [`qb-target`](https://github.com/qbcore-framework/qb-target)
 - Inventory: `ox` or `codem` or `quasar` or `qb` or `esx`
 - Menu: `ox` or `QB` or `QBox`
 - ProgressBar: `ox` or `QB` or `QBox`
-- Notify: `wizard` or `ox` or `qb` or `qbx` or `okok` or `esx` or `nd`
+- Notify: `wizard` or `ox` or `qb` or `qbx` or `okok` or `esx`
 
 ## 🚀 Features Scope <a name = "feature_scope"></a>
 
@@ -54,15 +54,7 @@
 - Automatic mileage saving to database with configurable autosave interval
 - Command to reset vehicle mileage
 - Option to track only player-owned vehicles
-- Support for multiple vehicle database tables (QBCore, ESX, custom)
-
-### Oil System
-- Oil life monitoring based on distance traveled
-- Configurable oil change intervals
-- Engine damage simulation when oil maintenance is neglected
-- Visual warnings for low oil life
-- Oil change service interaction for mechanics with progress bar and animation
-- Cancelable maintenance procedures
+- Support for multiple vehicle database tables (QBCore, QBox, ESX, ND_Core)
 
 ### Spark Plug System
 - Spark plug wear tracking based on distance
@@ -70,6 +62,14 @@
 - Engine misfire simulation when spark plugs are worn
 - Spark plug replacement service with progress bar and animation
 - Warning notifications for spark plug maintenance
+- Cancelable maintenance procedures
+
+### Oil System
+- Oil life monitoring based on distance traveled
+- Configurable oil change intervals
+- Engine damage simulation when oil maintenance is neglected
+- Visual warnings for low oil life
+- Oil change service interaction for mechanics with progress bar and animation
 - Cancelable maintenance procedures
 
 ### Oil Filter System
@@ -105,6 +105,12 @@
 - Configurable wear rates and efficiency loss
 - Cancelable maintenance procedures
 
+### Suspension System
+- Suspension wear tracking and replacement service
+- Configurable wear rates and maximum wear values
+- Progress bar and animation for suspension service
+- Cancelable maintenance procedures
+
 ### Clutch System
 - Clutch wear tracking based on gear changes
 - Impact on vehicle performance
@@ -114,23 +120,18 @@
 - Configurable wear rates and performance loss
 - Cancelable maintenance procedures
 
-### Suspension System
-- Suspension wear tracking and replacement service
-- Configurable wear rates and maximum wear values
-- Progress bar and animation for suspension service
-- Cancelable maintenance procedures
-
 ### Mechanic Interactions
 1. Approach a vehicle
 2. Use the target system (ox_target or qb-target)
 3. Available maintenance options:
+   - Replace SparkPlugs
    - Change Oil
    - Replace Oil Filter
    - Replace Air Filter
    - Change Tires
    - Service Brakes
-   - Replace Clutch
    - Service Suspension
+   - Replace Clutch
 4. Each interaction requires appropriate inventory items
 5. Progress bars and animations for maintenance actions
 6. Cancelable maintenance procedures
@@ -141,26 +142,6 @@
 - Job name configurable in config.lua
 - Supports both ox_target and qb-target systems
 
-### Inventory System
-- Integrated inventory support for:
-  - Spark Plugs
-  - Engine Oil
-  - Oil Filter
-  - Air Filter
-  - Tires
-  - Brake Parts
-  - Suspension Parts
-  - Clutch Parts
-- Supports multiple inventory systems:
-  - ox_inventory
-  - qb-inventory
-  - Quasar inventory
-  - CodeM inventory
-  - ESX inventory
-- Configurable item weights and descriptions
-- Items can be used directly from inventory
-- Automatic item removal after use
-
 ### Multiple Menu Support
 - Supports multiple menu systems:
   - ox_lib
@@ -168,20 +149,9 @@
 
 ### HUD Features
 - Real-time mileage display
-- Configurable position (top-left, top-right, bottom-left, bottom-right)
+- Configurable position
 - Component wear display when using /checkwear command
 - Warning notifications for maintenance needs
-
-### Notification System
-- Multiple notification system support:
-  - QBox
-  - QBCore
-  - ESX
-  - Wizard Notify
-  - OkOk Notify
-  - ox_lib notify
-- Configurable warning intervals
-- Multi-language support
 
 ### Database Integration
 - Automatic mileage saving
@@ -204,14 +174,14 @@
 - Displays a list of vehicles with plate numbers and current mileage
 - Allows editing of vehicle data including:
   - Mileage
+  - Last spark plug change
   - Last oil change
   - Last oil filter change
   - Last air filter change
   - Last tire change
   - Last brakes change and brake wear
-  - Last clutch change and clutch wear
   - Last suspension change
-  - Last spark plug change
+  - Last clutch change and clutch wear
 - Validation to ensure data consistency (e.g., last change values not exceeding mileage)
 - Supports deleting vehicles with user confirmation
 - Real-time updates and notifications for successful or failed operations
@@ -233,19 +203,10 @@ This guide will help you set up the script easily!
 1. Download the folder and remove the -main suffix from it. The folder name should be wizard-mileage
 
 ### Installing
-[GUIDE](https://code-wizards.gitbook.io/codewizards/installation)
+[GUIDE](https://code-wizards.gitbook.io/codewizards/mileage-system/installation)
 
 ### Configuration
-1. Open the `config.lua` file in the wizard-mileage folder.
-2. Choose your favorite notification system from the list and set it as the default.
-3. Choose the preffered distance unit (km or mile).
-4. Choose the preffered location for mileage HUD.
-5. Change the `Config.VehDB` to your vehicle database table name.
-   - `'player_vehicles'` for QBCore & QBox
-   - `'owned_vehicles'` for ESX
-   - you can change it to your custom table name.
-6. Customize other settings as per your preference.
-7. Save the `config.lua` file.
+[GUIDE](https://code-wizards.gitbook.io/codewizards/mileage-system/configuration)
 
 ## ✍️ Authors <a name = "authors"></a>
 

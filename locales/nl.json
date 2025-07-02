@@ -4,9 +4,60 @@
 
 
     "ui": {
-        "mileage": "Kilometerstand:",
-        "unit_km": "Km",
-        "unit_miles": "Mijlen"
+        "mileage": "Kilometerstand",
+        "unit_km": " Km",
+        "unit_miles": " Mijlen",
+
+        "save": "Opslaan",
+        "edit": "Bewerken",
+        "delete": "Verwijderen",
+        "cancel": "Annuleren",
+        "close": "Sluiten",
+
+        "mileage_meter_ui": "Kilometerteller-interface",
+        "checkwear_ui": "Slijtagecontrole-interface",
+        "show_mileage_meter": "Toon kilometerteller",
+        "size": "Grootte",
+        "position": "Positie (X, Y)",
+
+        "vehicle_mileage_db": "Voertuig kilometerstand database",
+        "edit_veh_data": "Voertuiggegevens bewerken",
+        "actions": "Acties",
+        "plate": "Kenteken",
+        "last_oil_change": "Laatste olieverversing",
+        "last_filter_change": "Laatste oliefilter vervanging",
+        "last_air_filter_change": "Laatste luchtfilter vervanging",
+        "last_tire_change": "Laatste bandenwissel",
+        "last_brake_change": "Laatste remmen vervanging",
+        "brake_wear": "Remslijtage",
+        "last_clutch_change": "Laatste koppeling vervanging",
+        "clutch_wear": "Koppelingsslijtage",
+        "last_sus_change": "Laatste ophanging vervanging",
+        "last_plugs_change": "Laatste bougies vervanging",
+
+        "no_vehicles_found": "Geen voertuigen gevonden.",
+        "confirm_delete_vehicle": "Weet u zeker dat u dit voertuig wilt verwijderen?",
+        "vehicle_deleted_success": "Voertuig succesvol verwijderd.",
+        "failed_delete_vehicle": "Verwijderen van voertuig mislukt",
+        "enter_valid_plate_mileage": "Voer een geldig kenteken en kilometerstand in.",
+        "must_be_equal_or_lower": "{label} moet gelijk zijn aan of lager dan de kilometerstand.",
+        "vehicle_data_updated": "Voertuiggegevens succesvol bijgewerkt",
+        "failed_update_vehicle_data": "Bijwerken van voertuiggegevens mislukt",
+
+        "spark_plug": "Bougies",
+        "oil": "Olielevensduur",
+        "filter": "Oliefilter",
+        "air_filter": "Luchtfilter",
+        "tire": "Banden",
+        "brake": "Remmen",
+        "suspension": "Ophanging",
+        "clutch": "Koppeling",
+
+        "excellent": "Uitstekend",
+        "good": "Goed",
+        "warning": "Waarschuwing",
+        "critical": "Kritiek",
+        "disabled": "UITGESCHAKELD"
     },
     
     "target": {
@@ -73,6 +124,6 @@
         "no_brake_parts": "Je hebt geen remonderdelen",
         "no_clutch": "Je hebt geen koppelingsonderdelen",
         "no_suspension_parts": "Je hebt geen ophangingsonderdelen",
-        "no_spark_plugs": "Je hebt geen bougies"
+        "no_spark_plug": "Je hebt geen bougies"
     }
 }

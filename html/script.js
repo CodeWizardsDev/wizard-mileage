@@ -1,71 +1,193 @@
-let currentLocale = 'en';
 let translations = {};
-async function loadTranslations(locale) {
+
+async function fetchConfig() {
     try {
-        const response = await fetch(`../locales/${locale}.json`);
-        translations = await response.json();
-        updateUITranslations();
+        const response = await fetch('../config/ui_config.json');
+        const config = await response.json();
+        currentLocale = `${config.lang}`;
+        initialize();
     } catch (error) {
-        console.error(`Failed to load translations for ${locale}:`, error);
+        console.error('^9WIZARD DEBUG: ^7Error fetching config:', error);
     }
 }
 
-function updateUITranslations() {
-    document.querySelectorAll('[data-locale]').forEach(element => {
-        const key = element.getAttribute('data-locale');
-        if (translations[key]) {
-            element.textContent = translations[key];
+async function loadTranslations(locale) {
+    if (locale === currentLocale && Object.keys(translations).length > 0) return; // Prevent redundant fetch
+    try {
+        const response = await fetch(`../locales/${locale}.json`);
+        translations = await response.json();
+    } catch (error) {
+        console.error(`^9WIZARD DEBUG: ^7Failed to load translations for ^6${locale}:^7`, error);
+    }
+}
+
+function getTranslation(key) {
+    if (!translations) return key; // Check if translations are loaded
+    const parts = key.split('.');
+    let obj = translations;
+    for (const part of parts) {
+        if (obj && typeof obj === 'object' && part in obj) {
+            obj = obj[part];
+        } else {
+            console.warn(`^9WIZARD DEBUG: ^7Translation key ^6'${key}' ^7not found at part ^6'${part}'^7`);
+            return key;
         }
+    }
+    return typeof obj === 'string' ? obj : key;
+}
+
+async function initialize() {
+    await loadTranslations(currentLocale);
+    
+    // Apply CSS variables
+    applyCSSVariables();
+    const elementsList = {
+        mileageElement: document.getElementById('mileage'),
+        mileageValue: document.getElementById('mileageValue'),
+        unitLabel: document.getElementById('unitLabel'),
+        saveVehBtn: document.getElementById('saveVehicleBtn'),
+        saveBtn: document.getElementById('saveBtn'),
+        deleteVehBtn: document.getElementById('deleteVehicleBtn'),
+        cancelEditBtn: document.getElementById('cancelEditBtn'),
+        closeBtn: document.getElementById('closeDatabaseMenuBtn'),
+        closeBtn2: document.getElementById('closeUIButton'),
+        spW: document.getElementById('spw'),
+        oW: document.getElementById('ow'),
+        fW: document.getElementById('fw'),
+        afW: document.getElementById('afw'),
+        tW: document.getElementById('tw'),
+        bW: document.getElementById('bw'),
+        sW: document.getElementById('sw'),
+        cW: document.getElementById('cw'),
+        mmUI: document.getElementById('mmui'),
+        smm: document.getElementById('smm'),
+        sz: document.getElementById('sz'),
+        sz2: document.getElementById('sz2'),
+        posxy: document.getElementById('posxy'),
+        posxy2: document.getElementById('posxy2'),
+        cwUI: document.getElementById('cwui'),
+        vmDB: document.getElementById('vmdb'),
+        evD: document.getElementById('evd'),
+        pTB: document.getElementById('ptb'),
+        mTB: document.getElementById('mtb'),
+        aTB: document.getElementById('atb'),
+        pOP: document.getElementById('pop'),
+        mOP: document.getElementById('mop'),
+        loOP: document.getElementById('locop'),
+        lfOP: document.getElementById('lfcop'),
+        laOP: document.getElementById('lacop'),
+        ltOP: document.getElementById('ltcop'),
+        lbOP: document.getElementById('lbcop'),
+        bwOP: document.getElementById('bwcop'),
+        lcOP: document.getElementById('lccop'),
+        cwOP: document.getElementById('cwcop'),
+        lsOP: document.getElementById('lscop'),
+        lpOP: document.getElementById('lpcop'),
+    };
+    elementsList.mileageElement.innerHTML = `${getTranslation('ui.mileage')}: `;
+    elementsList.mileageElement.append(elementsList.mileageValue, elementsList.unitLabel);
+    const translations = [
+        { key: 'ui.save', elementsList: [elementsList.saveVehBtn, elementsList.saveBtn] },
+        { key: 'ui.delete', elementsList: [elementsList.deleteVehBtn] },
+        { key: 'ui.cancel', elementsList: [elementsList.cancelEditBtn] },
+        { key: 'ui.close', elementsList: [elementsList.closeBtn, elementsList.closeBtn2] },
+        { key: 'ui.spark_plug', elementsList: [elementsList.spW] },
+        { key: 'ui.oil', elementsList: [elementsList.oW] },
+        { key: 'ui.filter', elementsList: [elementsList.fW] },
+        { key: 'ui.air_filter', elementsList: [elementsList.afW] },
+        { key: 'ui.tire', elementsList: [elementsList.tW] },
+        { key: 'ui.brake', elementsList: [elementsList.bW] },
+        { key: 'ui.suspension', elementsList: [elementsList.sW] },
+        { key: 'ui.clutch', elementsList: [elementsList.cW] },
+        { key: 'ui.mileage_meter_ui', elementsList: [elementsList.mmUI] },
+        { key: 'ui.show_mileage_meter', elementsList: [elementsList.smm] },
+        { key: 'ui.size', elementsList: [elementsList.sz, elementsList.sz2] },
+        { key: 'ui.position', elementsList: [elementsList.posxy, elementsList.posxy2] },
+        { key: 'ui.checkwear_ui', elementsList: [elementsList.cwUI] },
+        { key: 'ui.vehicle_mileage_db', elementsList: [elementsList.vmDB] },
+        { key: 'ui.edit_veh_data', elementsList: [elementsList.evD] },
+        { key: 'ui.plate', elementsList: [elementsList.pTB, elementsList.pOP] },
+        { key: 'ui.mileage', elementsList: [elementsList.mTB, elementsList.mOP] },
+        { key: 'ui.last_oil_change', elementsList: [elementsList.loOP] },
+        { key: 'ui.last_filter_change', elementsList: [elementsList.lfOP] },
+        { key: 'ui.last_air_filter_change', elementsList: [elementsList.laOP] },
+        { key: 'ui.last_tire_change', elementsList: [elementsList.ltOP] },
+        { key: 'ui.last_brake_change', elementsList: [elementsList.lbOP] },
+        { key: 'ui.brake_wear', elementsList: [elementsList.bwOP] },
+        { key: 'ui.last_clutch_change', elementsList: [elementsList.lcOP] },
+        { key: 'ui.clutch_wear', elementsList: [elementsList.cwOP] },
+        { key: 'ui.last_sus_change', elementsList: [elementsList.lsOP] },
+        { key: 'ui.last_plugs_change', elementsList: [elementsList.lpOP] },
+    ];
+    translations.forEach(({ key, elementsList }) => {
+        const translation = getTranslation(key);
+        elementsList.forEach(el => {
+            if (el === elementsList.pOP || el === elementsList.mOP) {
+                el.innerHTML = `${translation}: `;
+            } else {
+                el.textContent = translation;
+            }
+        });
     });
 }
-loadTranslations(currentLocale);
+
+async function applyCSSVariables() {
+    const response = await fetch('../config/ui_config.json');
+    const config = await response.json();
+    const cssVariables = config.cssVariables;
+    for (const [key, value] of Object.entries(cssVariables)) {
+        document.documentElement.style.setProperty(`--${key}`, value);
+    }
+}
+
+fetchConfig()
 
 let WEAR_COMPONENTS = {
     sparkPlug: {
         id: 'sparkPlugWear',
-        label: 'Spark Plugs',
+        label: 'spw',
         icon: 'fas fa-bolt',
         type: 'engine'
     },
     oil: {
         id: 'oilWear',
-        label: 'Oil Life ',
+        label: 'ow',
         icon: 'fas fa-oil-can',
         type: 'engine'
     },
     filter: {
         id: 'filterWear',
-        label: 'Oil Filter',
+        label: 'fw',
         icon: 'fas fa-filter',
         type: 'engine'
     },
     airFilter: {
         id: 'airFilterWear',
-        label: 'Air Filter',
+        label: 'afw',
         icon: 'fas fa-wind',
         type: 'engine'
     },
     tire: {
         id: 'tireWear',
-        label: 'Tires',
+        label: 'tw',
         icon: 'fa-regular fa-circle',
         type: 'tires'
     },
     brake: {
         id: 'brakeWear',
-        label: 'Brakes',
+        label: 'bw',
         icon: 'fas fa-record-vinyl',
         type: 'brakes'
     },
     suspension: {
         id: 'suspensionWear',
-        label: 'Suspension',
+        label: 'sw',
         icon: 'fas fa-car-burst',
         type: 'suspension'
     },
     clutch: {
         id: 'clutchWear',
-        label: 'Clutch',
+        label: 'cw',
         icon: 'fas fa-cog',
         type: 'transmission'
     }
@@ -75,26 +197,26 @@ const HEALTH_STATUS = {
     excellent: {
         threshold: 75,
         class: 'health-excellent',
-        label: 'Excellent'
+        labelKey: 'ui.excellent'
     },
     good: {
         threshold: 50,
         class: 'health-good',
-        label: 'Good'
+        labelKey: 'ui.good'
     },
     warning: {
         threshold: 25,
         class: 'health-warning',
-        label: 'Warning'
+        labelKey: 'ui.warning'
     },
     critical: {
         threshold: 0,
         class: 'health-critical pulse',
-        label: 'Critical'
+        labelKey: 'ui.critical'
     },
     disabled: {
         class: 'health-disabled',
-        label: 'DISABLED'
+        labelKey: 'ui.disabled'
     }
 };
 
@@ -102,19 +224,15 @@ function createWearBars() {
     const template = document.getElementById('wearBarTemplate');
     const container = document.getElementById('wearDisplay');
 
-    Object.values(WEAR_COMPONENTS).forEach(({
-        id,
-        label,
-        icon,
-        type
-    }) => {
+    Object.values(WEAR_COMPONENTS).forEach(({ id, label, icon, type }) => {
         const wearBar = template.content.cloneNode(true).firstElementChild;
         wearBar.classList.add(type);
 
         const wearIcon = wearBar.querySelector('.wear-icon');
         wearIcon.innerHTML = `<i class="${icon}"></i>`;
 
-        wearBar.querySelector('.component-name').textContent = label;
+        // Use translation for component name
+        wearBar.querySelector('.component-name').id = label;
         wearBar.querySelector('.progress').id = id;
         wearBar.querySelector('.percent').id = `${id}Percent`;
         container.appendChild(wearBar);
@@ -122,28 +240,25 @@ function createWearBars() {
 }
 
 function getHealthStatus(value) {
-    for (const [status, {
-            threshold,
-            class: statusClass,
-            label
-        }] of Object.entries(HEALTH_STATUS)) {
-        if (value >= threshold) {
+    for (const [status, { threshold, class: statusClass, labelKey }] of Object.entries(HEALTH_STATUS)) {
+        if (typeof threshold !== 'undefined' && value >= threshold) {
             return {
                 class: statusClass,
-                label
+                label: getTranslation(labelKey)
             };
         }
     }
+    // Fallback
     return {
-        class: 'health-critical pulse',
-        label: 'Critical'
+        class: HEALTH_STATUS.critical.class,
+        label: getTranslation(HEALTH_STATUS.critical.labelKey)
     };
 }
 
 function getDisabledHealthStatus() {
     return {
-        class: 'health-disabled',
-        label: 'DISABLED'
+        class: HEALTH_STATUS.disabled.class,
+        label: getTranslation(HEALTH_STATUS.disabled.labelKey)
     };
 }
 
@@ -154,7 +269,7 @@ function updateProgressBar(barId, value) {
 
     if (value === null || typeof value === 'undefined') {
         bar.style.width = `100%`;
-        percent.textContent = `DISABLED`;
+        percent.textContent = getTranslation('ui.disabled');
         const wearBar = bar.closest('.wear-bar');
         const healthStatus = wearBar.querySelector('.health-status');
         const {
@@ -275,52 +390,25 @@ function registerDatabaseMenuEventListeners() {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: 'Please enter valid plate and mileage.',
+                        message: getTranslation('ui.enter_valid_plate_mileage'),
                         type: 'error'
                     })
                 })
                 return;
             }
 
-            const validations = [{
-                    value: lastOilChange,
-                    label: 'Last Oil Change'
-                },
-                {
-                    value: lastOilFilterChange,
-                    label: 'Last Oil Filter Change'
-                },
-                {
-                    value: lastAirFilterChange,
-                    label: 'Last Air Filter Change'
-                },
-                {
-                    value: lastTireChange,
-                    label: 'Last Tire Change'
-                },
-                {
-                    value: lastBrakesChange,
-                    label: 'Last Brakes Change'
-                },
-                {
-                    value: lastClutchChange,
-                    label: 'Last Clutch Change'
-                },
-                {
-                    value: lastSuspensionChange,
-                    label: 'Last Suspension Change'
-                },
-                {
-                    value: lastSparkPlugChange,
-                    label: 'Last Spark Plug Change'
-                }
+            const validations = [
+                { value: lastOilChange, label: getTranslation('ui.last_oil_change') },
+                { value: lastOilFilterChange, label: getTranslation('ui.last_oil_filter_change') },
+                { value: lastAirFilterChange, label: getTranslation('ui.last_air_filter_change') },
+                { value: lastTireChange, label: getTranslation('ui.last_tire_change') },
+                { value: lastBrakesChange, label: getTranslation('ui.last_brakes_change') },
+                { value: lastClutchChange, label: getTranslation('ui.last_clutch_change') },
+                { value: lastSuspensionChange, label: getTranslation('ui.last_suspension_change') },
+                { value: lastSparkPlugChange, label: getTranslation('ui.last_spark_plug_change') }
             ];
 
-            for (const {
-                    value,
-                    label
-                }
-                of validations) {
+            for (const { value, label } of validations) {
                 if (!isNaN(value) && value > mileage) {
                     fetch(`https://${GetParentResourceName()}/notify`, {
                         method: 'POST',
@@ -328,7 +416,7 @@ function registerDatabaseMenuEventListeners() {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: `${label} must be equal or lower than Mileage.`,
+                            message: getTranslation('ui.must_be_equal_or_lower').replace('{label}', label),
                             type: 'error'
                         })
                     });
@@ -366,7 +454,7 @@ function registerDatabaseMenuEventListeners() {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: 'Vehicle data updated successfully',
+                            message: getTranslation('ui.vehicle_data_updated'),
                             type: 'success'
                         })
                     })
@@ -386,7 +474,7 @@ function registerDatabaseMenuEventListeners() {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: 'Failed to update vehicle data: ' + (data.error || 'Unknown error'),
+                            message: getTranslation('ui.failed_update_vehicle_data') + (data.error ? ': ' + data.error : ''),
                             type: 'error'
                         })
                     })
@@ -411,7 +499,7 @@ function registerDatabaseMenuEventListeners() {
                 })
                 return;
             }
-            const confirmed = await showCustomConfirm('Are you sure you want to delete this vehicle?');
+            const confirmed = await showCustomConfirm(getTranslation('ui.confirm_delete_vehicle'));
             if (!confirmed) {
                 return;
             }
@@ -431,21 +519,20 @@ function registerDatabaseMenuEventListeners() {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: 'Vehicle deleted successfully.',
+                            message: getTranslation('ui.vehicle_deleted_success'),
                             type: 'success'
                         })
                     })
                     closeVehicleEdit();
-                    fetch(`https://${GetParentResourceName()}/requestVehicleList`, {
+                    const databaseMenu = document.getElementById('databaseMenu');
+                    if (databaseMenu) {
+                        databaseMenu.style.display = 'none';
+                    }
+                    fetch(`https://${GetParentResourceName()}/closeMenu`, {
                         method: 'POST'
-                    }).then(res => res.json()).then(resData => {
-                        window.postMessage({
-                            type: 'vehicleList',
-                            vehicles: resData.vehicles
-                        }, '*');
                     });
                 } else {
-                    alert('Failed to delete vehicle: ' + (data.error || 'Unknown error'));
+                    alert(getTranslation('ui.failed_delete_vehicle') + (data.error ? ': ' + data.error : ''));
                 }
             });
         });
@@ -488,25 +575,20 @@ window.addEventListener('message', ({
             } else {
                 document.getElementById('mileageValue').textContent = formatNumberWithCommas(Math.floor(data.mileage));
             }
+            let unitKey = '';
             if (data.unit.toLowerCase() === 'km') {
-                document.getElementById('unitLabel').textContent = 'KM';
+                unitKey = 'ui.unit_km';
             } else if (data.unit.toLowerCase().startsWith('mile')) {
-                document.getElementById('unitLabel').textContent = 'Mile';
+                unitKey = 'ui.unit_miles';
+            }
+            if (unitKey) {
+                document.getElementById('unitLabel').textContent = getTranslation(unitKey);
             } else {
                 document.getElementById('unitLabel').textContent = data.unit;
             }
         },
         toggleMileage: () => {
             document.getElementById('mileageDisplay').style.display = data.visible ? 'block' : 'none';
-        },
-        Configuration: () => {
-            const display = document.getElementById('mileageDisplay');
-            display.style.display = 'none';
-
-            if (data.language) {
-                currentLocale = data.language;
-                loadTranslations(currentLocale);
-            }
         },
         updateWear: () => {
             if (data.showUI == true) {
@@ -516,13 +598,15 @@ window.addEventListener('message', ({
                 // Update the mileage title in the wearDisplay UI
                 const wearMileageTitle = document.getElementById('wearMileageTitle');
                 if (wearMileageTitle && typeof data.mileage === 'number' && typeof data.unit === 'string') {
-                    let unitLabel = data.unit.toLowerCase();
-                    if (unitLabel === 'km') {
-                        unitLabel = 'km';
-                    } else if (unitLabel.startsWith('mile')) {
-                        unitLabel = 'miles';
+                    let unitKey = '';
+                    if (data.unit.toLowerCase() === 'km') {
+                        unitKey = 'ui.unit_km';
+                    } else if (data.unit.toLowerCase().startsWith('mile')) {
+                        unitKey = 'ui.unit_miles';
                     }
-                    wearMileageTitle.textContent = `Mileage: ${data.mileage.toFixed(2)} ${unitLabel}`;
+                    let unitLabel = unitKey ? getTranslation(unitKey) : data.unit;
+                    let mileageLabel = getTranslation('ui.mileage');
+                    wearMileageTitle.textContent = `${mileageLabel} ${data.mileage.toFixed(2)} ${unitLabel}`;
                 }
             }
 
@@ -582,7 +666,7 @@ window.addEventListener('message', ({
                         const healthStatus = wearBar.querySelector('.health-status');
                         if (healthStatus) {
                             healthStatus.className = 'health-status health-disabled';
-                            healthStatus.textContent = 'DISABLED';
+                            healthStatus.textContent = getTranslation('ui.disabled');
                             healthStatus.style.color = 'red';
                         }
                         const statusIndicator = wearBar.querySelector('.status-indicator');
@@ -667,7 +751,7 @@ window.addEventListener('message', ({
                 const row = document.createElement('tr');
                 const cell = document.createElement('td');
                 cell.colSpan = 3;
-                cell.textContent = 'No vehicles found.';
+                cell.textContent = getTranslation('ui.no_vehicles_found');
                 row.appendChild(cell);
                 vehicleListBody.appendChild(row);
                 return;
@@ -680,17 +764,17 @@ window.addEventListener('message', ({
                 mileageCell.textContent = vehicle.mileage !== undefined ? vehicle.mileage.toFixed(2) : '';
                 const actionsCell = document.createElement('td');
                 const editBtn = document.createElement('button');
-                editBtn.textContent = 'Edit';
+                editBtn.textContent = getTranslation('ui.edit');
                 editBtn.classList.add('edit-button');
                 editBtn.addEventListener('click', () => {
                     openVehicleEdit(vehicle);
                 });
                 actionsCell.appendChild(editBtn);
                 const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = 'Delete';
+                deleteBtn.textContent = getTranslation('ui.delete');
                 deleteBtn.classList.add('delete-button');
                 deleteBtn.addEventListener('click', async () => {
-                    const confirmed = await showCustomConfirm('Are you sure you want to delete this vehicle?');
+                    const confirmed = await showCustomConfirm(getTranslation('ui.confirm_delete_vehicle'));
                     if (!confirmed) {
                         return;
                     }
@@ -710,20 +794,19 @@ window.addEventListener('message', ({
                                     'Content-Type': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    message: 'Vehicle deleted successfully.',
+                                    message: getTranslation('ui.vehicle_deleted_success'),
                                     type: 'success'
                                 })
                             });
-                            fetch(`https://${GetParentResourceName()}/requestVehicleList`, {
+                            const databaseMenu = document.getElementById('databaseMenu');
+                            if (databaseMenu) {
+                                databaseMenu.style.display = 'none';
+                            }
+                            fetch(`https://${GetParentResourceName()}/closeMenu`, {
                                 method: 'POST'
-                            }).then(res => res.json()).then(resData => {
-                                window.postMessage({
-                                    type: 'vehicleList',
-                                    vehicles: resData.vehicles
-                                }, '*');
                             });
                         } else {
-                            alert('Failed to delete vehicle: ' + (data.error || 'Unknown error'));
+                            alert(getTranslation('ui.failed_delete_vehicle') + (data.error ? ': ' + data.error : ''));
                         }
                     });
                 });
@@ -813,22 +896,22 @@ window.addEventListener('message', function(event) {
             if (value >= 75) {
                 return {
                     class: 'health-excellent',
-                    label: 'Excellent'
+                    label: 'ui.excellent'
                 };
             } else if (value >= 50) {
                 return {
                     class: 'health-good',
-                    label: 'Good'
+                    label: 'ui.good'
                 };
             } else if (value >= 25) {
                 return {
                     class: 'health-warning',
-                    label: 'Warning'
+                    label: 'ui.warning'
                 };
             } else {
                 return {
                     class: 'health-critical pulse',
-                    label: 'Critical'
+                    label: 'ui.critical'
                 };
             }
         }
@@ -858,7 +941,7 @@ window.addEventListener('message', function(event) {
 
                 const status = getStatusForValue(animationValue);
                 healthStatus.className = `health-status ${status.class}`;
-                healthStatus.textContent = status.label;
+                healthStatus.textContent = getTranslation(`${status.label}`);
 
                 wearBar.classList.remove('health-excellent', 'health-good', 'health-warning', 'health-critical', 'pulse');
                 wearBar.classList.add(status.class.split(' ')[0]);
