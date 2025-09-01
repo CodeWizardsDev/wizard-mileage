@@ -8,8 +8,6 @@
 local luaFileNames = {'config/config.lua', 'client.lua', 'server.lua'}
 
 
-require("@wizard-lib/server/functions")
-
 
 ---------------- Functions ----------------
 --[[

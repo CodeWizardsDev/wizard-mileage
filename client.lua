@@ -1403,66 +1403,82 @@ end
     - Only runs if the player is in a vehicle and not waiting for data.
 ]]--
 if Config.ChangeWarnings then
-    local components = {
-        sparkPlug = {
+    local components = {}
+
+    if Config.WearTracking.SparkPlugs then
+        components.sparkPlug = {
             lastChange = function() return lastSparkPlugChange end,
             changedist = sparkPlugchangedist,
             computeDistance = function() return accDistance - lastSparkPlugChange end,
             thresholds = Config.Thresholds.SparkPlugs,
             localeKey = "warning.remaining_spark_plug"
-        },
-        oil = {
+        }
+    end
+    if Config.WearTracking.Oil then
+        components.oil = {
             lastChange = function() return lastOilChange end,
             changedist = oilchangedist,
             computeDistance = function() return accDistance - lastOilChange end,
             thresholds = Config.Thresholds.Oil,
             localeKey = "warning.remaining_oil"
-        },
-        filter = {
+        }
+        components.filter = {
             lastChange = function() return lastOilFilterChange end,
             changedist = oilfilterchangedist,
             computeDistance = function() return accDistance - lastOilFilterChange end,
             thresholds = Config.Thresholds.OilFilter,
             localeKey = "warning.remaining_filter"
-        },
-        airFilter = {
+        }
+    end
+    if Config.WearTracking.AirFilter then
+        components.airFilter = {
             lastChange = function() return lastAirFilterChange end,
             changedist = airfilterchangedist,
             computeDistance = function() return accDistance - lastAirFilterChange end,
             thresholds = Config.Thresholds.AirFilter,
             localeKey = "warning.remaining_air_filter"
-        },
-        tire = {
+        }
+    end
+    if Config.WearTracking.Tires then
+        components.tire = {
             lastChange = function() return lastTireChange end,
             changedist = tirechangedist,
             computeDistance = function() return accDistance - lastTireChange end,
             thresholds = Config.Thresholds.Tires,
             localeKey = "warning.remaining_tire"
-        },
-        suspension = {
+        }
+    end
+    if Config.WearTracking.Suspension then
+        components.suspension = {
             lastChange = function() return lastSuspensionChange end,
             changedist = Config.SuspensionChangeDistance * 1000,
             computeDistance = function() return accDistance - lastSuspensionChange end,
             thresholds = Config.Thresholds.Suspension,
             localeKey = "warning.remaining_suspension"
         }
-    }
-    local staticComponents = {
-        brakes = {
+    end
+
+    local staticComponents = {}
+    if Config.WearTracking.Brakes then
+        staticComponents.brakes = {
             value = function()
                 return math.floor((1 - (lastbrakeWear / Config.MaxBrakeWear)) * 100)
             end,
             thresholds = Config.Thresholds.Brakes,
             localeKey = "warning.remaining_brakes"
-        },
-        clutch = {
+        }
+    end
+    if Config.WearTracking.Clutch then
+        staticComponents.clutch = {
             value = function()
                 return math.floor((1 - (lastClutchWear / Config.MaxClutchWear)) * 100)
             end,
             thresholds = Config.Thresholds.Clutch,
             localeKey = "warning.remaining_clutch"
         }
-    }
+    end
+    
+    
     local function checkComponent(componentData, percentage)
         local baseMessage = locale(componentData.localeKey)
         for _, threshold in ipairs(componentData.thresholds) do
