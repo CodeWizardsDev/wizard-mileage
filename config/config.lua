@@ -70,7 +70,7 @@ Config.DatabaseCommand  = 'mileagedb'   -- Open vehicle data list
 
 -- ████████████████ ADMIN SETTINGS ████████████████
 
-Config.AdminPermission  = 'admin'       -- Required permission for database access
+Config.AdminPermission  = 'group.admin'       -- Required permission for database access
 
 
 
@@ -87,8 +87,10 @@ Config.VehDB            = 'player_vehicles' -- Vehicle ownership table
 -- ████████████████ JOB & TARGETING ████████████████
 
 Config.JobRequired      = true          -- Only mechanics can service vehicles
-Config.MechanicJob      = 'mechanic'    -- Mechanic job name
-Config.MinimumJobGrade  = 2             -- Minimum mechanic grade
+Config.MechanicJobs     = {             -- Allowed jobs name
+    ['mechanic'] = 0,                   -- Mechanic from grade 0
+    ['lsc']      = 2,                   -- LSC from grade 2
+}
 Config.Targeting        = 'ox'          -- "ox" or "qb", set to false to disable
 
 
@@ -184,19 +186,19 @@ Config.CheckVehicle = {
 
 -- ████████████████ MAINTENANCE INTERVALS & EFFECTS ████████████████
 
-Config.SparkPlugChangeDistance = 50     -- Distance before spark plug change (km/miles)
+Config.SparkPlugChangeDistance = 13000  -- Distance before spark plug change (km/miles)
 Config.MaxSparkPlugWear        = 0.02   -- Max spark plug wear value
 Config.MissfireChance          = 0.3    -- Chance of misfire when worn (0-1)
 
-Config.OilChangeDistance       = 50     -- Distance before oil change
-Config.OilFilterDistance       = 40     -- Distance before oil filter change
+Config.OilChangeDistance       = 4300   -- Distance before oil change
+Config.OilFilterDistance       = 8600   -- Distance before oil filter change
 Config.EngineDamageRate        = 0.5    -- Engine damage rate from poor maintenance
 
-Config.AirFilterDistance       = 100    -- Distance before air filter change
+Config.AirFilterDistance       = 13000  -- Distance before air filter change
 Config.MaxSpeedReduction       = 0.2    -- Max speed reduction (0-1)
 Config.AccelerationReduction   = 0.3    -- Max acceleration reduction (0-1)
 
-Config.TireWearDistance        = 250    -- Distance before tire change
+Config.TireWearDistance        = 10800  -- Distance before tire change
 Config.BaseTireGrip            = 2.5    -- New tire grip
 Config.MinTireGrip             = 0.5    -- Worn tire grip
 
@@ -205,7 +207,7 @@ Config.MaxBrakeWear            = 100.0  -- Max brake wear value
 Config.BrakeEfficiencyLoss     = 1.0    -- Braking power loss when worn
 Config.BaseBrakeForce          = 1.0    -- Base brake force
 
-Config.SuspensionChangeDistance= 300    -- Distance before suspension change
+Config.SuspensionChangeDistance= 43200  -- Distance before suspension change
 Config.MaxSuspensionWear       = 1.0    -- Max suspension wear value
 
 Config.ClutchWearRate          = 0.1    -- Clutch wear rate

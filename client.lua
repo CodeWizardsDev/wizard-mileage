@@ -555,13 +555,18 @@ end
 local function DoMaintenance(item, errorMSG, configData, progressMSG, isAdv)
     if Config.JobRequired then
         local Job, Grade = CheckJob()
-        if Job ~= Config.MechanicJob then
-            Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
-            return
-        end
-        if Grade < Config.MinimumJobGrade then
-            Notify('Wizard Mileage', locale("error.low_grade"), "error")
-            return
+        for jobName, minGrade in pairs(Config.MechanicJobs) do
+            if Job == jobName then 
+                if Grade >= minGrade then 
+                    break
+                else
+                    Notify('Wizard Mileage', locale("error.low_grade"), "error")
+                    return
+                end
+            else
+                Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
+                return
+            end
         end
     end
 
@@ -753,13 +758,19 @@ CreateThread(function()
                         onSelect = function(data)
                             if Config.JobRequired then
                                 local Job, Grade = CheckJob()
-                                if Job ~= Config.MechanicJob then
-                                    Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
-                                    return
-                                end
-                                if Grade < Config.MinimumJobGrade then
-                                    Notify('Wizard Mileage', locale("error.low_grade"), "error")
-                                    return
+                                local allowed = false
+                                for jobName, minGrade in pairs(Config.MechanicJobs) do
+                                    if Job == jobName then 
+                                        if Grade >= minGrade then 
+                                            break
+                                        else
+                                            Notify('Wizard Mileage', locale("error.low_grade"), "error")
+                                            return
+                                        end
+                                    else
+                                        Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
+                                        return
+                                    end
                                 end
                             end
                             openServiceMenu()
@@ -812,17 +823,23 @@ CreateThread(function()
                                 end
                             end,
                             action = function()
-                                if Config.JobRequired then
-                                    local Job, Grade = CheckJob()
-                                    if Job ~= Config.MechanicJob then
+                            if Config.JobRequired then
+                                local Job, Grade = CheckJob()
+                                local allowed = false
+                                for jobName, minGrade in pairs(Config.MechanicJobs) do
+                                    if Job == jobName then 
+                                        if Grade >= minGrade then 
+                                            break
+                                        else
+                                            Notify('Wizard Mileage', locale("error.low_grade"), "error")
+                                            return
+                                        end
+                                    else
                                         Notify('Wizard Mileage', locale("error.not_mechanic"), "error")
                                         return
                                     end
-                                    if Grade < Config.MinimumJobGrade then
-                                        Notify('Wizard Mileage', locale("error.low_grade"), "error")
-                                        return
-                                    end
                                 end
+                            end
                                 openServiceMenu()
                             end
                         },
