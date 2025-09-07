@@ -6,7 +6,7 @@
 
 ## 📝 Table of Contents
 
-- [WIKI PAGE](https://code-wizards.gitbook.io/codewizards/mileage-system/informations)
+- [WIKI PAGE](https://code-wizards.gitbook.io/codewizards/mileage-system/)
 - [ShowCase](#showcase)
 - [Todo](#todo)
 - [Dependencies](#dependencies)
