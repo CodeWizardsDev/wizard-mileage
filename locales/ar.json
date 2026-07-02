@@ -57,7 +57,9 @@
         "good": "جيد",
         "warning": "تحذير",
         "critical": "حرج",
-        "disabled": "معطل"
+        "disabled": "معطل",
+        "select_replace": "اختر الإطارات/الفرامل للاستبدال",
+        "replace_selected": "استبدال المحدد"
     },
     
     "target": {
@@ -91,6 +93,7 @@
         "spark_plug_changed": "تم تغيير شمعات إشعال المركبة بنجاح"
     },
     "warning": {
+        "check_veh": "Check the vehicle first!",
         "checking_veh": "فحص السيارة...",
         "remaining_oil": "عمر الزيت المتبقي عند",
         "remaining_filter": "عمر فلتر الزيت المتبقي عند",

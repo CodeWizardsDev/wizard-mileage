@@ -58,15 +58,17 @@
         "warning": "Warning",
         "critical": "Critical",
         "disabled": "DISABLED"
+        ,"select_replace": "Select wheels/brakes to replace",
+        "replace_selected": "Replace Selected"
     },
 
 
     "target": {
-        "changeoil": "Changing Oil...",
-        "changeoilfilter": "Changing Oil Filter...",
-        "changeairfilter": "Changing Air Filter...",
-        "changetires": "Changing Tires...",
-        "changebrakes": "Change Brakes",
+        "changeoil": "Change Oil",
+        "changeoilfilter": "Change Oil Filter",
+        "changeairfilter": "Change Air Filter",
+        "changetires": "Change Tire(s)",
+        "changebrakes": "Change Brake Pad(s)",
         "changeclutch": "Change Clutch",
         "changesuspension": "Change Suspension",
         "changesparkplug": "Change Spark Plugs"
@@ -75,8 +77,8 @@
         "changingoil": "Changing Oil...",
         "changingoilfilter": "Changing Oil Filter...",
         "changingairfilter": "Changing Air Filter...",
-        "changingtires": "Changing Tires...",
-        "changingbrakes": "Changing Brakes...",
+        "changingtires": "Changing Tire(s)...",
+        "changingbrakes": "Changing Brake(s)...",
         "changingclutch": "Changing Clutch...",
         "changingsuspension": "Changing Suspension...",
         "changingsparkplug": "Changing Spark Plugs..."
@@ -87,14 +89,15 @@
         "oil_changed": "Vehicle Oil has been successfully changed",
         "filter_changed": "Vehicle Oil Filter has been successfully changed",
         "air_filter_changed": "Vehicle Air Filter has been successfully changed",
-        "tire_changed": "Vehicle Tires has been successfully changed",
-        "brakes_changed": "Vehicle Brakes have been successfully changed",
+        "tire_changed": "Vehicle Tire(s) has been successfully changed",
+        "brakes_changed": "Vehicle Brake(s) have been successfully changed",
         "clutch_changed": "Vehicle Clutch have been successfully changed",
         "suspension_changed": "Vehicle Suspension has been successfully changed",
         "spark_plug_changed": "Vehicle Spark Plugs have been successfully changed"
     },
     "warning": {
         "checking_veh": "Checking vehicle...",
+        "check_veh": "Check the vehicle first!",
         "remaining_oil": "Oil life at",
         "remaining_filter": "Oil filter life at",
         "remaining_air_filter": "Air filter life at",
@@ -123,8 +126,8 @@
         "no_oil": "You don't have engine oil",
         "no_oil_filter": "You don't have an oil filter",
         "no_air_filter": "You don't have an air filter",
-        "no_tires": "You don't have replacement tires",
-        "no_brake_parts": "You don't have brake parts",
+        "no_tires": "You don't have replacement tire(s)",
+        "no_brake_parts": "You don't have brake part(s)",
         "no_clutch": "You don't have clutch parts",
         "no_suspension_parts": "You don't have suspension parts",
         "no_spark_plug": "You don't have spark plugs"

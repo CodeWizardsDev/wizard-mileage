@@ -141,6 +141,24 @@ body {
     color: var(--text-secondary);
 }
 
+.per-wheel {
+    flex: 1 1 100%;
+    text-align: left;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wheel-labels {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-left: 6px;
+    font-weight: 400;
+}
+
 .status-indicator {
     width: 10px;
     height: 10px;
@@ -694,83 +712,172 @@ body {
 }
 
 
-/* ---------------- Confirmation modal ---------------- */
-.custom-confirm-modal {
+
+/* ---------------- Maintenance Modal ---------------- */
+
+.maintenance-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.6);
+    inset: 0;
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 1300;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    z-index: 9999;
 }
 
-.custom-confirm-content {
-    background: var(--glass-bg);
-    border-radius: 20px;
-    border: 1px solid var(--glass-border);
-    padding: 24px 32px;
-    width: 320px;
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
-    color: var(--text-primary);
-    font-family: 'Inter', -apple-system, system-ui, sans-serif;
-    text-align: center;
+.maintenance-content {
+    width: 420px;
+    padding: 22px;
+    background: var(--glass-bg, rgba(20, 20, 20, 0.72));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    color: var(--text-primary, #fff);
+    overflow: hidden;
 }
 
-.custom-confirm-content p {
-    font-size: 1.1rem;
-    margin-bottom: 24px;
-}
-
-.custom-confirm-buttons {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
-}
-
-.confirm-ok-btn,
-.confirm-cancel-btn {
-    flex: 1;
-    padding: 10px 0;
-    border: none;
-    border-radius: 12px;
+.maintenance-content h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
     font-weight: 700;
-    font-size: 1rem;
+    color: var(--accent-red, #ff6b6b);
+    text-align: center;
+    letter-spacing: 0.2px;
+}
+
+.maintenance-content p {
+    margin: 0 0 16px 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary, #bfbfbf);
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* list */
+
+.maintenance-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding-right: 2px;
+}
+
+.maintenance-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
     cursor: pointer;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    color: inherit;
 }
 
-.confirm-ok-btn {
-    background: var(--accent-green);
+.maintenance-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.maintenance-row.selected {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.18), rgba(255, 149, 0, 0.16));
+    border-color: rgba(255, 107, 107, 0.35);
+    color: #fff;
+}
+
+.maintenance-row input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.maintenance-label {
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.maintenance-label-left {
+    flex: 1;
+    text-align: left;
+}
+
+.maintenance-label-right {
+    flex: 0 0 auto;
+    text-align: right;
+    min-width: 46px;
+    direction: ltr;
+}
+
+
+/* actions */
+
+.maintenance-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.maintenance-actions button {
+    border: none;
+    padding: 11px 16px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+#maintenanceReplaceBtn {
+    background: linear-gradient(135deg, var(--accent-red, #ff6b6b), var(--accent-orange, #ff9500));
     color: white;
-    box-shadow: 0 6px 15px rgba(59, 136, 60, 0.6);
+    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.35);
 }
 
-.confirm-ok-btn:hover {
-    background: #3b883dcc;
-    box-shadow: 0 8px 20px rgba(59, 136, 60, 0.8);
-}
-
-.confirm-ok-btn:active {
-    transform: scale(0.98);
-    box-shadow: 0 4px 10px rgba(59, 136, 60, 0.5);
-}
-
-.confirm-cancel-btn {
-    background: var(--accent-red);
+#maintenanceCancelBtn {
+    background: rgba(255, 255, 255, 0.08);
     color: white;
-    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.confirm-cancel-btn:hover {
-    background: #913434cc;
-    box-shadow: 0 8px 20px rgba(145, 52, 52, 0.8);
+.maintenance-actions button:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
 }
 
-.confirm-cancel-btn:active {
+#maintenanceReplaceBtn:hover {
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.45);
+}
+
+#maintenanceCancelBtn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.maintenance-actions button:active {
     transform: scale(0.98);
-    box-shadow: 0 4px 10px rgba(145, 52, 52, 0.5);
+}
+
+/* optional scrollbar polish */
+.maintenance-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.maintenance-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.maintenance-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+}
+
+.maintenance-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
 }

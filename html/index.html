@@ -36,6 +36,7 @@
                 </div>
                 <div class="progress-info">
                     <span class="percent">100%</span>
+                    <div class="per-wheel"></div>
                 </div>
             </div>
         </template>
@@ -139,13 +140,16 @@
         </div>
     </div>
 
-    <!---------------- Custom Confirmation Modal ---------------->
-    <div id="customConfirmModal" class="custom-confirm-modal" style="display:none;">
-        <div class="custom-confirm-content">
-            <p id="customConfirmMessage"></p>
-            <div class="custom-confirm-buttons">
-                <button id="customConfirmOk" class="confirm-ok-btn">OK</button>
-                <button id="customConfirmCancel" class="confirm-cancel-btn">Cancel</button>
+    <!---------------- Maintenance Selection Modal ---------------->
+    <div id="maintenanceModal" class="maintenance-modal" style="display:none;">
+        <div class="maintenance-content">
+            <h2 id="maintenanceTitle"></h2>
+            <p id="maintenanceDesc"></p>
+            <div id="maintenanceList" class="maintenance-list">
+            </div>
+            <div class="maintenance-actions">
+                <button id="maintenanceReplaceBtn"></button>
+                <button id="maintenanceCancelBtn"></button>
             </div>
         </div>
     </div>

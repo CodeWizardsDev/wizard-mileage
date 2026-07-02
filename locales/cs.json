@@ -55,7 +55,9 @@
         "good": "Dobrý",
         "warning": "Varování",
         "critical": "Kritický",
-        "disabled": "VYPNUTO"
+        "disabled": "VYPNUTO",
+        "select_replace": "Vyberte pneumatiky/brzdy k výměně",
+        "replace_selected": "Vyměnit označené"
     },
     
     "target": {
@@ -89,7 +91,9 @@
         "spark_plug_changed": "Zapalovací svíčky byly úspěšně vyměněny"
     },
     "warning": {
+        "check_veh": "Check the vehicle first!",
         "checking_veh": "Kontrola vozidla...",
+
         "remaining_oil": "Životnost oleje zbývá",
         "remaining_filter": "Životnost olejového filtru zbývá",
         "remaining_air_filter": "Životnost vzduchového filtru zbývá",

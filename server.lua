@@ -1,15 +1,15 @@
----------------- Main data ----------------
---[[
-    These variables define the main Lua files that make up the Wizard Mileage resource.
-    They are used for version checking, file integrity, and to ensure all necessary files are present and loaded.
-    If you add, remove, or rename Lua files in this resource, update this list accordingly.
-    Customers can reference this variable to understand which files are essential for the script to function.
-]]--
 local luaFileNames = {'config/config.lua', 'client.lua', 'server.lua'}
 
 
 
----------------- Functions ----------------
+
+
+--==========================================================================
+--
+--                                FUNCTIONS
+--
+--==========================================================================
+
 --[[
     This function loads the player's UI customization settings from the database.
     If settings exist for the given player ID, they are returned via the callback.
@@ -79,7 +79,14 @@ end
 
 
 
----------------- Inventory initialize ----------------
+
+
+--==========================================================================
+--
+--                          INVENTORY INITIALIZE
+--
+--==========================================================================
+
 --[[
     This section initializes the inventory system based on the configured inventory script.
     It creates usable items for vehicle maintenance parts, allowing players to use these items
@@ -99,7 +106,14 @@ end)
 
 
 
----------------- Net Events ----------------
+
+
+--==========================================================================
+--
+--                                NET EVENTS
+--
+--==========================================================================
+
 --[[
     This section registers various server-side events that handle different functionalities of the Wizard Mileage script.
     These events include checking for updates, loading and saving player settings, updating vehicle data,
@@ -235,19 +249,14 @@ RegisterNetEvent('wizard_vehiclemileage:server:getOriginalSuspensionValue')
 AddEventHandler('wizard_vehiclemileage:server:getOriginalSuspensionValue', function(plate)
     if not plate then return end
     local src = source
-    local query = "SELECT original_suspension_raise FROM vehicle_mileage WHERE plate = ?"
-    local query2 = "SELECT original_suspension_force FROM vehicle_mileage WHERE plate = ?"
+    local query = "SELECT original_suspension_raise, original_suspension_force FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate}, function(result)
-        if result and result[1] and result[1].original_suspension_raise then
+        if result and result[1] then
             local susRaise = tonumber(result[1].original_suspension_raise)
+            local susForce = tonumber(result[1].original_suspension_force)
             if susRaise then
                 TriggerClientEvent('wizard_vehiclemileage:client:setOriginalSusRaise', src, susRaise)
             end
-        end
-    end)
-    exports.oxmysql:execute(query2, {plate}, function(result2)
-        if result2 and result2[1] and result2[1].original_suspension_force then
-            local susForce = tonumber(result2[1].original_suspension_force)
             if susForce then
                 TriggerClientEvent('wizard_vehiclemileage:client:setOriginalSusForce', src, susForce)
             end
@@ -276,18 +285,12 @@ end)
 RegisterNetEvent('wizard_vehiclemileage:server:updateSuspensionChange')
 AddEventHandler('wizard_vehiclemileage:server:updateSuspensionChange', function(plate)
     if not plate then return end
-    local query = "SELECT mileage FROM vehicle_mileage WHERE plate = ?"
-    exports.oxmysql:execute(query, {plate}, function(result)
-        if result and result[1] then
-            local mileage = tonumber(result[1].mileage) or 0.0
-            local updateQuery = "UPDATE vehicle_mileage SET last_suspension_change = ? WHERE plate = ?"
-            exports.oxmysql:execute(updateQuery, {mileage, plate}, function(rowsChanged)
-                if rowsChanged then
-                    debug(Config.Debug, "Wizard Mileage", "Suspension change updated for plate " .. plate .. " at mileage " .. mileage)
-                else
-                    debug(Config.Debug, "Wizard Mileage", "Failed to update suspension change for plate " .. plate)
-                end
-            end)
+    local updateQuery = "UPDATE vehicle_mileage SET last_suspension_change = mileage WHERE plate = ?"
+    exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
+        if rowsChanged then
+            debug(Config.Debug, "Wizard Mileage", "Suspension change updated for plate " .. plate)
+        else
+            debug(Config.Debug, "Wizard Mileage", "Failed to update suspension change for plate " .. plate)
         end
     end)
 end)
@@ -380,6 +383,8 @@ AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
         SELECT mileage, last_oil_change, last_oil_filter_change, last_air_filter_change, 
         last_tire_change, last_brakes_change, brake_wear, last_clutch_change, clutch_wear,
         original_drive_force, last_suspension_change, suspension_wear, last_spark_plug_change, spark_plug_wear
+        , COALESCE(tire_wear_json, '') as tire_wear_json, COALESCE(last_tire_change_json, '') as last_tire_change_json,
+        COALESCE(brake_wear_json, '') as brake_wear_json, COALESCE(last_brake_change_json, '') as last_brake_change_json
         FROM vehicle_mileage WHERE plate = ? LIMIT 1
     ]]
     exports.oxmysql:execute(query, {plate}, function(result)
@@ -397,6 +402,10 @@ AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
         local suspensionWear = 0.0
         local lastSparkPlugChange = 0.0
         local sparkPlugWear = 0.0
+        local tireWearJson = ''
+        local lastTireChangeJson = ''
+        local brakeWearJson = ''
+        local lastBrakeChangeJson = ''
         if result and result[1] then
             mileage = tonumber(result[1].mileage) or 0.0
             lastOil = tonumber(result[1].last_oil_change) or 0.0
@@ -412,9 +421,58 @@ AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
             suspensionWear = tonumber(result[1].suspension_wear) or 0.0
             lastSparkPlugChange = tonumber(result[1].last_spark_plug_change) or 0.0
             sparkPlugWear = tonumber(result[1].spark_plug_wear) or 0.0
+            tireWearJson = result[1].tire_wear_json or ''
+            lastTireChangeJson = result[1].last_tire_change_json or ''
+            brakeWearJson = result[1].brake_wear_json or ''
+            lastBrakeChangeJson = result[1].last_brake_change_json or ''
         end
-        TriggerClientEvent('wizard_vehiclemileage:client:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear, lastClutch, clutchWear, original_drive_force, lastSuspensionChange, suspensionWear, lastSparkPlugChange, sparkPlugWear)
+        TriggerClientEvent('wizard_vehiclemileage:client:setData', src, mileage, lastOil, lastFilter, lastAirFilter, lastTire, lastBrake, brakeWear, lastClutch, clutchWear, original_drive_force, lastSuspensionChange, suspensionWear, lastSparkPlugChange, sparkPlugWear, tireWearJson, lastTireChangeJson, brakeWearJson, lastBrakeChangeJson)
     end)
+end)
+
+--[[
+    Update per-wheel tire wear JSON in DB (expects Lua table from client)
+]]--
+RegisterNetEvent('wizard_vehiclemileage:server:updateTireWearAll')
+AddEventHandler('wizard_vehiclemileage:server:updateTireWearAll', function(plate, tireWearTable)
+    if not plate or type(tireWearTable) ~= 'table' then return end
+    local encoded = json.encode(tireWearTable)
+    local query = "UPDATE vehicle_mileage SET tire_wear_json = ? WHERE plate = ?"
+    exports.oxmysql:execute(query, {encoded, plate})
+end)
+
+--[[
+    Update per-wheel last tire change JSON in DB
+]]--
+RegisterNetEvent('wizard_vehiclemileage:server:updateTireChangeAll')
+AddEventHandler('wizard_vehiclemileage:server:updateTireChangeAll', function(plate, lastTireTable)
+    if not plate or type(lastTireTable) ~= 'table' then return end
+    local encoded = json.encode(lastTireTable)
+    local query = "UPDATE vehicle_mileage SET last_tire_change_json = ? WHERE plate = ?"
+    exports.oxmysql:execute(query, {encoded, plate})
+end)
+
+
+--[[
+    Update per-wheel brake wear JSON in DB
+]]--
+RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeWearAll')
+AddEventHandler('wizard_vehiclemileage:server:updateBrakeWearAll', function(plate, brakeWearTable)
+    if not plate or type(brakeWearTable) ~= 'table' then return end
+    local encoded = json.encode(brakeWearTable)
+    local query = "UPDATE vehicle_mileage SET brake_wear_json = ? WHERE plate = ?"
+    exports.oxmysql:execute(query, {encoded, plate})
+end)
+
+--[[
+    Update per-wheel last brake change JSON in DB
+]]--
+RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeChangeAll')
+AddEventHandler('wizard_vehiclemileage:server:updateBrakeChangeAll', function(plate, lastBrakeTable)
+    if not plate or type(lastBrakeTable) ~= 'table' then return end
+    local encoded = json.encode(lastBrakeTable)
+    local query = "UPDATE vehicle_mileage SET last_brake_change_json = ? WHERE plate = ?"
+    exports.oxmysql:execute(query, {encoded, plate})
 end)
 
 --[[
@@ -495,13 +553,8 @@ RegisterNetEvent('wizard_vehiclemileage:server:updateOilChange')
 AddEventHandler('wizard_vehiclemileage:server:updateOilChange', function(plate)
     if not plate then return end
 
-    local updateQuery = [[
-        UPDATE vehicle_mileage vm
-        JOIN (SELECT mileage FROM vehicle_mileage WHERE plate = ?) AS sub ON vm.plate = ?
-        SET vm.last_oil_change = sub.mileage
-        WHERE vm.plate = ?
-    ]]
-    exports.oxmysql:execute(updateQuery, {plate, plate, plate}, function(rowsChanged)
+    local updateQuery = "UPDATE vehicle_mileage SET last_oil_change = mileage WHERE plate = ?"
+    exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
         if rowsChanged then
             debug(Config.Debug, "Wizard Mileage", "Oil change update successful for plate " .. plate)
         else
@@ -519,13 +572,8 @@ RegisterNetEvent('wizard_vehiclemileage:server:updateOilFilter')
 AddEventHandler('wizard_vehiclemileage:server:updateOilFilter', function(plate)
     if not plate then return end
 
-    local updateQuery = [[
-        UPDATE vehicle_mileage vm
-        JOIN (SELECT mileage FROM vehicle_mileage WHERE plate = ?) AS sub ON vm.plate = ?
-        SET vm.last_oil_filter_change = sub.mileage
-        WHERE vm.plate = ?
-    ]]
-    exports.oxmysql:execute(updateQuery, {plate, plate, plate}, function(rowsChanged)
+    local updateQuery = "UPDATE vehicle_mileage SET last_oil_filter_change = mileage WHERE plate = ?"
+    exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
         if rowsChanged then
             debug(Config.Debug, "Wizard Mileage", "Oil filter change update successful for plate " .. plate)
         else
@@ -543,13 +591,8 @@ RegisterNetEvent('wizard_vehiclemileage:server:updateAirFilter')
 AddEventHandler('wizard_vehiclemileage:server:updateAirFilter', function(plate)
     if not plate then return end
 
-    local updateQuery = [[
-        UPDATE vehicle_mileage vm
-        JOIN (SELECT mileage FROM vehicle_mileage WHERE plate = ?) AS sub ON vm.plate = ?
-        SET vm.last_air_filter_change = sub.mileage
-        WHERE vm.plate = ?
-    ]]
-    exports.oxmysql:execute(updateQuery, {plate, plate, plate}, function(rowsChanged)
+    local updateQuery = "UPDATE vehicle_mileage SET last_air_filter_change = mileage WHERE plate = ?"
+    exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
         if rowsChanged then
             debug(Config.Debug, "Wizard Mileage", "Air filter change update successful for plate " .. plate)
         else
@@ -567,13 +610,8 @@ RegisterNetEvent('wizard_vehiclemileage:server:updateTireChange')
 AddEventHandler('wizard_vehiclemileage:server:updateTireChange', function(plate)
     if not plate then return end
 
-    local updateQuery = [[
-        UPDATE vehicle_mileage vm
-        JOIN (SELECT mileage FROM vehicle_mileage WHERE plate = ?) AS sub ON vm.plate = ?
-        SET vm.last_tire_change = sub.mileage
-        WHERE vm.plate = ?
-    ]]
-    exports.oxmysql:execute(updateQuery, {plate, plate, plate}, function(rowsChanged)
+    local updateQuery = "UPDATE vehicle_mileage SET last_tire_change = mileage WHERE plate = ?"
+    exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
         if rowsChanged then
             debug(Config.Debug, "Wizard Mileage", "Tire change update successful for plate " .. plate)
         else
@@ -615,13 +653,8 @@ AddEventHandler('wizard_vehiclemileage:server:updateBrakeChange', function(plate
         return 
     end
 
-    local updateQuery = [[
-        UPDATE vehicle_mileage vm
-        JOIN (SELECT mileage FROM vehicle_mileage WHERE plate = ?) AS sub ON vm.plate = ?
-        SET vm.last_brakes_change = sub.mileage, vm.brake_wear = 0.0
-        WHERE vm.plate = ?
-    ]]
-    exports.oxmysql:execute(updateQuery, {plate, plate, plate}, function(rowsChanged)
+    local updateQuery = "UPDATE vehicle_mileage SET last_brakes_change = mileage, brake_wear = 0.0 WHERE plate = ?"
+    exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
         if rowsChanged then
             debug(Config.Debug, "Wizard Mileage", "Brake change update successful for plate " .. plate)
         else
@@ -663,13 +696,8 @@ AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(plat
         return 
     end
 
-    local updateQuery = [[
-        UPDATE vehicle_mileage vm
-        JOIN (SELECT mileage FROM vehicle_mileage WHERE plate = ?) AS sub ON vm.plate = ?
-        SET vm.last_clutch_change = sub.mileage, vm.clutch_wear = 0.0
-        WHERE vm.plate = ?
-    ]]
-    exports.oxmysql:execute(updateQuery, {plate, plate, plate}, function(rowsChanged)
+    local updateQuery = "UPDATE vehicle_mileage SET last_clutch_change = mileage, clutch_wear = 0.0 WHERE plate = ?"
+    exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
         if rowsChanged then
             debug(Config.Debug, "Wizard Mileage", "Clutch change update successful for plate " .. plate)
         else
@@ -679,21 +707,61 @@ AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(plat
 end)
 
 --[[
-    This event checks if a vehicle with the given plate is owned by a player.
-    It queries the ownership table defined in Config.VehDB to see if the plate exists.
-    The result is sent back to the client as a boolean value.
-    Customers can use this event to verify vehicle ownership for features like mileage tracking or maintenance.
+    Server callback used to check if a vehicle plate exists in the owned vehicles table.
+
+    - Queries the configured vehicle database table for the given plate.
+    - Returns true if a matching record exists.
+    - Returns false when the plate is missing or no record is found.
+
+    @param source (number): Player source requesting the check.
+    @param plate (string): Vehicle license plate.
+    @return boolean: Whether the vehicle exists in the ownership database.
 ]]--
-RegisterNetEvent('wizard_vehiclemileage:server:checkOwnership')
-AddEventHandler('wizard_vehiclemileage:server:checkOwnership', function(plate)
-    local src = source
-    if not plate then return end
-    
-    local query = "SELECT 1 FROM " .. Config.VehDB .. " WHERE plate = ? LIMIT 1"
-    exports.oxmysql:execute(query, {plate}, function(result)
-        local isOwned = result and #result > 0
-        TriggerClientEvent('wizard_vehiclemileage:client:ownershipResult', src, isOwned)
+lib.callback.register('wizard_vehiclemileage:server:ownerShipCallBack', function(source, plate)
+    if not plate then return false end
+
+    local p = promise.new()
+    local query = 'SELECT 1 FROM ' ..Config.VehDB.. ' WHERE plate = ? LIMIT 1'
+
+    exports.oxmysql:execute(query, { plate }, function(result)
+        if result and result[1] then
+            p:resolve(true)
+        else
+            p:resolve(false)
+        end
     end)
+
+    return Citizen.Await(p)
+end)
+
+--[[
+    Removes an item from the player's inventory depending on the active inventory system.
+
+    - Detects which inventory resource is currently running.
+    - Removes the specified item and amount from the player.
+    - Supports ox_inventory, codem-inventory, qs-inventory, qb-inventory, and ESX inventory.
+
+    @param item (string): Item name to remove.
+    @param amount (number): Amount of the item to remove.
+]]--
+RegisterNetEvent('wizard_vehiclemileage:server:removeItem')
+AddEventHandler('wizard_vehiclemileage:server:removeItem', function(item, amount)
+    local src = source
+    if not item or not amount then return end
+    if GetResourceState('ox_inventory') == 'started' then
+        exports.ox_inventory:RemoveItem(src, item, amount)
+        print(amount)
+    elseif GetResourceState('codem-inventory') == 'started' then
+        exports['codem-inventory']:RemoveItem(src, item, amount)
+    elseif GetResourceState('qs-inventory') == 'started' then
+        exports['qs-inventory']:RemoveItem(src, item, amount)
+    elseif GetResourceState('qb-inventory') == 'started' then
+        exports['qb-inventory']:RemoveItem(src, item, amount, false, 'wizard-mileage:Vehicle maintenance')
+    elseif GetResourceState('es_extended') == 'started' then
+        local ESX = exports["es_extended"]:getSharedObject()
+        local xPlayer = ESX.GetPlayerFromId(src)
+        xPlayer.removeInventoryItem(item, amount)
+    end
 end)
 
 AddEventHandler('onResourceStart', function(resourceName)
@@ -704,7 +772,14 @@ end)
 
 
 
----------------- Exports ----------------
+
+
+--==========================================================================
+--
+--                                 EXPORTS
+--
+--==========================================================================
+
 --[[
     Exports for other scripts to interact with vehicle mileage and maintenance data.
     Provides functions to get/set mileage, parts change history, and wear levels.

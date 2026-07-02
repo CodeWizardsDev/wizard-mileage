@@ -129,7 +129,123 @@ async function initialize() {
             }
         });
     });
+
+    // Set maintenance modal button labels if present
+    const replaceBtn = document.getElementById('maintenanceReplaceBtn');
+    const cancelBtn = document.getElementById('maintenanceCancelBtn');
+    const desc = document.getElementById('maintenanceDesc');
+    if (replaceBtn) replaceBtn.textContent = getTranslation('ui.replace_selected');
+    if (cancelBtn) cancelBtn.textContent = getTranslation('ui.cancel');
+    if (desc) desc.textContent = getTranslation('ui.select_replace');
 }
+
+// Maintenance modal handling
+let maintenanceModal, maintenanceTitle, maintenanceDesc, maintenanceList, maintenanceReplaceBtn, maintenanceCancelBtn;
+document.addEventListener('DOMContentLoaded', () => {
+    maintenanceModal = document.getElementById('maintenanceModal');
+    maintenanceTitle = document.getElementById('maintenanceTitle');
+    maintenanceDesc = document.getElementById('maintenanceDesc');
+    maintenanceList = document.getElementById('maintenanceList');
+    maintenanceReplaceBtn = document.getElementById('maintenanceReplaceBtn');
+    maintenanceCancelBtn = document.getElementById('maintenanceCancelBtn');
+    if (maintenanceCancelBtn) maintenanceCancelBtn.addEventListener('click', () => closeMaintenance());
+    if (maintenanceReplaceBtn) maintenanceReplaceBtn.addEventListener('click', () => submitMaintenanceSelection());
+});
+
+function openMaintenanceMenu(payload) {
+    // payload: { type: 'tire'|'brake', values: [percent,...], labels: ["FL","FR",..] }
+    maintenanceTitle.textContent = getTranslation('ui.' + (payload.type === 'tire' ? 'tire' : 'brake')) + ' - ' + getTranslation('target.' + (payload.type === 'tire' ? 'changetires' : 'changebrakes'));
+    maintenanceDesc.textContent = getTranslation('ui.select_replace');
+    maintenanceList.innerHTML = '';
+    maintenanceModal.dataset.partType = payload.type || 'tire';
+    payload.values.forEach((val, idx) => {
+        const row = document.createElement('div');
+        row.className = 'maintenance-row';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.idx = idx;
+
+        const left = document.createElement('span');
+        left.className = 'maintenance-label maintenance-label-left';
+        left.textContent = payload.labels && payload.labels[idx] ? payload.labels[idx] : idx + 1;
+
+        const right = document.createElement('span');
+        right.className = 'maintenance-label maintenance-label-right';
+        right.textContent = `${val}%`;
+
+        const syncRowState = () => {
+            row.classList.toggle('selected', checkbox.checked);
+        };
+
+        row.addEventListener('click', (e) => {
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            syncRowState();
+        });
+
+        checkbox.addEventListener('change', syncRowState);
+
+        row.appendChild(checkbox);
+        row.appendChild(left);
+        row.appendChild(right);
+        maintenanceList.appendChild(row);
+    });
+
+    maintenanceModal.style.display = 'flex';
+}
+
+function closeMaintenance() {
+    maintenanceModal.style.display = 'none';
+    
+    fetch(`https://${GetParentResourceName()}/closeMenu`, {method: 'POST'});
+}
+
+function submitMaintenanceSelection() {
+    const allBoxes = Array.from(maintenanceList.querySelectorAll('input[type="checkbox"]'));
+    const checked = allBoxes.filter(box => box.checked === true);
+
+    if (checked.length === 0) {
+        fetch(`https://${GetParentResourceName()}/notify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: getTranslation('error.no_tires'),
+                type: 'error'
+            })
+        });
+        return;
+    }
+
+    const indices = checked
+        .map(box => Number(box.dataset.idx))
+        .filter(Number.isInteger);
+
+    fetch(`https://${GetParentResourceName()}/replaceParts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            selected: indices,
+            type: maintenanceModal.dataset.partType
+        })
+    });
+
+    closeMaintenance();
+}
+
+
+// Expose NUI message handler
+window.openMaintenanceMenu = openMaintenanceMenu;
+
+// Listen for NUI messages from Lua
+window.addEventListener('message', (event) => {
+    const d = event.data;
+    if (!d) return;
+    if (d.action === 'openMaintenance') {
+        openMaintenanceMenu(d.payload || {});
+    }
+});
 
 async function applyCSSVariables() {
     const response = await fetch('../config/ui_config.json');
@@ -319,46 +435,26 @@ document.addEventListener('keydown', function(event) {
         if (databaseMenu) {
             databaseMenu.style.display = 'none';
         }
+        closeMaintenance()
     }
 });
 
-let customConfirmModal, customConfirmMessage, customConfirmOk, customConfirmCancel;
+async function showCustomConfirm(message) {
+    try {
+        const response = await fetch(`https://${GetParentResourceName()}/confirmDialog`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message })
+        });
 
-document.addEventListener('DOMContentLoaded', () => {
-    customConfirmModal = document.getElementById('customConfirmModal');
-    customConfirmMessage = document.getElementById('customConfirmMessage');
-    customConfirmOk = document.getElementById('customConfirmOk');
-    customConfirmCancel = document.getElementById('customConfirmCancel');
-});
-
-function showCustomConfirm(message) {
-    return new Promise((resolve) => {
-        if (!customConfirmMessage || !customConfirmModal) {
-            resolve(false);
-            return;
-        }
-        customConfirmMessage.textContent = message;
-        customConfirmModal.style.display = 'flex';
-
-        function onOk() {
-            cleanup();
-            resolve(true);
-        }
-
-        function onCancel() {
-            cleanup();
-            resolve(false);
-        }
-
-        function cleanup() {
-            customConfirmOk.removeEventListener('click', onOk);
-            customConfirmCancel.removeEventListener('click', onCancel);
-            customConfirmModal.style.display = 'none';
-        }
-
-        customConfirmOk.addEventListener('click', onOk);
-        customConfirmCancel.addEventListener('click', onCancel);
-    });
+        const data = await response.json();
+        return data.confirmed === true;
+    } catch (err) {
+        console.error('confirmDialog failed:', err);
+        return false;
+    }
 }
 
 function registerDatabaseMenuEventListeners() {
@@ -644,19 +740,59 @@ window.addEventListener('message', ({
                 }
             ];
 
-            wearTypes.forEach(({
-                key,
-                id
-            }) => {
-                if (typeof data[key] === 'undefined') {
-                    const bar = document.getElementById(id);
-                    const percent = document.getElementById(`${id}Percent`);
-                    const wearBar = bar ? bar.closest('.wear-bar') : null;
+            wearTypes.forEach(({ key, id }) => {
+                const value = data[key];
+                const bar = document.getElementById(id);
+                const wearBar = bar ? bar.closest('.wear-bar') : null;
+                const perWheelEl = wearBar ? wearBar.querySelector('.per-wheel') : null;
+                const compNameEl = wearBar ? wearBar.querySelector('.component-name') : null;
+
+                if (Array.isArray(value)) {
+                    // compute average of numeric entries
+                    const nums = value.map(v => (typeof v === 'number' ? Math.max(0, Math.min(100, Math.floor(v))) : null));
+                    const valid = nums.filter(n => typeof n === 'number');
+                    const avg = valid.length ? Math.floor(valid.reduce((a, b) => a + b, 0) / valid.length) : null;
+                    // update main progress with average
+                    updateProgressBar(id, avg);
+
+                    // update per-wheel line
+                    if (perWheelEl) {
+                        const displayValues = value.map(v => (typeof v === 'number' ? `${Math.floor(v)}%` : '-'));
+                        perWheelEl.textContent = displayValues.join(' | ');
+                    }
+
+                    // update header with short labels for common wheel counts
+                    if (compNameEl) {
+                        const n = value.length;
+                        let labels = [];
+                        if (n === 4) labels = ['FL', 'FR', 'RL', 'RR'];
+                        else if (n === 2) labels = ['F', 'R'];
+                        else if (n === 3) labels = ['FL', 'FR', 'R'];
+                        else labels = Array.from({ length: n }, (_, i) => `W${i + 1}`);
+
+                        // ensure small labels span exists
+                        let labelSpan = compNameEl.querySelector('.wheel-labels');
+                        if (!labelSpan) {
+                            labelSpan = document.createElement('span');
+                            labelSpan.className = 'wheel-labels';
+                            compNameEl.appendChild(labelSpan);
+                        }
+                        labelSpan.textContent = ` (${labels.join(' | ')})`;
+                    }
+                } else if (typeof value === 'number') {
+                    // single scalar handled normally
+                    updateProgressBar(id, value);
+                    if (perWheelEl) perWheelEl.textContent = '';
+                    if (compNameEl) {
+                        const labelSpan = compNameEl.querySelector('.wheel-labels');
+                        if (labelSpan) labelSpan.textContent = '';
+                    }
+                } else {
+                    // undefined / disabled
                     if (bar) {
                         bar.style.width = `0%`;
                         bar.style.backgroundColor = 'gray';
                     }
-                    if (percent) percent.parentNode.removeChild(percent);
                     if (wearBar) {
                         const wearIcon = wearBar.querySelector('.wear-icon');
                         if (wearIcon) {
@@ -673,9 +809,8 @@ window.addEventListener('message', ({
                         if (statusIndicator) {
                             statusIndicator.style.background = '#888';
                         }
+                        if (perWheelEl) perWheelEl.textContent = '';
                     }
-                } else {
-                    updateProgressBar(id, data[key]);
                 }
             });
 

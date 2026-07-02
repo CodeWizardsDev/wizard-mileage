@@ -1,12 +1,13 @@
-<h1 align="center">Wizard Mileage  System</h1>
+<h1 align="center">Wizard Mileage System</h1>
 
-<p align="center"> A comprehensive vehicle maintenance and mileage tracking system for FiveM servers that simulates realistic vehicle wear and tear, including oil life, filters, tires, and brake conditions. The system tracks vehicle mileage and component wear, requiring regular maintenance to maintain optimal vehicle performance.
-    <br> 
+<p align="center">
+    A complete vehicle mileage and maintenance system for FiveM servers. Wizard Mileage System tracks vehicle distance and simulates realistic component wear over time, including oil life, filters, tires, brakes, suspension, clutch, and spark plugs. Regular maintenance is required to keep vehicles performing properly and prevent progressive handling, engine, and performance issues.
+    <br>
 </p>
 
 ## 📝 Table of Contents
 
-- [WIKI PAGE](https://code-wizards.gitbook.io/codewizards/mileage-system/)
+- [WIKI PAGE](https://code-wizards.gitbook.io/codewizards/mileage-system/informations)
 - [ShowCase](#showcase)
 - [Todo](#todo)
 - [Dependencies](#dependencies)
@@ -18,6 +19,7 @@
 - [License](#license)
 
 ## 🖼️ ShowCase <a name = "showcase"></a>
+
 <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
     <img src="https://github.com/user-attachments/assets/adfb0ba2-03d6-41e1-87a4-8992d38bb7d0" alt="" style="width: 400px; height: auto; object-fit: cover;">
     <img src="https://github.com/user-attachments/assets/23e2ed14-b2cc-4467-a47f-854aa0e534d2" alt="" style="width: 400px; height: auto; object-fit: cover;">
@@ -28,17 +30,16 @@
     <img src="https://github.com/user-attachments/assets/a845d78f-b3c0-49b7-b793-2ae4bbbaaec3" alt="" style="width: 400px; height: 200px; object-fit: cover;">
 </div>
 
-
 ## 💡 Todo <a name = "todo"></a>
 
-- Introduce more features
-- Fix existing bugs
+- Add more maintenance and vehicle behavior features
+- Improve existing systems and fix reported issues
 
-## ⛓️ Dependencie <a name = "dependencies"></a>
+## ⛓️ Dependencies <a name = "dependencies"></a>
 
-- FrameWork: `QBox` or `QBCore` or `ESX` or `ND_Core`
+- Framework: `QBox` or `QBCore` or `ESX` or `ND_Core`
 - SQL: [`oxmysql`](https://github.com/overextended/oxmysql)
-- NEEDED: [`ox_lib`](https://github.com/overextended/ox_lib) & [`wizard_lib`](https://github.com/CodeWizardsDev/wizard-lib)
+- Required: [`ox_lib`](https://github.com/overextended/ox_lib) & [`wizard_lib`](https://github.com/CodeWizardsDev/wizard-lib)
 - Target: [`ox_target`](https://github.com/overextended/ox_target) or [`qb-target`](https://github.com/qbcore-framework/qb-target)
 - Inventory: `ox` or `codem` or `quasar` or `qb` or `esx`
 - Menu: `ox` or `QB` or `QBox`
@@ -48,83 +49,93 @@
 ## 🚀 Features Scope <a name = "feature_scope"></a>
 
 ### Vehicle Mileage Tracking
-- Real-time mileage tracking for owned vehicles
-- Configurable distance units (kilometers or miles)
-- Customizable mileage display position on screen
-- Automatic mileage saving to database with configurable autosave interval
-- Command to reset vehicle mileage
-- Option to track only player-owned vehicles
-- Support for multiple vehicle database tables (QBCore, QBox, ESX, ND_Core)
+
+- Tracks vehicle mileage in real time while driving
+- Supports both kilometers and miles
+- Saves mileage automatically with a configurable autosave interval
+- Can be limited to player-owned vehicles only
+- Supports configurable vehicle database tables for different frameworks
+- Includes commands for mileage reset and mileage database management
+- Displays mileage through a configurable in-game UI
 
 ### Spark Plug System
-- Spark plug wear tracking based on distance
-- Maintenance interval configuration
-- Engine misfire simulation when spark plugs are worn
-- Spark plug replacement service with progress bar and animation
-- Warning notifications for spark plug maintenance
-- Cancelable maintenance procedures
+
+- Tracks spark plug wear based on driven distance
+- Supports configurable service intervals and warning thresholds
+- Can simulate engine misfires when spark plugs are heavily worn
+- Includes a mechanic service option for replacing spark plugs
+- Uses progress bars and animations during maintenance
+- Maintenance actions can be canceled before completion
 
 ### Oil System
-- Oil life monitoring based on distance traveled
-- Configurable oil change intervals
-- Engine damage simulation when oil maintenance is neglected
-- Visual warnings for low oil life
-- Oil change service interaction for mechanics with progress bar and animation
-- Cancelable maintenance procedures
+
+- Monitors oil life based on vehicle mileage
+- Supports configurable oil change intervals
+- Can apply engine damage or performance issues when oil is neglected
+- Shows warning notifications when oil service is required
+- Includes a mechanic oil change interaction
+- Uses progress bars, animations, and cancelable service actions
 
 ### Oil Filter System
-- Separate tracking for oil filter life
-- Independent oil filter change intervals
-- Engine performance impact when filter is worn
-- Service option for filter replacement with progress bar and animation
-- Warning system for filter maintenance
-- Cancelable maintenance procedures
+
+- Tracks oil filter condition separately from engine oil
+- Supports independent oil filter service intervals
+- Can affect vehicle performance when the filter is worn
+- Includes a dedicated oil filter replacement service
+- Shows maintenance warnings based on configured thresholds
+- Supports progress bars, animations, and cancelable procedures
 
 ### Air Filter System
-- Air filter condition monitoring
-- Performance impact on vehicle when filter is dirty:
-  - Reduced top speed
-  - Decreased acceleration
-- Air filter replacement service with progress bar and animation
-- Warning notifications for filter maintenance
-- Cancelable maintenance procedures
+
+- Monitors air filter condition over time
+- Can reduce acceleration and top speed when the filter is dirty
+- Includes an air filter replacement interaction
+- Supports configurable wear values and warning thresholds
+- Uses progress bars and animations for service actions
+- Maintenance can be canceled during the process
 
 ### Tire System
-- Tire wear tracking based on distance
-- Impact on vehicle handling and grip
-- Configurable tire wear rates and grip values
-- Tire replacement service with progress bar and animation
-- Visual wear indicators and warnings
-- Cancelable maintenance procedures
+
+- Tracks tire wear based on vehicle usage
+- Can affect vehicle handling and grip as tires degrade
+- Supports configurable tire wear rates and grip impact values
+- Includes a tire replacement service
+- Provides wear indicators and maintenance warnings
+- Supports progress bars, animations, and cancelable service actions
 
 ### Brake System
-- Progressive brake wear simulation
-- Impact on braking efficiency
-- Brake maintenance service with progress bar and animation
-- Warning system for brake condition
-- Configurable wear rates and efficiency loss
-- Cancelable maintenance procedures
+
+- Simulates progressive brake wear over time
+- Can reduce braking efficiency when brakes are worn
+- Includes a brake service interaction for mechanics
+- Supports configurable wear rates and braking efficiency loss
+- Shows warning notifications when brake maintenance is needed
+- Uses progress bars, animations, and cancelable procedures
 
 ### Suspension System
-- Suspension wear tracking and replacement service
-- Configurable wear rates and maximum wear values
-- Progress bar and animation for suspension service
-- Cancelable maintenance procedures
+
+- Tracks suspension wear and service state
+- Can affect vehicle handling when suspension condition drops
+- Supports configurable wear rates and maximum wear values
+- Includes a suspension replacement service
+- Preserves original suspension handling values for proper restoration
+- Uses progress bars, animations, and cancelable maintenance actions
 
 ### Clutch System
-- Clutch wear tracking based on gear changes
-- Impact on vehicle performance
-- Engine stalls chance when clutch is worn out
-- Clutch replacement service with progress bar and animation
-- Warning system for clutch condition
-- Configurable wear rates and performance loss
-- Cancelable maintenance procedures
+
+- Tracks clutch wear based on gear changes and vehicle usage
+- Can affect vehicle performance when the clutch is worn
+- Supports engine stall chance when clutch condition is critical
+- Includes a clutch replacement service
+- Supports configurable wear rates and performance loss values
+- Shows warning notifications and supports cancelable service actions
 
 ### Mechanic Interactions
+
 1. Approach a vehicle
-2. Use the target system (ox_target or qb-target)
-3. Available maintenance options:
-   - Replace SparkPlugs
+2. Use the configured target system, either `ox_target` or `qb-target`
+3. Select one of the available maintenance actions:
+   - Replace Spark Plugs
    - Change Oil
    - Replace Oil Filter
    - Replace Air Filter
@@ -132,35 +143,42 @@
    - Service Brakes
    - Service Suspension
    - Replace Clutch
-4. Each interaction requires appropriate inventory items
-5. Progress bars and animations for maintenance actions
-6. Cancelable maintenance procedures
+4. Required inventory items are checked before service
+5. Progress bars and animations are used during maintenance
+6. Service actions can be canceled before completion
 
 ### Job Requirements
-- Mechanic job required for maintenance (configurable)
-- Minimum job grade requirement (configurable)
-- Job name configurable in config.lua
-- Supports both ox_target and qb-target systems
+
+- Maintenance can be restricted to mechanic jobs
+- Supported mechanic jobs and minimum grades are configurable
+- Job names can be adjusted from `config.lua`
+- Works with supported target systems such as `ox_target` and `qb-target`
 
 ### Multiple Menu Support
+
 - Supports multiple menu systems:
-  - ox_lib
-  - QBCore/QBox menu
+  - `ox_lib`
+  - `QBCore/QBox` menu
 
 ### HUD Features
-- Real-time mileage display
-- Configurable position
-- Component wear display when using /checkwear command
-- Warning notifications for maintenance needs
+
+- Real-time mileage display while driving
+- Configurable mileage UI position and size
+- Component wear display through the `/checkwear` command
+- Warning notifications for components that need maintenance
+- Persistent player UI preferences
 
 ### Database Integration
-- Automatic mileage saving
-- Persistent maintenance history
-- Vehicle ownership verification
-- Supports multiple vehicle database structures
+
+- Automatically saves mileage and maintenance values
+- Stores persistent vehicle wear and service history
+- Supports vehicle ownership verification
+- Supports configurable vehicle database structures
+- Saves player UI customization settings persistently
 
 ### Disabled Vehicle Classes
-- Option to disable mileage tracking and maintenance for specific vehicle classes such as:
+
+- Option to disable mileage tracking and maintenance for specific vehicle classes, such as:
   - Cycles
   - Boats
   - Helicopters
@@ -170,9 +188,10 @@
   - Commercial vehicles
 
 ### Vehicle Mileage Database UI
-- Interactive vehicle mileage database panel accessible in-game
-- Displays a list of vehicles with plate numbers and current mileage
-- Allows editing of vehicle data including:
+
+- In-game panel for managing vehicle mileage records
+- Displays registered vehicles with plate numbers and mileage values
+- Allows editing of vehicle maintenance data, including:
   - Mileage
   - Last spark plug change
   - Last oil change
@@ -182,47 +201,84 @@
   - Last brakes change and brake wear
   - Last suspension change
   - Last clutch change and clutch wear
-- Validation to ensure data consistency (e.g., last change values not exceeding mileage)
-- Supports deleting vehicles with user confirmation
-- Real-time updates and notifications for successful or failed operations
-- Custom confirmation modal for user actions
+- Validates values to prevent invalid maintenance data
+- Supports vehicle deletion with confirmation
+- Provides notifications for successful and failed actions
+- Updates database values directly from the UI
 
 ### Mileage UI Customizer
-- Allows players to toggle visibility of mileage and wear displays
-- Provides sliders to adjust size of mileage meter and wear bars
-- Allows precise positioning of UI elements via X and Y coordinates inputs
-- Supports dragging UI elements to reposition them interactively
-- Saves player customization settings persistently
-- Enhances user experience with customizable and flexible UI layout
+
+- Allows players to toggle mileage and wear display visibility
+- Includes size controls for the mileage display and wear UI
+- Supports precise X/Y positioning for UI elements
+- Saves each player's UI settings persistently
+- Helps players adjust the HUD layout to fit their screen and preference
+
+### Localization
+
+- Supports translation files for multiple languages
+- Loads the selected language from `ui_config.json`
+- Uses locale JSON files for UI labels, notifications, warnings, and errors
+- Makes it easy to add or modify supported languages
+
+### Performance
+
+- Uses client-side cached values to reduce unnecessary updates
+- Syncs changed wear data efficiently
+- Preserves original vehicle handling values where needed
+- Keeps NUI updates focused on active UI state
+- Designed to run cleanly during normal gameplay
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
-This guide will help you set up the script easily!
+This guide will help you set up the script easily.
 
 ### Setting up
-1. Download the folder and remove the -main suffix from it. The folder name should be wizard-mileage
+
+1. Download the folder and remove the `-main` suffix from it.
+2. The final folder name should be:
+```txt
+wizard-mileage
+```
+
+3. Place the resource inside your server `resources` folder.
+
+4. Add the resource to your `server.cfg`:
+
+```cfg
+ensure oxmysql  
+ensure ox_lib  
+ensure wizard-lib  
+ensure wizard-mileage
+```
 
 ### Installing
+
 [GUIDE](https://code-wizards.gitbook.io/codewizards/mileage-system/installation)
 
 ### Configuration
+
 [GUIDE](https://code-wizards.gitbook.io/codewizards/mileage-system/configuration)
 
-## ✍️ Authors <a name = "authors"></a>
+## ✍️ Authors
 
 - @The_Hs5
 
-## 🌐 Translations <a name = "trans"></a>
+## 🌐 Translations
 
 - English, Persian: @The_Hs5
 - German: @Sascha
 - Arabic: @abonan
 - French: @junior
 - Dutch: @meneer-Duck
-- Other Langs: AI
+- Other Languages: AI
 
-## 🤝 Support <a name = "support"></a>
-For support, join our Discord server: [CodeWizards Discord](https://discord.gg/ZBvacHyczY)
+## 🤝 Support
 
-## License <a name = "license"></a>
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+For support, join our Discord server: 
+https://discord.gg/ZBvacHyczY
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 
+See the LICENSE file for details

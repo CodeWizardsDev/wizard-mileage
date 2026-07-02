@@ -43,7 +43,7 @@ Config = {}
 
 -- ████████████████ GENERAL SETTINGS ████████████████
 
-Config.Debug            = true      -- Enable debug messages in console
+Config.Debug            = false     -- Enable debug messages in console
 Config.InventoryItems   = true      -- Require inventory items for maintenance
 Config.Menu             = 'ox'      -- "ox" or "qb"
 
@@ -70,14 +70,14 @@ Config.DatabaseCommand  = 'mileagedb'   -- Open vehicle data list
 
 -- ████████████████ ADMIN SETTINGS ████████████████
 
-Config.AdminPermission  = 'group.admin'       -- Required permission for database access
+Config.AdminPermission  = 'admin'       -- Required permission for database access
 
 
 
 -- ████████████████ AUTOSAVE & OWNERSHIP ████████████████
 
 Config.Autosave         = true          -- Enable autosave for mileage
-Config.AutosaveInterval = 30            -- Autosave interval (seconds)
+Config.AutosaveInterval = 5             -- Autosave interval (seconds)
 Config.MinDiffToSave    = 100.0         -- Minimum difference required between current mileage and last saved mileage to update the database
 Config.BoughtVehiclesOnly = true        -- Only track owned vehicles
 Config.VehDB            = 'player_vehicles' -- Vehicle ownership table
@@ -198,14 +198,39 @@ Config.AirFilterDistance       = 13000  -- Distance before air filter change
 Config.MaxSpeedReduction       = 0.2    -- Max speed reduction (0-1)
 Config.AccelerationReduction   = 0.3    -- Max acceleration reduction (0-1)
 
-Config.TireWearDistance        = 10800  -- Distance before tire change
+Config.TireWearDistance        = 30000  -- Distance before tire change (increased to slow distance-based wear)
 Config.BaseTireGrip            = 2.5    -- New tire grip
 Config.MinTireGrip             = 0.5    -- Worn tire grip
 
-Config.BrakeWearRate           = 0.08   -- Brake wear rate
+-- Tire wear mode: "distance" | "slip" | "both"
+-- "slip" uses drifting/burnout/slip detection to apply wear per-wheel.
+-- "distance" keeps legacy distance-based wear. "both" applies the larger of the two.
+Config.TireWearMode = "slip"
+
+-- Slip and burnout tuning (used when TireWearMode includes "slip")
+Config.Slip = {
+    DriftThreshold = 3.0,               -- lateral m/s threshold to consider drifting
+    DriftWear = 0.00008,                -- wear added per tick during drift (base per-wheel) — reduced
+    BurnoutRpmThreshold = 0.6,          -- engine RPM (0..1) threshold for burnout
+    BurnoutSpeedThreshold = 1.0,        -- vehicle speed (m/s) below which burnout applies
+    BurnoutWear = 0.0003,               -- wear added per tick during burnouts — reduced
+    GripLossThreshold = 0.1             -- additional threshold if want to detect grip loss (unused by default)
+}
+
+Config.BrakeWearRate           = 0.02   -- Brake wear rate (reduced to slow wear)
 Config.MaxBrakeWear            = 100.0  -- Max brake wear value
 Config.BrakeEfficiencyLoss     = 1.0    -- Braking power loss when worn
 Config.BaseBrakeForce          = 1.0    -- Base brake force
+
+-- Realistic braking tuning
+Config.Brake = {
+    SlamDeltaThreshold = 5.0,           -- Speed delta (m/s) over interval to consider a hard brake
+    PassengerWeightFactor = 0.25,       -- Extra wear multiplier per passenger
+    DriverSideBias = 1.25,              -- Multiplier applied to driver-side front brake when alone
+    FrontBothBias = 1.1,                -- Multiplier applied to both front brakes when passenger present
+    RearBrakeFactor = 0.45,             -- Fraction of front wear applied to rear brakes during heavy braking
+    SpeedScalingKmh = 0.02              -- Multiplier to scale wear based on vehicle speed (km/h)
+}
 
 Config.SuspensionChangeDistance= 43200  -- Distance before suspension change
 Config.MaxSuspensionWear       = 1.0    -- Max suspension wear value
@@ -327,7 +352,8 @@ Config.DisabledVehicleClasses = {
     [14] = true,    -- Boats
     [15] = true,    -- Helicopters
     [16] = true,    -- Planes
-    [21] = true,    -- Trains
+    [17] = true,    -- Service vehicles
+    [18] = true,    -- Emergency vehicles
     [19] = true,    -- Military vehicles
     [20] = true,    -- Commercial vehicles
     [21] = true,    -- Trains
