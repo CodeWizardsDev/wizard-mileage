@@ -48,6 +48,11 @@
 
 ## 🚀 Features Scope <a name = "feature_scope"></a>
 
+### Security Features
+
+- Advanced Anti-Exploit system
+- Automaticly log the detected exploits at `exploit_log.txt`
+
 ### Vehicle Mileage Tracking
 
 - Tracks vehicle mileage in real time while driving
