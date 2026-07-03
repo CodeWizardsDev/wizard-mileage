@@ -1,4 +1,5 @@
 local luaFileNames = {'config/config.lua', 'client.lua', 'server.lua'}
+local playerTokens = {}
 
 
 
@@ -9,6 +10,54 @@ local luaFileNames = {'config/config.lua', 'client.lua', 'server.lua'}
 --                                FUNCTIONS
 --
 --==========================================================================
+local function generateRandomToken(length)
+    local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    local token = ""
+    math.randomseed(os.time())
+    for i = 1, length do
+        local rand = math.random(1, #chars)
+        token = token .. string.sub(chars, rand, rand)
+    end
+    return token
+end
+
+local function logExploit(src, action)
+    TriggerClientEvent('wizard-tracker:client:notify', src, 'Wizard Mileage', 'Your unauthorized action has been logged and admins can see it', 'warning')
+    local time = os.date('%Y-%m-%d %H:%M:%S')
+
+    local identifiers = {}
+    for i = 0, GetNumPlayerIdentifiers(src) - 1 do
+        identifiers[#identifiers + 1] = GetPlayerIdentifier(src, i)
+    end
+
+    local line = string.format(
+        "[%s] Player %s | Identifiers: %s | Tried: %s\n",
+        time,
+        tostring(src),
+        table.concat(identifiers, ", "),
+        tostring(action)
+    )
+
+    local path = GetResourcePath(GetCurrentResourceName()) .. "/exploit_log.txt"
+
+    local file = io.open(path, "a")
+    if file then
+        file:write(line)
+        file:close()
+    end
+end
+
+local function isTokenValid(src, token, action)
+    if not token or not playerTokens[src] then
+        return false 
+    end
+    if playerTokens[src] == token then
+        return true
+    else
+        logExploit(src, "Invalid token submission attempt (" .. action .. ")")
+        return false
+    end
+end
 
 --[[
     This function loads the player's UI customization settings from the database.
@@ -114,6 +163,16 @@ end)
 --
 --==========================================================================
 
+RegisterNetEvent('wizard_vehiclemileage:server:requestToken', function()
+    local src = source
+    if playerTokens[src] then return end
+
+    local token = generateRandomToken(32)
+    playerTokens[src] = token
+
+    TriggerClientEvent('wizard_vehiclemileage:client:receiveToken', src, token)
+end)
+
 --[[
     This section registers various server-side events that handle different functionalities of the Wizard Mileage script.
     These events include checking for updates, loading and saving player settings, updating vehicle data,
@@ -121,8 +180,9 @@ end)
     Customers can reference these events to understand how to interact with the script and extend its functionality.
 ]]--
 RegisterNetEvent("wizard_vehiclemileage:server:getupdate")
-AddEventHandler("wizard_vehiclemileage:server:getupdate", function()
+AddEventHandler("wizard_vehiclemileage:server:getupdate", function(token)
     local src = source
+    if not isTokenValid(src, token, "Get Update") then return end
     local currentVersion = GetResourceMetadata(GetCurrentResourceName(), "version", 0)
     local latestVersionUrl = "https://raw.githubusercontent.com/CodeWizardsDev/wizard-mileage/refs/heads/main/version.txt"
     local latestVersion = fetchUrl(latestVersionUrl)
@@ -140,8 +200,9 @@ end)
     Customers can use this event to manage player-specific UI preferences for the mileage display.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:loadPlayerSettings')
-AddEventHandler('wizard_vehiclemileage:server:loadPlayerSettings', function()
+AddEventHandler('wizard_vehiclemileage:server:loadPlayerSettings', function(token)
     local src = source
+    if not isTokenValid(src, token, "Load Player Settings") then return end
     local playerId = GetPlayerIdentifier(src, 0)
     loadPlayerSettings(playerId, function(settings)
         TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
@@ -154,8 +215,9 @@ end)
     Customers can use this event to allow players to customize their UI preferences for the mileage display.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:savePlayerSettings')
-AddEventHandler('wizard_vehiclemileage:server:savePlayerSettings', function(settings)
+AddEventHandler('wizard_vehiclemileage:server:savePlayerSettings', function(token, settings)
     local src = source
+    if not isTokenValid(src, token, "Save Player Settings") then return end
     local playerId = GetPlayerIdentifier(src, 0)
     savePlayerSettings(playerId, settings)
     TriggerClientEvent('wizard_vehiclemileage:client:setPlayerSettings', src, settings)
@@ -167,9 +229,14 @@ end)
     Customers can use this event to display a list of all vehicles and their mileage data in the UI.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:getAllVehicles')
-AddEventHandler('wizard_vehiclemileage:server:getAllVehicles', function(cbId)
+AddEventHandler('wizard_vehiclemileage:server:getAllVehicles', function(token, cbId)
     local src = source
+    if not isTokenValid(src, token, "Update Vehicle Data") then return end
     local query = "SELECT * FROM vehicle_mileage"
+    if not IsPlayerAceAllowed(src, Config.AdminPermission) then
+        logExploit(src, "Unauthorized admin action attempt (Get Vehicles List) for plate: " .. plate)
+        return
+    end
     exports.oxmysql:execute(query, {}, function(result)
         TriggerClientEvent('wizard_vehiclemileage:client:getAllVehiclesCallback', src, cbId, result or {})
     end)
@@ -182,11 +249,16 @@ end)
     Customers can use this event to fetch and display mileage data for individual vehicles.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateVehicleData')
-AddEventHandler('wizard_vehiclemileage:server:updateVehicleData', function(vehicleData)
+AddEventHandler('wizard_vehiclemileage:server:updateVehicleData', function(token, vehicleData)
+    local src = source
+    if not isTokenValid(src, token, "Update Vehicle Data") then return end
     if not vehicleData or not vehicleData.plate then return end
     local plate = vehicleData.plate
     local mileage = vehicleData.mileage or 0
-    local src = source
+    if not IsPlayerAceAllowed(src, Config.AdminPermission) then
+        logExploit(src, "Unauthorized admin action attempt (Update Vehicle Data) for plate: " .. plate)
+        return
+    end
     local query = [[
         INSERT INTO vehicle_mileage (plate, mileage, last_oil_change, last_oil_filter_change, last_air_filter_change, last_tire_change, last_brakes_change, brake_wear, last_clutch_change, clutch_wear, last_suspension_change, suspension_wear, last_spark_plug_change, spark_plug_wear)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -222,6 +294,7 @@ AddEventHandler('wizard_vehiclemileage:server:updateVehicleData', function(vehic
         vehicleData.spark_plug_wear or 0
     }, function(rowsChanged)
         if rowsChanged then
+            TriggerClientEvent('wizard-tracker:client:notify', src, 'Wizard Mileage', locale(ui.vehicle_data_updated), 'success')
             TriggerClientEvent('wizard_vehiclemileage:client:vehicleDataUpdated', src)
         end
     end)
@@ -233,10 +306,17 @@ end)
     Customers can use this event to allow players or admins to delete vehicle records from the mileage database.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:deleteVehicle')
-AddEventHandler('wizard_vehiclemileage:server:deleteVehicle', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:deleteVehicle', function(token, plate)
     if not plate then return end
+    local src = source
+    if not isTokenValid(src, token, "Delete Vehicle") then return end
+    if not IsPlayerAceAllowed(src, Config.AdminPermission) then
+        logExploit(src, "Unauthorized admin action attempt (Delete Vehicle) for plate: " .. plate)
+        return
+    end
     local query = "DELETE FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate})
+    TriggerClientEvent('wizard-tracker:client:notify', src, 'Wizard Mileage', locale(ui.vehicle_deleted_success), 'success')
 end)
 
 --[[
@@ -246,9 +326,10 @@ end)
     Customers can use this event to manage vehicle suspension settings in the mileage system.
 ]]
 RegisterNetEvent('wizard_vehiclemileage:server:getOriginalSuspensionValue')
-AddEventHandler('wizard_vehiclemileage:server:getOriginalSuspensionValue', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:getOriginalSuspensionValue', function(token, plate)
     if not plate then return end
     local src = source
+    if not isTokenValid(src, token, "Get Original Suspension Value") then return end
     local query = "SELECT original_suspension_raise, original_suspension_force FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate}, function(result)
         if result and result[1] then
@@ -270,7 +351,9 @@ end)
     Customers can use this event to track brake wear and manage vehicle maintenance.
 ]]
 RegisterNetEvent('wizard_vehiclemileage:server:updateSuspensionWear')
-AddEventHandler('wizard_vehiclemileage:server:updateSuspensionWear', function(plate, suspensionWear)
+AddEventHandler('wizard_vehiclemileage:server:updateSuspensionWear', function(token, plate, suspensionWear)
+    local src = source
+    if not isTokenValid(src, token, "Update Suspension Wear") then return end
     if not plate or type(suspensionWear) ~= "number" then return end
     local query = "UPDATE vehicle_mileage SET suspension_wear = ? WHERE plate = ?"
     exports.oxmysql:execute(query, {suspensionWear, plate}, function(rowsChanged)
@@ -283,7 +366,9 @@ end)
     Customers can use this event to track when the suspension was last changed for maintenance records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateSuspensionChange')
-AddEventHandler('wizard_vehiclemileage:server:updateSuspensionChange', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateSuspensionChange', function(token, plate)
+    local src = source
+    if not isTokenValid(src, token, "Update Suspension Change") then return end
     if not plate then return end
     local updateQuery = "UPDATE vehicle_mileage SET last_suspension_change = mileage WHERE plate = ?"
     exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
@@ -301,7 +386,9 @@ end)
     Customers can use this event to track spark plug wear and manage vehicle maintenance.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateSparkPlugWear')
-AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugWear', function(plate, sparkPlugWear)
+AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugWear', function(token, plate, sparkPlugWear)
+    local src = source
+    if not isTokenValid(src, token, "Update Spark Plug Wear") then return end
     if not plate or type(sparkPlugWear) ~= "number" then return end
     local query = "UPDATE vehicle_mileage SET spark_plug_wear = ? WHERE plate = ?"
     exports.oxmysql:execute(query, {sparkPlugWear, plate}, function(rowsChanged)
@@ -314,7 +401,9 @@ end)
     Customers can use this event to track when the spark plugs were last changed for maintenance records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateSparkPlugChange')
-AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugChange', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateSparkPlugChange', function(token, plate)
+    local src = source
+    if not isTokenValid(src, token, "Update Spark Plug Change") then return end
     if not plate then return end
     local query = "SELECT mileage FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate}, function(result)
@@ -338,7 +427,9 @@ end)
     Customers can use this event to store the original suspension settings for vehicles.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalSuspensionForce')
-AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionForce', function(plate, force)
+AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionForce', function(token, plate, force)
+    local src = source
+    if not isTokenValid(src, token, "Save Original Suspension Force") then return end
     if not plate or not force then return end
     local query = [[
         UPDATE vehicle_mileage
@@ -356,7 +447,9 @@ end)
     which can be useful for restoring or comparing suspension modifications.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalSuspensionRaise')
-AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', function(plate, raise)
+AddEventHandler('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', function(token, plate, raise)
+    local src = source
+    if not isTokenValid(src, token, "Save Original Suspension Raise") then return end
     if not plate or not raise then return end
     local query = [[
         UPDATE vehicle_mileage
@@ -376,8 +469,9 @@ end)
     the server and client for accurate UI and gameplay updates.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:retrieveMileage')
-AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:retrieveMileage', function(token, plate)
     local src = source
+    if not isTokenValid(src, token, "Retrieve Mileage") then return end
     if not plate then return end
     local query = [[
         SELECT mileage, last_oil_change, last_oil_filter_change, last_air_filter_change, 
@@ -434,7 +528,9 @@ end)
     Update per-wheel tire wear JSON in DB (expects Lua table from client)
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateTireWearAll')
-AddEventHandler('wizard_vehiclemileage:server:updateTireWearAll', function(plate, tireWearTable)
+AddEventHandler('wizard_vehiclemileage:server:updateTireWearAll', function(token, plate, tireWearTable)
+    local src = source
+    if not isTokenValid(src, token, "Update Tire Wear") then return end
     if not plate or type(tireWearTable) ~= 'table' then return end
     local encoded = json.encode(tireWearTable)
     local query = "UPDATE vehicle_mileage SET tire_wear_json = ? WHERE plate = ?"
@@ -445,7 +541,9 @@ end)
     Update per-wheel last tire change JSON in DB
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateTireChangeAll')
-AddEventHandler('wizard_vehiclemileage:server:updateTireChangeAll', function(plate, lastTireTable)
+AddEventHandler('wizard_vehiclemileage:server:updateTireChangeAll', function(token, plate, lastTireTable)
+    local src = source
+    if not isTokenValid(src, token, "Update Last Tire Change") then return end
     if not plate or type(lastTireTable) ~= 'table' then return end
     local encoded = json.encode(lastTireTable)
     local query = "UPDATE vehicle_mileage SET last_tire_change_json = ? WHERE plate = ?"
@@ -457,7 +555,9 @@ end)
     Update per-wheel brake wear JSON in DB
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeWearAll')
-AddEventHandler('wizard_vehiclemileage:server:updateBrakeWearAll', function(plate, brakeWearTable)
+AddEventHandler('wizard_vehiclemileage:server:updateBrakeWearAll', function(token, plate, brakeWearTable)
+    local src = source
+    if not isTokenValid(src, token, "Update Brake Wear") then return end
     if not plate or type(brakeWearTable) ~= 'table' then return end
     local encoded = json.encode(brakeWearTable)
     local query = "UPDATE vehicle_mileage SET brake_wear_json = ? WHERE plate = ?"
@@ -468,7 +568,9 @@ end)
     Update per-wheel last brake change JSON in DB
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeChangeAll')
-AddEventHandler('wizard_vehiclemileage:server:updateBrakeChangeAll', function(plate, lastBrakeTable)
+AddEventHandler('wizard_vehiclemileage:server:updateBrakeChangeAll', function(token, plate, lastBrakeTable)
+    local src = source
+    if not isTokenValid(src, token, "Update Last Brake Change") then return end
     if not plate or type(lastBrakeTable) ~= 'table' then return end
     local encoded = json.encode(lastBrakeTable)
     local query = "UPDATE vehicle_mileage SET last_brake_change_json = ? WHERE plate = ?"
@@ -482,7 +584,9 @@ end)
     which can be useful for restoring or comparing drive force modifications.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:saveOriginalDriveForce')
-AddEventHandler('wizard_vehiclemileage:server:saveOriginalDriveForce', function(plate, driveForce)
+AddEventHandler('wizard_vehiclemileage:server:saveOriginalDriveForce', function(token, plate, driveForce)
+    local src = source
+    if not isTokenValid(src, token, "Save Original Drive Force") then return end
     if not plate or not driveForce then return end
     
     local query = [[
@@ -502,9 +606,10 @@ end)
     between the server and client for accurate vehicle performance restoration or comparison.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:getOriginalDriveForce')
-AddEventHandler('wizard_vehiclemileage:server:getOriginalDriveForce', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:getOriginalDriveForce', function(token, plate)
     if not plate then return end
     local src = source
+    if not isTokenValid(src, token, "Get Original Drive Force") then return end
     
     local query = "SELECT original_drive_force FROM vehicle_mileage WHERE plate = ?"
     exports.oxmysql:execute(query, {plate}, function(result)
@@ -524,7 +629,10 @@ end)
     Customers can reference this event to understand how vehicle mileage is stored and updated.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateMileage')
-AddEventHandler('wizard_vehiclemileage:server:updateMileage', function(plate, mileage)
+AddEventHandler('wizard_vehiclemileage:server:updateMileage', function(token, plate, mileage)
+    local src = source
+    if not isTokenValid(src, token, "Update Mileage") then return end
+
     if not plate or type(mileage) ~= "number" then
         debug(Config.Debug, "Wizard Mileage", "Invalid data provided for mileage update.")
         return
@@ -550,7 +658,10 @@ end)
     Customers can use this event to track when the oil was last changed for maintenance records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateOilChange')
-AddEventHandler('wizard_vehiclemileage:server:updateOilChange', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateOilChange', function(token, plate)
+    local src = source
+    if not isTokenValid(src, token, "Update Oil Change") then return end
+
     if not plate then return end
 
     local updateQuery = "UPDATE vehicle_mileage SET last_oil_change = mileage WHERE plate = ?"
@@ -569,7 +680,10 @@ end)
     Customers can use this event to track when the oil filter was last changed for maintenance records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateOilFilter')
-AddEventHandler('wizard_vehiclemileage:server:updateOilFilter', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateOilFilter', function(token, plate)
+    local src = source
+    if not isTokenValid(src, token, "Update Oil Filter") then return end
+
     if not plate then return end
 
     local updateQuery = "UPDATE vehicle_mileage SET last_oil_filter_change = mileage WHERE plate = ?"
@@ -588,8 +702,10 @@ end)
     Customers can use this event to track when the air filter was last changed for maintenance records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateAirFilter')
-AddEventHandler('wizard_vehiclemileage:server:updateAirFilter', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateAirFilter', function(token, plate)
     if not plate then return end
+    local src = source
+    if not isTokenValid(src, token, "Update Air Filter") then return end
 
     local updateQuery = "UPDATE vehicle_mileage SET last_air_filter_change = mileage WHERE plate = ?"
     exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
@@ -607,8 +723,10 @@ end)
     Customers can use this event to track when the tires were last changed for maintenance records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateTireChange')
-AddEventHandler('wizard_vehiclemileage:server:updateTireChange', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateTireChange', function(token, plate)
     if not plate then return end
+    local src = source
+    if not isTokenValid(src, token, "Update Tire Change") then return end
 
     local updateQuery = "UPDATE vehicle_mileage SET last_tire_change = mileage WHERE plate = ?"
     exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
@@ -627,9 +745,12 @@ end)
     Customers can use this event to track brake wear and manage vehicle maintenance.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeWear')
-AddEventHandler('wizard_vehiclemileage:server:updateBrakeWear', function(plate, brakeWear)
+AddEventHandler('wizard_vehiclemileage:server:updateBrakeWear', function(token, plate, brakeWear)
     if not plate or type(brakeWear) ~= "number" then  return  end
-    
+
+    local src = source
+    if not isTokenValid(src, token, "Update Brake Wear") then return end
+
     local query = "UPDATE vehicle_mileage SET brake_wear = ? WHERE plate = ?"
     exports.oxmysql:execute(query, {brakeWear, plate}, function(rowsChanged)
         if rowsChanged then
@@ -647,11 +768,14 @@ end)
     reset their wear level after maintenance. Customers can use this event to maintain accurate brake service records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateBrakeChange')
-AddEventHandler('wizard_vehiclemileage:server:updateBrakeChange', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateBrakeChange', function(token, plate)
     if not plate then 
         debug(Config.Debug, "Wizard Mileage", "Invalid plate provided for brake change update")
         return 
     end
+
+    local src = source
+    if not isTokenValid(src, token, "Update Brake Change") then return end
 
     local updateQuery = "UPDATE vehicle_mileage SET last_brakes_change = mileage, brake_wear = 0.0 WHERE plate = ?"
     exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
@@ -670,9 +794,12 @@ end)
     Customers can use this event to track clutch wear and manage vehicle maintenance.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateClutchWear')
-AddEventHandler('wizard_vehiclemileage:server:updateClutchWear', function(plate, clutchWear)
+AddEventHandler('wizard_vehiclemileage:server:updateClutchWear', function(token, plate, clutchWear)
     if not plate or type(clutchWear) ~= "number" then return end
-    
+
+    local src = source
+    if not isTokenValid(src, token, "Update Clutch Wear") then return end
+
     local query = "UPDATE vehicle_mileage SET clutch_wear = ? WHERE plate = ?"
     exports.oxmysql:execute(query, {clutchWear, plate}, function(rowsChanged)
         if rowsChanged then
@@ -690,11 +817,14 @@ end)
     reset its wear level after maintenance. Customers can use this event to maintain accurate clutch service records.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:updateClutchChange')
-AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(plate)
+AddEventHandler('wizard_vehiclemileage:server:updateClutchChange', function(token, plate)
     if not plate then 
         debug(Config.Debug, "Wizard Mileage", "Invalid plate provided for clutch change update")
         return 
     end
+
+    local src = source
+    if not isTokenValid(src, token, "Update Clutch Change") then return end
 
     local updateQuery = "UPDATE vehicle_mileage SET last_clutch_change = mileage, clutch_wear = 0.0 WHERE plate = ?"
     exports.oxmysql:execute(updateQuery, {plate}, function(rowsChanged)
@@ -745,8 +875,9 @@ end)
     @param amount (number): Amount of the item to remove.
 ]]--
 RegisterNetEvent('wizard_vehiclemileage:server:removeItem')
-AddEventHandler('wizard_vehiclemileage:server:removeItem', function(item, amount)
+AddEventHandler('wizard_vehiclemileage:server:removeItem', function(token, item, amount)
     local src = source
+    if not isTokenValid(src, token, "Remove Item") then return end
     if not item or not amount then return end
     if GetResourceState('ox_inventory') == 'started' then
         exports.ox_inventory:RemoveItem(src, item, amount)
@@ -768,6 +899,11 @@ AddEventHandler('onResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
         checkVersion("wizard-mileage", "^3\n\n\n\n░█──░█ ─▀─ ▀▀█ █▀▀█ █▀▀█ █▀▀▄ 　 ░█▀▄▀█ ─▀─ █── █▀▀ █▀▀█ █▀▀▀ █▀▀\n░█░█░█ ▀█▀ ▄▀─ █▄▄█ █▄▄▀ █──█ 　 ░█░█░█ ▀█▀ █── █▀▀ █▄▄█ █─▀█ █▀▀\n░█▄▀▄█ ▀▀▀ ▀▀▀ ▀──▀ ▀─▀▀ ▀▀▀─ 　 ░█──░█ ▀▀▀ ▀▀▀ ▀▀▀ ▀──▀ ▀▀▀▀ ▀▀▀", "Wizard Mileage", "https://raw.githubusercontent.com/CodeWizardsDev/wizard-mileage/refs/heads/main/version.txt", "https://raw.githubusercontent.com/CodeWizardsDev/wizard-mileage/refs/heads/main/changelog.txt", luaFileNames)
     end
+end)
+
+AddEventHandler('playerDropped', function()
+    local src = source
+    playerTokens[src] = nil
 end)
 
 

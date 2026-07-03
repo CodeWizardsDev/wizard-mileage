@@ -9,6 +9,7 @@ require("@wizard-lib/client/functions")
 
 -- Player / Vehicle state
 local playerPed = PlayerPedId()       -- Player ped id (updated during runtime)
+local serverToken = nil               -- Server-issued token for secure communication
 local isInVehicle = false             -- Is the player currently inside a vehicle?
 local currentPlate = nil              -- Plate of the vehicle currently being tracked
 local vehOwned = false                -- Does this vehicle belong to any player?
@@ -213,7 +214,7 @@ local function TriggerVehicleListCallback(cb)
     end
     local cbId = math.random(100000, 999999) -- Generate a unique callback ID
     vehicleListCallbacks[cbId] = cb          -- Store the callback for later use
-    TriggerServerEvent('wizard_vehiclemileage:server:getAllVehicles', cbId) -- Ask the server for the vehicle list
+    TriggerServerEvent('wizard_vehiclemileage:server:getAllVehicles', serverToken, cbId) -- Ask the server for the vehicle list
 end
 
 --[[
@@ -332,10 +333,10 @@ local function updateAirFilterPerformance(vehicle)
 
     -- Get and save original drive force if not already saved
     local plate = normalizePlate(GetVehiclePlate(closestVehicle))
-    TriggerServerEvent('wizard_vehiclemileage:server:getOriginalDriveForce', plate)
+    TriggerServerEvent('wizard_vehiclemileage:server:getOriginalDriveForce', serverToken, plate)
     local currentAcceleration = GetVehicleHandlingFloat(vehicle, "CHandlingData", "fInitialDriveForce")
     originalDriveForce = originalDriveForce or currentAcceleration
-    TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalDriveForce', plate, originalDriveForce)
+    TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalDriveForce', serverToken, plate, originalDriveForce)
 
     -- Reduce acceleration based on wear
     local reducedAcceleration = originalDriveForce * (1.0 - (Config.AccelerationReduction * airFilterWearRatio))
@@ -457,7 +458,7 @@ local function updateSuspensionWear(vehicle)
 
     local plate = normalizePlate(GetVehiclePlate(closestVehicle))
     -- Request original suspension values from the server (if not already cached)
-    TriggerServerEvent('wizard_vehiclemileage:server:getOriginalSuspensionValue', plate)
+    TriggerServerEvent('wizard_vehiclemileage:server:getOriginalSuspensionValue', serverToken, plate)
 
     suspensionWear = wearRatio
 
@@ -467,11 +468,11 @@ local function updateSuspensionWear(vehicle)
 
     if not originalSuspensionForce or originalSuspensionForce == 0 then
         originalSuspensionForce = originalForce
-        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionForce', plate, originalForce)
+        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionForce', serverToken, plate, originalForce)
     end
     if not originalSuspensionRaise then
         originalSuspensionRaise = originalRaise
-        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', plate, originalRaise)
+        TriggerServerEvent('wizard_vehiclemileage:server:saveOriginalSuspensionRaise', serverToken, plate, originalRaise)
     end
 
     -- Calculate new suspension values based on wear
@@ -712,7 +713,7 @@ local function openCheckWearMenu(vehicle)
 
     loaded = false
 
-    TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', plate)
+    TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', serverToken, plate)
 
     while not loaded do
         Wait(500)
@@ -792,7 +793,7 @@ local function DoMaintenance(item, errorMSG, configData, progressMSG, isAdv, qua
 
     PlayAnimation(playerPed, configData.AnimationDict, configData.Animation, -1 , 1)
     if DisplayProgressBar(configData.Duration, locale("progress." .. progressMSG), configData) then
-        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', item, quantity or 1)
+        TriggerServerEvent('wizard_vehiclemileage:server:removeItem', serverToken, item, quantity or 1)
         if isAdv then SetVehicleDoorShut(closestVehicle, 4, false) end
         ClearPedTasks(playerPed)
         return true, closestVehicle
@@ -817,7 +818,7 @@ local function LoadData()
         SendNUIMessage({ type = "toggleMileage", visible = true })
         mileageVisible = true
     end
-    TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', currentPlate)
+    TriggerServerEvent('wizard_vehiclemileage:server:retrieveMileage', serverToken, currentPlate)
 end
 
 --[[
@@ -866,20 +867,20 @@ local function ClearData(ClearType)
         local savedPlugWear = sparkPlugWear
         local savedSusWear = suspensionWear
         if clutchWearDirty then
-            TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', currentPlate, cachedClutchWear)
+            TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', serverToken, currentPlate, cachedClutchWear)
         clutchWearDirty = false
         end
         if brakeWearDirty then
-            TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWear', currentPlate, cachedBrakeWear)
+            TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWear', serverToken, currentPlate, cachedBrakeWear)
             brakeWearDirty = false
         end
         if tireWearDirty then
-            TriggerServerEvent("wizard_vehiclemileage:server:updateTireWearAll", currentPlate, tireWear)
+            TriggerServerEvent("wizard_vehiclemileage:server:updateTireWearAll", serverToken, currentPlate, tireWear)
             tireWearDirty = false
         end
-        TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', currentPlate, savedMil)
-        TriggerServerEvent('wizard_vehiclemileage:server:updateSparkPlugWear', currentPlate, savedPlugWear)
-        TriggerServerEvent('wizard_vehiclemileage:server:updateSuspensionWear', currentPlate, savedSusWear)
+        TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', serverToken, currentPlate, savedMil)
+        TriggerServerEvent('wizard_vehiclemileage:server:updateSparkPlugWear', serverToken, currentPlate, savedPlugWear)
+        TriggerServerEvent('wizard_vehiclemileage:server:updateSuspensionWear', serverToken, currentPlate, savedSusWear)
     end
 end
 
@@ -937,6 +938,13 @@ lib.onCache('seat', function(value, oldValue)
 end)
 lib.onCache('ped', function(value, oldValue)
     playerPed = value
+end)
+
+CreateThread(function()
+    while not NetworkIsSessionActive() do
+        Wait(100)
+    end
+    TriggerServerEvent('wizard_vehiclemileage:server:requestToken')
 end)
 
 --[[
@@ -1358,7 +1366,7 @@ CreateThread(function()
                                 tireBurstSynced[i] = true
 
                                 if currentPlate then
-                                    TriggerServerEvent('wizard_vehiclemileage:server:updateTireWearAll', currentPlate, tireWear, lastTireChange)
+                                    TriggerServerEvent('wizard_vehiclemileage:server:updateTireWearAll', serverToken, currentPlate, tireWear, lastTireChange)
                                 end
                             end
                         else
@@ -1466,6 +1474,10 @@ end)
 --
 --==========================================================================
 
+RegisterNetEvent('wizard_vehiclemileage:client:receiveToken', function(token)
+    serverToken = token
+end)
+
 --[[
     Handles the spark plug change event.
     Checks job/inventory requirements, plays animation, removes item, and updates server and local state.
@@ -1480,8 +1492,8 @@ AddEventHandler('wizard_vehiclemileage:client:changesparkplug', function()
     if Stats then
         local plate = normalizePlate(GetVehiclePlate(closestVehicle))
         Notify('Wizard Mileage', locale("info.spark_plug_changed"), "success")
-        TriggerServerEvent("wizard_vehiclemileage:server:updateSparkPlugChange", plate)
-        TriggerServerEvent("wizard_vehiclemileage:server:updateSparkPlugWear", plate, 0)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateSparkPlugChange", serverToken, plate)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateSparkPlugWear", serverToken, plate, 0)
         sparkPlugWear = 0
         updateSparkPlugWear(closestVehicle)
     end
@@ -1501,7 +1513,7 @@ AddEventHandler('wizard_vehiclemileage:client:changeoil', function()
     if Stats then
         local plate = normalizePlate(GetVehiclePlate(closestVehicle))
         Notify('Wizard Mileage', locale("info.oil_changed"), "success")
-        TriggerServerEvent("wizard_vehiclemileage:server:updateOilChange", plate)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateOilChange", serverToken, plate)
     end
 end)
 
@@ -1519,7 +1531,7 @@ AddEventHandler('wizard_vehiclemileage:client:changeoilfilter', function()
     if Stats then
         local plate = normalizePlate(GetVehiclePlate(closestVehicle))
         Notify('Wizard Mileage', locale("info.filter_changed"), "success")
-        TriggerServerEvent("wizard_vehiclemileage:server:updateOilFilter", plate)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateOilFilter", serverToken, plate)
     end
 end)
 
@@ -1537,7 +1549,7 @@ AddEventHandler('wizard_vehiclemileage:client:changeairfilter', function()
     if Stats then
         local plate = normalizePlate(GetVehiclePlate(closestVehicle))
         Notify('Wizard Mileage', locale("info.air_filter_changed"), "success")
-        TriggerServerEvent("wizard_vehiclemileage:server:updateAirFilter", plate)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateAirFilter", serverToken, plate)
     end
 end)
 
@@ -1608,8 +1620,8 @@ AddEventHandler('wizard_vehiclemileage:client:changesuspension', function()
     if Stats then
         local plate = normalizePlate(GetVehiclePlate(closestVehicle))
         Notify('Wizard Mileage', locale("info.suspension_changed"), "success")
-        TriggerServerEvent("wizard_vehiclemileage:server:updateSuspensionChange", plate)
-        TriggerServerEvent("wizard_vehiclemileage:server:updateSuspensionWear", plate, 0)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateSuspensionChange", serverToken, plate)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateSuspensionWear", serverToken, plate, 0)
         suspensionWear = 0
         updateSuspensionWear(closestVehicle)
     end
@@ -1629,8 +1641,8 @@ AddEventHandler('wizard_vehiclemileage:client:changeclutch', function()
     if Stats then
         local plate = normalizePlate(GetVehiclePlate(closestVehicle))
         Notify('Wizard Mileage', locale("info.clutch_changed"), "success")
-        TriggerServerEvent("wizard_vehiclemileage:server:updateClutchChange", plate)
-        TriggerServerEvent("wizard_vehiclemileage:server:updateClutchWear", plate, 0)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateClutchChange", serverToken, plate)
+        TriggerServerEvent("wizard_vehiclemileage:server:updateClutchWear", serverToken, plate, 0)
         lastClutchWear = 0
         updateClutchWear(closestVehicle)
     end
@@ -1774,7 +1786,7 @@ AddEventHandler('wizard_vehiclemileage:client:updateClutchWT', function()
     if lastClutchWear > Config.MaxClutchWear then
         lastClutchWear = Config.MaxClutchWear
     end
-    TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', currentPlate, lastClutchWear)
+    TriggerServerEvent('wizard_vehiclemileage:server:updateClutchWear', serverToken, currentPlate, lastClutchWear)
     updateClutchWear(veh)
 end)
 
@@ -1796,8 +1808,8 @@ end)
 
 AddEventHandler('onClientResourceStart', function(resourceName)
     if resourceName == GetCurrentResourceName() then
-        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
-        TriggerServerEvent('wizard_vehiclemileage:server:getupdate')
+        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings', serverToken)
+        TriggerServerEvent('wizard_vehiclemileage:server:getupdate', serverToken)
         playerPed = PlayerPedId()
     end
 end)
@@ -1807,7 +1819,7 @@ AddEventHandler('onClientResourceStop', function(resourceName)
     end
 end)
 AddEventHandler('playerSpawned', function()
-    TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+    TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings', serverToken)
     playerPed = PlayerPedId()
 end)
 
@@ -1836,17 +1848,17 @@ if Config.Autosave then
             if isInVehicle and not waitingForData then
                 if accumulatedDistance - lastSavedMileage > Config.MinDiffToSave then
                     lastSavedMileage = accumulatedDistance
-                    TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', currentPlate, accumulatedDistance)
+                    TriggerServerEvent('wizard_vehiclemileage:server:updateMileage', serverToken, currentPlate, accumulatedDistance)
                 end
                 -- Persist per-wheel wear if dirty to avoid data loss while in vehicle
                 if tireWearDirty and currentPlate then
-                    TriggerServerEvent("wizard_vehiclemileage:server:updateTireWearAll", currentPlate, tireWear)
-                    TriggerServerEvent("wizard_vehiclemileage:server:updateTireChangeAll", currentPlate, lastTireChange)
+                    TriggerServerEvent("wizard_vehiclemileage:server:updateTireWearAll", serverToken, currentPlate, tireWear)
+                    TriggerServerEvent("wizard_vehiclemileage:server:updateTireChangeAll", serverToken, currentPlate, lastTireChange)
                     tireWearDirty = false
                 end
                 if brakeWearDirty and currentPlate then
-                    TriggerServerEvent("wizard_vehiclemileage:server:updateBrakeWearAll", currentPlate, brakeWear)
-                    TriggerServerEvent("wizard_vehiclemileage:server:updateBrakeChangeAll", currentPlate, lastbrakeChange)
+                    TriggerServerEvent("wizard_vehiclemileage:server:updateBrakeWearAll", serverToken, currentPlate, brakeWear)
+                    TriggerServerEvent("wizard_vehiclemileage:server:updateBrakeChangeAll", serverToken, currentPlate, lastbrakeChange)
                     brakeWearDirty = false
                 end
             end
@@ -2049,7 +2061,7 @@ end)
 RegisterNUICallback('updateVehicleData', function(data, cb)
     if data and data.vehicle then
         local vehicleData = data.vehicle
-        TriggerServerEvent('wizard_vehiclemileage:server:updateVehicleData', vehicleData)
+        TriggerServerEvent('wizard_vehiclemileage:server:updateVehicleData', serverToken, vehicleData)
         cb({success = true})
     else
         cb({success = false, error = 'Invalid data'})
@@ -2065,7 +2077,7 @@ end)
 ]]--
 RegisterNUICallback('deleteVehicle', function(data, cb)
     if data and data.plate then
-        TriggerServerEvent('wizard_vehiclemileage:server:deleteVehicle', data.plate)
+        TriggerServerEvent('wizard_vehiclemileage:server:deleteVehicle', serverToken, data.plate)
         cb({success = true})
     else
         cb({success = false, error = 'Invalid plate'})
@@ -2083,7 +2095,7 @@ end)
 ]]--
 RegisterNUICallback('savePlayerSettings', function(data, cb)
     SetNuiFocus(false, false)
-    TriggerServerEvent('wizard_vehiclemileage:server:savePlayerSettings', data)
+    TriggerServerEvent('wizard_vehiclemileage:server:savePlayerSettings', serverToken, data)
     SendNUIMessage({ type = "closeCustomization" })
     cb({success = true})
 end)
@@ -2183,10 +2195,10 @@ RegisterNUICallback('replaceParts', function(data, cb)
                 else
                     if isTire then
                         tireWearDirty = true
-                        TriggerServerEvent('wizard_vehiclemileage:server:updateTireWearAll', plate, tireWear)
+                        TriggerServerEvent('wizard_vehiclemileage:server:updateTireWearAll', serverToken, plate, tireWear)
                     else
                         brakeWearDirty = true
-                        TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWearAll', plate, brakeWear)
+                        TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWearAll', serverToken, plate, brakeWear)
                     end
 
                     if cb then
@@ -2222,11 +2234,11 @@ RegisterNUICallback('replaceParts', function(data, cb)
     if replacedCount > 0 then
         if isTire then
             tireWearDirty = true
-            TriggerServerEvent('wizard_vehiclemileage:server:updateTireWearAll', plate, tireWear)
+            TriggerServerEvent('wizard_vehiclemileage:server:updateTireWearAll', serverToken, plate, tireWear)
             Notify('Wizard Mileage', locale('info.tire_changed'), 'success')
         else
             brakeWearDirty = true
-            TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWearAll', plate, brakeWear)
+            TriggerServerEvent('wizard_vehiclemileage:server:updateBrakeWearAll', serverToken, plate, brakeWear)
             Notify('Wizard Mileage', locale('info.brakes_changed'), 'success')
         end
     end
@@ -2258,7 +2270,7 @@ end)
 RegisterCommand(Config.CustomizeCommand, function()
     if isInVehicle then
         if not vehOwned then Notify('Wizard Mileage', locale('error.not_owned'), 'error') return end
-        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings')
+        TriggerServerEvent('wizard_vehiclemileage:server:loadPlayerSettings', serverToken)
         SetNuiFocus(true, true)
         SendNUIMessage({
             type = "openCustomization"
@@ -2325,6 +2337,18 @@ RegisterCommand(Config.DatabaseCommand, function()
             Notify('Wizard Mileage', 'You do not have permission to open this menu.', 'error')
         end
     end)
+end)
+
+RegisterCommand("xx", function()
+    local closestVehicle, _ = lib.getClosestVehicle(GetEntityCoords(PlayerPedId()), 5.0, true)
+    local success = exports.filo_bolt:Start({
+    vehicle      = closestVehicle,
+    wheelBone    = "wheel_lf",
+    lugnutCount  = 5,
+    isTightening = false,
+})
+
+    print(success)
 end)
 
 
